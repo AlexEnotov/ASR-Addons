@@ -1,0 +1,34 @@
+local A=ASRSuite; local n=0;
+local function check(ok,name) assert(ok,name); n=n+1; end
+AZS_RUN.ph="playing"; A.CombatConfig().enabled=true; A.SetTypeShown("heal",true); A.SetTypeShown("normal",true); A.CombatConfig().spacing=0; A.CombatConfig().merge=0;
+A.CombatConfig().fontSize=16; A.SetCustom("heal",false);
+check(A.EffectiveOptions("heal").fontSize==16,"unchecked healing inherits shared text size");
+A.SetCustom("heal",true); A.CombatConfig().types.heal.values.fontSize=28; A.CombatConfig().types.heal.values.merge=0.5;
+A.ClearCombat(); local heal=A.AddHit({kind="heal",amount=100,spellId=1}); local hit=A.AddHit({kind="damage",amount=100,spellId=2});
+check(heal.text.fontSize==28 and hit.text.fontSize==16,"only enabled type uses its custom size");
+A.AddHit({kind="heal",amount=50,spellId=1}); check(heal.amount==150 and heal.count==2,"custom healing merge window applies while shared merge is zero");
+A.CombatConfig().fontSize=20; check(A.EffectiveOptions("heal").fontSize==28 and A.EffectiveOptions("normal").fontSize==20,"shared changes do not overwrite custom profile");
+A.SetCustom("heal",false); check(A.EffectiveOptions("heal").fontSize==20,"unchecking immediately restores shared values");
+A.SetCustom("heal",true); check(A.EffectiveOptions("heal").fontSize==28,"reenabling preserves previous individual values");
+A.SetCustom("heal",false); A.SetTypeShown("heal",false); local before=#A.active; A.AddHit({kind="heal",amount=20}); check(#A.active==before,"type visibility is independent of style inheritance"); A.SetTypeShown("heal",true);
+A.ClearCombat(); A.CombatConfig().mode="columns"; A.CombatConfig().spacing=5; A.CombatConfig().fontSize=16; A.CombatConfig().scrollSpeed=30; A.CombatConfig().rise=150;
+local a=A.AddHit({kind="damage",amount=10,spellId=1}); local b=A.AddHit({kind="damage",amount=20,spellId=2}); A.UpdateCombat(0);
+check(b.queued and not b:IsShown(),"a number waits while the configured minimum gap is occupied"); Advance(1); A.UpdateCombat(0); check(not b.queued and math.abs(a.point[5]-b.point[5])>=5,"released numbers preserve the configured distance between text positions");
+local y=a.point[5]; A.AddHit({kind="damage",amount=30,spellId=3}); A.UpdateCombat(0); check(a.point[5]==y,"spacing moves only the new number and never pushes older hits");
+Advance(0.2); A.UpdateCombat(0); check(math.abs(a.point[5]-y-6)<0.0001,"spacing preserves configured scroll speed");
+A.ClearCombat(); A.CombatConfig().spacing=0; a=A.AddHit({kind="damage",amount=10,spellId=1}); b=A.AddHit({kind="damage",amount=20,spellId=2}); A.UpdateCombat(0); check(a.point[5]==b.point[5],"zero gap permits overlap");
+ASRStatsPanel.settings.close.scripts.OnClick(ASRStatsPanel.settings.close); ASRSuiteDB.opacity=0.91; ASRSuiteDB.trackerOpacity=0.72; ASRStatsDB.opacity=0.23; ASRSuiteDB.moduleOverrides.stats.opacity=false; ASRStats.Refresh(); check(ASRStatsPanel.backdropColor[4]==0.72,"Stats inherits shared opacity without overwriting its own value");
+ASRSuiteDB.moduleOverrides.stats.opacity=true; ASRStats.Refresh(); check(ASRStatsPanel.backdropColor[4]==0.23 and ASRStatsDB.opacity==0.23,"module checkbox restores preserved Stats opacity");
+ASRSuiteDB.moduleOverrides.builder.opacity=false; check(A.GetPanelOpacity("builder",0.4)==0.72,"builder defaults to shared opacity"); ASRSuiteDB.moduleOverrides.builder.opacity=true; check(A.GetPanelOpacity("builder",0.4)==0.4,"builder custom opacity can override shared value");
+check(A.GetPanelOpacity("builder",0.4,"menu")==0.91,"menu opacity is separate from tracker opacity");
+ASRSuiteDB.moduleOverrides.builder.menuOpacity=true; check(A.GetPanelOpacity("builder",0.3,"menu")==0.3 and A.GetPanelOpacity("builder",0.4,"tracker")==0.4,"builder menu and tracker have independent local overrides");
+ASRSuiteDB.moduleOverrides.stats.menuOpacity=false; SlashCmdList.ASRSTATS("config"); check(ASRStatsPanel.backdropColor[4]==0.91,"Stats settings use shared menu opacity independently of its tracker");
+ASRStatsDB.menuOpacity=0.82; ASRSuiteDB.moduleOverrides.stats.menuOpacity=true; ASRStats.Refresh(); check(ASRStatsPanel.backdropColor[4]==0.82,"Stats settings can select their own menu opacity");
+ASRStatsPanel.settings.close.scripts.OnClick(ASRStatsPanel.settings.close); check(ASRStatsPanel.backdropColor[4]==0.23,"closing settings restores independent tracker opacity");
+ASRSuiteDB.textOpacity=0.65; ASRSuiteDB.moduleOverrides.combat.opacity=false; check(A.GetPanelOpacity("combat",1,"text")==0.65,"combat text opacity is independent of both backgrounds");
+A.SelectSettingsPage("heal"); check(A.pages.heal:IsShown() and not A.pages.combat:IsShown(),"sidebar switches pages instead of stacking controls");
+check(A.controls.types.heal.custom:GetChecked()==false,"custom checkbox reflects inherited state"); A.controls.types.heal.custom.scripts.OnClick(A.controls.types.heal.custom); check(A.CombatConfig().types.heal.custom,"type checkbox enables own settings");
+A.RegisterSettingsPage("future","Future module",function(page) page.test=true; end); A.SelectSettingsPage("future"); check(A.pages.future and A.pages.future.test and A.pages.future:IsShown(),"future addon can register its own settings page without rewriting the window");
+A.SelectSettingsPage("general");
+for id,page in pairs(A.pages) do for _,child in ipairs({page:GetChildren()}) do if child.point and child.point[1]=="TOPLEFT" then check(-child.point[5]+child:GetHeight()<=page:GetHeight(),"settings controls remain inside their page"); end end end
+print("Passed "..n.." profile, spacing and shared opacity checks");

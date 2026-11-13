@@ -1,0 +1,51 @@
+local A=ASRStats; local count=0;
+local function check(ok,label) assert(ok,label); count=count+1; end
+local function approx(a,b) return math.abs(a-b)<0.0001; end
+local offense=A.sections[1][4]; local reach=A.sections[3][4];
+check(approx(A.Value(offense[1],{crit=0.36}),36),"factor crit is converted to percent");
+check(approx(A.Value(offense[2],{cm=2.26}),126),"critical multiplier is displayed as bonus above base 100 percent");
+check(approx(A.Value(offense[3],{dmg=2.4}),140),"damage factor subtracts baseline");
+check(approx(A.Value(offense[4],{cd=0.58}),42),"cooldown factor is inverted");
+check(A.Value(offense[3],nil,{dmg="140"})==140,"fallback percentages are never multiplied by 100");
+check(A.Value(offense[1],{crit=0},{crit=50})==50,"native Reborn sheet wins over the secondary factor feed");
+check(A.Value(offense[2],nil,{critd=126})==126,"fallback critical damage is already the bonus percentage");
+check(A.Value(reach[3],{pick=38.1},{pick=281})==281,"native pickup bonus is used instead of absolute range");
+check(A.Format(reach[3],281,true)=="+281%","pickup is formatted as a percentage bonus");
+check(A.Value(offense[1],{crit="missing"})==nil and A.Number(math.huge)==nil,"unknown and infinite values are rejected");
+check(A.Format(offense[1],nil)=="—","missing values remain unknown");
+AZS_RUN={ph="playing"}; AZS_STATS={crit=0.36,cm=2.26,dmg=2.4,cd=0.58,hp=759,reg=7,arm=0.23,area=1.3,pick=33,spd=1.61,gold=1.76,luck=0.41,bp=0.54};
+check(A.Format(offense[2],A.Value(offense[2],{cm=3.09}),false)=="+209%","user screenshot: 3.09 factor matches the native +209 percent");
+AZS_RUNSTATS={pick="230"};
+check(A.Value(A.sections[2][4][4],{lch=0.007},{ls="0.8"})==0.8,"lifesteal matches native 0.8 percent rather than secondary 0.7 percent");
+check(A.Value(reach[3],{pick=38.1},nil)==nil,"absolute pickup radius is never guessed into a percent bonus");
+local original=AZS_STATS;
+ASRStatsRuntime.scripts.OnEvent(ASRStatsRuntime,"ADDON_LOADED","ASRStats");
+check(ASRStatsDB.language=="en","fresh Stats installation defaults to English");
+local panel=ASRStatsPanel;
+check(panel:IsShown(),"panel appears in active run");
+local shown=0; local byKey={};
+for _,r in ipairs(panel.rows) do byKey[r.definition[3]]=r; if r:IsShown() then shown=shown+1; check(-r.point[5]+r:GetHeight()<=panel:GetHeight()-23,"each visible row fits inside automatic panel height"); end end
+check(shown==13,"compact view shows the screenshot's thirteen nonzero known stats");
+check(byKey.dmg.value:GetText()=="+140%" and byKey.cd.value:GetText()=="+42%","panel displays correct percentage values");
+check(AZS_STATS==original and AZS_STATS.dmg==2.4,"addon never changes the game stats table");
+Emit("AZS","crit=0.5;cm=2.5;dmg=3;cd=0.5;");
+check(byKey.crit.value:GetText()=="50%" and byKey.dmg.value:GetText()=="+200%","native AZS event updates current stats without SurvivorUI");
+SlashCmdList.ASRSTATS("config");
+check(panel.settings:IsShown(),"settings replace stats within the same panel");
+ASRStatsDB.menuOpacity=1; A.Refresh(); check(panel.backdropColor[4]==1,"100 percent opacity is fully opaque");
+local lang=panel.settings.settings[1].button; lang.scripts.OnClick(lang); check(ASRStatsDB.language=="en","opening the locale list does not change language"); lang.localePopup.options.ru.scripts.OnClick(lang.localePopup.options.ru); check(ASRStatsDB.language=="ru","Russian remains selectable"); lang.scripts.OnClick(lang); lang.localePopup.options.en.scripts.OnClick(lang.localePopup.options.en);
+check(ASRStatsDB.language=="en","language switches in settings");
+panel.settings.close.scripts.OnClick(panel.settings.close);
+check(byKey.dmg.name:GetText()=="Damage","stat labels follow selected language");
+AZS_RUN.ph="hub"; A.Refresh(); check(not panel:IsShown(),"only-run preference hides panel after leaving run");
+ASRStatsDB.onlyRun=false; A.Refresh(); check(not panel:IsShown(),"obsolete preference cannot show stats in hub");
+SlashCmdList.ASRSTATS("config"); check(panel:IsShown() and panel.settings:IsShown() and #panel.settings.settings==7,"settings remain available in hub without the removed toggle");
+check(panel:GetHeight()*panel.scale<=UIParent:GetHeight()-24,"panel fits the screen");
+AZS_RUN={ph="playing",sh=328}; Emit("AZS","hp=841;shd=0.35;"); ASRStatsDB.language="ru"; panel.settings.close.scripts.OnClick(panel.settings.close); A.Refresh();
+local hp,shield,bonus;
+for _,r in ipairs(panel.rows) do if r.definition[3]=="hp" then hp=r; elseif r.definition[3]=="shield" then shield=r; elseif r.definition[3]=="shd" then bonus=r; end end
+check(shield:IsShown() and shield.value:GetText()=="328","shield reads current AZS_RUN absorption amount");
+check(shield.point[5]==hp.point[5]-11,"shield row is immediately under health");
+check(A.Format(bonus.definition,A.Value(bonus.definition,{shd=0.35}))=="+35%" and bonus.definition[1]=="Урон под щитом","conditional damage is named clearly and formatted as a bonus");
+AZS_RUN.sh=0; A.Refresh(); check(not shield:IsShown(),"zero shield follows hide-zero preference");
+print("Passed "..count.." ASR Stats checks and Lua 5.1 syntax");

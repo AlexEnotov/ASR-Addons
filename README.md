@@ -1,89 +1,52 @@
-# ASR Advisor
+# ASR Addons — by AlexEnotov
 
-**Планировщик билдов и подсказки для Azeroth Survivors Reborn.**
+Independent addons for **Azeroth Survivors Reborn**, with an optional shared settings and interface editor. Russian and English interfaces.
 
-Автор: **AlexEnotov** · Версия: **0.5.8** · Интерфейс: **Русский / English**
+| Addon | Install folder | Command | Purpose |
+| --- | --- | --- | --- |
+| ASR Advisor | `ASAdvisor` | `/asr` | Build planner, tracker and card recommendations |
+| ASR Stats | `ASRStats` | `/asrstats config` | Current character stats |
+| ASR Combat Text | `ASRCombatText` | `/asrtext` | Movable combat numbers with per-type settings |
+| ASR Suite | `ASRSuite` | `/asrhub` | Shared settings, compatibility controls and interface editor |
 
-[Скачать последнюю версию](https://github.com/AlexEnotov/ASR-Advisor/releases/latest) · [Сообщить об ошибке](https://github.com/AlexEnotov/ASR-Advisor/issues)
+Install only what you need. Advisor, Stats and Combat Text work without Suite. Suite discovers installed modules; it does not require all three. All modules require the game's native AzerothSurvivors addon; some also use AzerothSurvivorsAPI as declared in their TOCs. These native game components are not bundled.
 
-## Возможности
+## Installation
 
-- Создание локальных билдов для классов: умения, кольца, аксессуары и амулеты.
-- Приоритеты выбора и замены амулетов, включая классовые варианты.
-- Требования к умениям: ранг, перезарядка, урон, число целей, радиус и длительность там, где доступны данные.
-- Целевые значения свойств бижутерии и общие капы характеристик.
-- **Any**: свободный выбор или группа взаимозаменяемых вариантов.
-- Подсветка подходящих карточек во время выбора. Если подходящего нет — подсказка изгнания завершённого умения, переброса или пропуска при доступности действия.
-- Компактный и подробный трекер, настройка масштаба и непрозрачности.
-- Описания, заметки и превью билда для скриншотов.
-- Экспорт и импорт билдов кодом. Сайт и интернет для работы аддона не нужны.
+Download the individual addon ZIPs from the [latest release](https://github.com/AlexEnotov/ASR-Addons/releases/latest)'s **Assets** section. Extract each directly into `Interface/AddOns`. For example: `Interface/AddOns/ASAdvisor/ASAdvisor.toc`. GitHub's automatically generated **Source code** archives are for development and cannot be installed through the game's addon catalogue.
 
-Аддон **только подсказывает**: выбор карточки, изгнание, переброс и пропуск выполняет игрок.
+Technical folder names and SavedVariables names stay unchanged, preserving existing builds and preferences. Read each module's README for its controls and limitations.
 
-## Установка
+## Repository layout
 
-1. Открой [Releases](https://github.com/AlexEnotov/ASR-Advisor/releases/latest).
-2. Скачай **ASRAdvisor-0.5.8.zip** из раздела **Assets**. Архивы GitHub `Source code` предназначены для исходников.
-3. Распакуй папку **ASAdvisor** в `Interface/AddOns` установленной игры.
-4. Проверь путь: `Interface/AddOns/ASAdvisor/ASAdvisor.toc`. Вложенной второй папки `ASAdvisor` быть не должно.
-5. Включи аддон в игре и введи **`/asr`**.
-
-Требуется **Azeroth Survivors Reborn** с основным аддоном `AzerothSurvivors` (Interface 30300). Это аддон для Reborn, совместимость с обычным WoW не заявляется.
-
-При обновлении замени папку `ASAdvisor` и выполни `/reload` или перезапусти игру. Техническое имя папки сохраняется для совместимости с уже созданными билдами.
-
-## Как пользоваться
-
-1. Открой `/asr`, выбери класс и создай билд.
-2. Добавь умения и украшения из каталога. Выбранные иконки выделяются.
-3. Нажми на элемент в плане, чтобы задать требования, изменить приоритет или убрать его.
-4. Во время забега следи за трекером и отметками на карточках.
-5. Для обмена нажми **Экспорт**. Полученный код другой игрок может вставить через **Импорт**.
-
-**Перезарядка** задаётся в секундах как верхний предел; урон, цели, радиус и длительность — как нижний. `0` убирает отдельный порог. Если заданы цели характеристик, ранг не определяет завершённость. Когда все заданные цели характеристик выполнены, умение больше не рекомендуется улучшать. Пока цель не достигнута, возможны рекомендации других улучшений без заданного порога.
-
-Урон означает значение в игровом описании, а не DPS. Базовые параметры отделены от текущих значений забега. Неизвестные или неоднозначные текущие значения не подменяются базовыми. Несколько разных длительностей в одном описании могут остаться неопределёнными.
-
-## Команды
-
-| Команда | Действие |
-| --- | --- |
-| `/asr` | Открыть редактор |
-| `/asr tracker` | Показать или скрыть трекер |
-| `/asr reset` | Сбросить расположение окон |
-| `/asr debug` | Переключить запись диагностических событий |
-| `/asr data` | Показать диагностические данные |
-
-## Статус и обратная связь
-
-Первая публичная тестовая версия. Ошибки интерфейса и распознавания отдельных эффектов ещё возможны. Полная совместимость со всеми сторонними UI-аддонами не проверена.
-
-Для сообщения об ошибке приложи версию аддона, класс, скриншот карточек и требований билда; по возможности — код билда. Не публикуй код восстановления аккаунта.
-
-## Для разработчиков
-
-Lua 5.1. Порядок загрузки указан в `ASAdvisor.toc`.
-
-- `Core.lua` — модель билдов, каталоги, сохранение, импорт и экспорт.
-- `Advisor.lua` — проверка требований и рекомендации.
-- `Stats.lua` — характеристики, описания, Any и трекер.
-- `UI.lua` — редактор, превью, трекер и отметки.
-- `Runtime.lua` — игровые события и обновление состояния.
-- `Mechanics.lua`, `Names.lua` — вспомогательные метаданные и переводы.
-
-Каталог читается из `AZS_GEN`, предложения из `AZS_CARDS`, текущие умения из `AZS_SPELLS` и `AZS_SPELLTIPS`, экипировка из `AZS_GEAR`, суммарные статы из `AZS_RUNSTATS`. Код игры и её ресурсы в репозиторий не входят.
-
-Для тестов нужны Node.js и локально установленная игра:
-
-```powershell
-npm install
-npm test -- "D:/path/to/game/Interface/AddOns/AzerothSurvivors"
+```text
+ASAdvisor/       builder source, tests, metadata tools and original glyphs
+ASRStats/        character stats source and tests
+ASRCombatText/   standalone combat text source and tests
+ASRSuite/        optional shared settings source and tests
+tools/          repository checks and release packaging
+catalog/        proposed store entries, not yet submitted
+docs/           release process and resource notes
+.github/        checks; no automatic publication
 ```
 
-Проверки используют настоящий каталог установленной игры и имитацию UI API. Они не заменяют визуальную проверку в игровом клиенте.
+The repository retains the builder's original Git history. Runtime addon folders are independent. Repository test dependencies are development-only and never shipped to players.
 
-Скрипты в `tools` обновляют метаданные, читая локальные файлы игры; пути передаются аргументами. Они не нужны игроку для установки.
+## Development
 
----
+Node.js 22 and PowerShell 7:
 
-Неофициальный пользовательский аддон. Названия игры, умений и предметов принадлежат их правообладателям.
+```powershell
+npm ci --ignore-scripts
+npm test
+npm run test:game -- "D:/path/to/game/Interface/AddOns/AzerothSurvivors"
+./tools/package.ps1 -Tag v0.5.14
+```
+
+`npm test` checks Lua 5.1 syntax for all modules, TOC resources and Stats/Combat Text/Suite scenarios. The builder's full recommendation tests require a locally installed native game catalogue, supplied explicitly to `test:game`; CI does not redistribute it. Mocked UI tests do not replace in-game visual checks.
+
+Packaging writes four independently installable, deterministic ZIPs and `SHA256SUMS` to ignored `release/`. The tag is the shared distribution release version; each module retains its own implementation version in `## Version`. The store displays the pinned release tag.
+
+See [the release process](docs/RELEASING.md). Original ASR implementation code is licensed under **GPL-3.0-only**. Copyright (C) 2026 AlexEnotov. See [LICENSE](LICENSE) for the full terms and [resource notes](docs/RESOURCES.md) for game data and third-party material, whose rights remain with their respective owners.
+
+Fresh installations default to English in all four addons. Saved language preferences are preserved on update.

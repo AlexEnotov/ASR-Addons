@@ -1,0 +1,19 @@
+## Interface: 30300
+## Title: |cff8cd123ASR|r Suite
+## Author: AlexEnotov
+## X-License: GPL-3.0-only
+## Version: 0.4.3
+## Notes: Shared ASR settings, magnetic docking and interface editor. /asrhub
+## Dependencies: AzerothSurvivors, AzerothSurvivorsAPI
+## OptionalDeps: AzerothSurvivorsUI, ASRStats, ASAdvisor, ASRCombatText, SurvivorUI
+## SavedVariables: ASRSuiteDB
+Language.lua
+Style.lua
+Core.lua
+CombatBridge.lua
+Profiles.lua
+Integration.lua
+Docking.lua
+Locale.lua
+Settings.lua
+UI.lua

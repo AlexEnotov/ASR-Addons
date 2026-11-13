@@ -1,8 +1,15 @@
 {
-  "name": "asr-advisor",
-  "version": "0.5.8",
+  "name": "asr-addons",
   "private": true,
-  "description": "Local build planner and card recommendations for Azeroth Survivors Reborn",
-  "scripts": { "test": "node tests/run.cjs" },
-  "devDependencies": { "fengari": "0.1.5", "luaparse": "0.3.1" }
+  "license": "GPL-3.0-only",
+  "description": "Independent ASR addons with an optional shared settings suite",
+  "scripts": {
+    "test": "node tools/check.cjs",
+    "test:game": "node ASAdvisor/tests/run.cjs",
+    "package": "pwsh -NoProfile -File tools/package.ps1"
+  },
+  "devDependencies": {
+    "fengari": "0.1.5",
+    "luaparse": "0.3.1"
+  }
 }

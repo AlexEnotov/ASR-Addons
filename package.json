@@ -1,0 +1,8 @@
+{
+  "name": "asr-advisor",
+  "version": "0.5.8",
+  "private": true,
+  "description": "Local build planner and card recommendations for Azeroth Survivors Reborn",
+  "scripts": { "test": "node tests/run.cjs" },
+  "devDependencies": { "fengari": "0.1.5", "luaparse": "0.3.1" }
+}

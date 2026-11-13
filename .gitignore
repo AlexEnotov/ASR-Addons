@@ -1,0 +1,10 @@
+node_modules/
+*.log
+.env
+.env.*
+!.env.example
+release/
+*.zip
+SavedVariables/
+.DS_Store
+Thumbs.db

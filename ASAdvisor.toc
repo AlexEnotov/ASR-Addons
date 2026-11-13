@@ -1,0 +1,16 @@
+## Interface: 30300
+## Title: |cff55ddc6ASR|r Advisor
+## Notes: Reborn build planner, Any alternatives and stat targets. /asr
+## Author: AlexEnotov
+## Version: 0.5.8
+## Dependencies: AzerothSurvivors
+## OptionalDeps: AzerothSurvivorsAPI
+## SavedVariables: ASAdvisorDB
+Mechanics.lua
+Names.lua
+Core.lua
+Locale.lua
+Stats.lua
+Advisor.lua
+UI.lua
+Runtime.lua

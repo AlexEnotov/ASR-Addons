@@ -1,0 +1,33 @@
+local A=ASAdvisor; local n=0;
+local function check(ok,name) assert(ok,name); n=n+1; end
+check(A.DurationFromTip("Твои способности перезаряжаются на 40% быстрее в течение 14,9 сек. Каждые 7,2 сек.")==14.9,"Russian effect duration is distinct from cooldown");
+check(A.DurationFromTip("Your abilities recharge 40% faster for 14.9 sec. Every 7.2 sec.")==14.9,"English duration is distinct from cooldown");
+check(A.DurationFromTip("Наносит урон за 15 сек. Каждые 2,1 сек.")==15,"damage over time duration");
+check(A.DurationFromTip("Every 2 sec.")==nil,"cooldown is never an effect duration");
+check(A.DurationFromTip("Действует в течение 6 сек. Оглушает на 1,5 сек.")==nil,"multiple timed effects stay ambiguous");
+local b=A.NewBuild("HUNTER"); b.spells={{key="rapid_fire",rank=1,cd=10,duration=20}}; b.items={};
+local live={inRun=true,spells={rapid_fire={rank=2,cdmax=7.2}},gear={}};
+AZS_SPELLTIPS.rapid_fire="Твои способности перезаряжаются на 40% быстрее в течение 14,9 сек. Каждые 7,2 сек.";
+local card={key="rapid_fire",rank=3,lines="u22"};
+check(A.ScoreSpell(b,card,live,1).score>0,"unmet duration goal recommends duration card with completed CD goal");
+b.spells[1].duration=14.9;
+check(A.ScoreSpell(b,card,live,1).score==0,"duration card stops once both explicit goals are completed");
+AZS_SPELLTIPS.rapid_fire="Unknown text";
+check(A.ScoreSpell(b,card,live,1).kind=="unknown","missing current duration does not use base duration");
+local decoded=assert(A.Decode(A.Export(b)));
+check(decoded.spells[1].duration==14.9,"duration survives export and import");
+b.spells[1].duration=-1;
+check(A.Decode(A.Export(b))==nil,"negative imported duration rejected");
+b.spells[1].duration="bad";
+check(A.Decode(A.Export(b))==nil,"nonnumeric imported duration rejected");
+b.spells[1].duration=20;
+AZSCardsFrame:Hide(); A.offer=false; AZS_RUN.ph="playing"; AZS_SPELLS={{key="rapid_fire",rank=2,cdmax=7.2}};
+local p=ASAdvisorPlanner;
+if p:IsShown() then A.ToggleUI(); end; A.ToggleUI();
+if p.preview:IsShown() then p.preview.back.scripts.OnClick(p.preview.back); end
+p.spellCells[1].scripts.OnClick(p.spellCells[1]);
+check(p.inline.fields.duration:IsShown(),"timed spell exposes duration requirement");
+local field=p.inline.fields.duration; field:SetFocus(); field:SetText("18.5"); field:ClearFocus();
+check(b.spells[1].duration==18.5,"duration requirement is editable and saved");
+check(string.find(A.GoalText(b.spells[1],"spell"),"18.5",1,true),"duration goal is displayed in preview summary");
+print("Passed "..n.." duration regression checks");

@@ -1,10 +1,10 @@
-# Local draft for the next release; not submitted and no public asset exists yet.
+# Standalone ASR Loot entry; Suite integration is optional.
 id = "asr-loot"
 name = "ASR Loot"
 author = "AlexEnotov"
 repo = "AlexEnotov/ASR-Addons"
 description = "Permanent boss equipment drops, new acquisitions and duplicate gold."
-category = "Combat"
+category = "Loot"
 license = "GPL-3.0-only"
 folders = ["ASRLoot"]
 requires = []
@@ -14,6 +14,6 @@ type = "release"
 asset = "ASRLoot-v*.zip"
 
 [reborn]
-status = "untested"
-tested = ""
-notes = ""
+status = "works"
+tested = "0.6.5"
+notes = "Tested in solo play: equipment drops, sold duplicates and optional Suite settings."

@@ -41,4 +41,4 @@ Item names remain as supplied by the game. The UI supports English and Russian;
 duplicate-message markers are taken from the game's available translations.
 
 The journal retains at most 500 drop entries; totals include older entries too.
-This is a local unreleased addon; live drop-event verification remains necessary.
+New and duplicate equipment drops were checked in game on Reborn 0.6.5.

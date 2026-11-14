@@ -6,6 +6,10 @@ are summarized with the feature they improve rather than listed individually.
 
 ## Unreleased
 
+No pending changes.
+
+## v0.6.0 — 2026-11-15
+
 ### ASR Loot — new standalone addon
 
 - Resolve duplicate base weapons from verified embedded class/tier tables,
@@ -27,8 +31,9 @@ are summarized with the feature they improve rather than listed individually.
 - Add optional Suite settings, shared language and layout-editor integration;
   standalone controls remain available through `/asrloot`.
 - Use native item metadata and verified equipment hints. Unrecognized duplicate
-  metadata uses a question-mark/unknown-rarity fallback. Live drop testing is
-  still required; this addon has not been published.
+  metadata uses a question-mark/unknown-rarity fallback. Real duplicate drops
+  and display were checked in game; unresolved future item metadata retains
+  the explicit fallback.
 
 ### ASR Advisor
 
@@ -107,8 +112,7 @@ are summarized with the feature they improve rather than listed individually.
 - Apply the lime ASR prefix consistently to module headings.
 
 - Add **Endless**, a module inside Suite, with an automatic replacement for the
-  native run tracker only during endless play. This is not a fifth standalone
-  addon. Disabling it restores the previous native tracker visibility.
+  native run tracker only during endless play. Endless does not have a separate package. Disabling it restores the previous native tracker visibility.
 - Track map boss order, repeat rounds, living and defeated bosses, endless boss
   kills, character level, run time and total enemies killed. Preserve progress
   across reloads and reconstruct it when enabled midway through a run.

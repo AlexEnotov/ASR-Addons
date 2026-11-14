@@ -48,5 +48,24 @@ foreach ($folder in $modules.Keys) {
     & (Join-Path $PSScriptRoot 'validate-package.ps1') -Path $target -Folder $folder
     $hashes += "$((Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash.ToLowerInvariant())  $name"
 }
+$bundleName = "ASR-All-$Tag.zip"
+$bundlePath = Join-Path $output $bundleName
+$bundleStream = [IO.File]::Open($bundlePath, [IO.FileMode]::Create)
+$bundle = [IO.Compression.ZipArchive]::new($bundleStream, [IO.Compression.ZipArchiveMode]::Create)
+try {
+    foreach ($folder in $modules.Keys) {
+        $moduleZip = [IO.Compression.ZipFile]::OpenRead((Join-Path $output "$($modules[$folder])-$Tag.zip"))
+        try {
+            foreach ($member in ($moduleZip.Entries | Sort-Object FullName)) {
+                $entry = $bundle.CreateEntry($member.FullName, [IO.Compression.CompressionLevel]::Optimal)
+                $entry.LastWriteTime = $member.LastWriteTime
+                $inputStream = $member.Open(); $destination = $entry.Open()
+                try { $inputStream.CopyTo($destination) } finally { $destination.Dispose(); $inputStream.Dispose() }
+            }
+        } finally { $moduleZip.Dispose() }
+    }
+} finally { $bundle.Dispose(); $bundleStream.Dispose() }
+& (Join-Path $PSScriptRoot 'validate-package.ps1') -Path $bundlePath -Folder @($modules.Keys)
+$hashes += "$((Get-FileHash -LiteralPath $bundlePath -Algorithm SHA256).Hash.ToLowerInvariant())  $bundleName"
 [IO.File]::WriteAllLines((Join-Path $output 'SHA256SUMS'), $hashes, (New-Object Text.UTF8Encoding($false)))
-Write-Output "Built $($modules.Count) independent addons for $Tag in $output"
+Write-Output "Built $($modules.Count) independent addons and one bundle for $Tag in $output"

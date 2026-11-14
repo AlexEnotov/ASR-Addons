@@ -26,25 +26,24 @@ Use one GitHub repository and one release containing one asset per standalone ad
 | `asr-stats` | `ASRStats-v*.zip` | `ASRStats` |
 | `asr-combat-text` | `ASRCombatText-v*.zip` | `ASRCombatText` |
 | `asr-suite` | `ASRSuite-v*.zip` | `ASRSuite` |
-| `asr-loot` (unreleased draft) | `ASRLoot-v*.zip` | `ASRLoot` |
+| `asr-loot`  | `ASRLoot-v*.zip` | `ASRLoot` |
 
 Each ID has its own catalogue entry. `requires = []` is deliberate: Suite is optional and the native game addons are not entries to install from this catalogue. Do not add Suite as a mandatory dependency of a standalone module.
 
-The published v0.5.14 release contains the original four addons. ASR Loot is a new,
-locally tested standalone addon with a draft entry only; its first publication and
-catalog submission require the usual release review. Local package previews do
-not create a public version or release.
+The v0.6.0 release adds ASR Loot to the original four modules. Endless remains
+inside Suite. The all-in-one ASR-All ZIP is a manual download only: separate
+store entries always point at their individual module ZIPs.
 
-## Before the first submission
+## Preparing a release
 
 1. GPL-3.0-only has been selected for original ASR implementation code; the complete text is in root `LICENSE`. Keep third-party notices and the resource inventory; do not relicense material owned by others.
-2. If renaming the GitHub repository, update the Git remote, README links and all four `catalog/*.toml` repository values. Keep technical addon folders and SavedVariables unchanged.
-3. Review the source changes since `v0.5.8`, run both test commands in the root README and verify the modules in the game independently and together.
-4. Select a new common release tag after `v0.5.8`; the first combined release uses `v0.5.14`. Record module changes in the release notes. Module TOC versions can differ; the store's distribution version is the common release tag.
-5. Run `./tools/package.ps1 -Tag <tag>`. Inspect `release/` and hashes. Repeating a build with unchanged input produces identical bytes. Only attach that tag's four ZIPs and optional checksum file; never attach a second ZIP matching the same module pattern.
+2. If renaming the GitHub repository, update the Git remote, README links and all `catalog/*.toml` repository values. Keep technical addon folders and SavedVariables unchanged.
+3. Review the source changes since the last published tag, run both test commands in the root README and verify the modules in the game independently and together.
+4. Select one new common release tag (v0.6.0 follows v0.5.14). Align TOC/runtime versions during release preparation and record module changes in the release notes. The store displays the common release tag.
+5. Run `./tools/package.ps1 -Tag <tag>`. Inspect `release/` and hashes. Repeating a build with unchanged input produces identical bytes. Only attach that tag's five module ZIPs, the optional ASR-All ZIP and optional checksum file; never attach a second ZIP matching the same module pattern.
 6. Commit the prepared source and packaging files, push to the author's repository, then create a Git tag pointing at the exact source used to build the ZIPs. Upload assets to a **draft** release first and review it.
 7. Publish a normal release only when ready. Drafts and prereleases are ignored by the index bot. Do not replace bytes in an already pinned asset; use a new tag for any correction.
-8. When explicitly authorized, submit the four proposed TOML entries to `Syiana/azs-addons`. Do not upload addon source to that repository. Reborn compatibility remains `untested` until an actual game version has been recorded from testing.
+8. When explicitly authorized, submit only new or intentionally changed TOML entries to `Syiana/azs-addons`. Do not upload addon source to that repository. Reborn compatibility remains `untested` until an actual game version has been recorded from testing.
 
 The existing release `v0.5.8` and its `ASRAdvisor-0.5.8.zip` asset predate this naming convention. Leave those published bytes intact; new assets include `-v` as in the patterns above.
 

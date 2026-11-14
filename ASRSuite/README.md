@@ -1,4 +1,4 @@
-# ASR Suite 0.4.3 — by AlexEnotov
+# ASR Suite 0.6.0 — by AlexEnotov
 
 Необязательный общий центр настроек ASR. Собственных боевых чисел больше не содержит: это отдельный ASR Combat Text.
 

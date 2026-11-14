@@ -106,6 +106,7 @@ local function tip(root,anchor,title,body,row)
   if not root.tip then
     root.tip=box(root,nil,300,104,nil,nil,1); root.tip.asrOverlay=true; root.tip:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8",edgeFile=BORDER,edgeSize=12,insets={left=3,right=3,top=3,bottom=3}}); root.tip:SetFrameLevel(root:GetFrameLevel()+100); root.tip:SetClampedToScreen(true);
     root.tip.title=label(root.tip,"",12,12,-10,276,mint); root.tip.body=label(root.tip,"",11,12,-34,276,text);
+    root.tip.measure=label(root.tip,"",11,0,0,0,text); root.tip.measure:Hide();
     root.tip.scrollHint=label(root.tip,"",9,12,-90,276,mint);
   end
   local f=root.tip; RestoreTipWheel(f); f:SetFrameStrata("TOOLTIP"); f:SetFrameLevel(math.max(1000,root:GetFrameLevel()+100)); f:SetAlpha(1); local raw=A.Plain(body or "");
@@ -120,17 +121,8 @@ local function tip(root,anchor,title,body,row)
   f.title:SetWidth(width-24); f.body:SetWidth(width-24); f.body:SetTextColor(text[1],text[2],text[3],1); f.body:SetAlpha(1);
   f.title:SetHeight(0); local th=math.max(14,f.title.GetStringHeight and f.title:GetStringHeight() or 14); f.title:SetHeight(th);
   f.body:ClearAllPoints(); f.body:SetPoint("TOPLEFT",f,"TOPLEFT",12,-(18+th));
-  local limit=math.max(12,math.floor((width-24)/6)); f.lines={};
-  for line in string.gmatch(raw.."\n","(.-)\n") do
-    local chars={}; for char in string.gmatch(line,".[\128-\191]*") do chars[#chars+1]=char; end
-    if #chars==0 then f.lines[#f.lines+1]=""; else
-      local from=1; while from<=#chars do local last=math.min(#chars,from+limit-1);
-        if last<#chars then for j=last,from+math.floor(limit/2),-1 do if chars[j]==" " then last=j; break end end end
-        f.lines[#f.lines+1]=table.concat(chars,"",from,last); from=last+1;
-      end
-    end
-  end
-  if raw=="" then f.lines={}; end
+  local font,size,flags=f.body:GetFont(); f.measure:SetFont(font,size,flags or ""); f.measure:SetWidth(0);
+  f.lines=A.WrapTooltipText(raw,width-28,function(value) f.measure:SetText(value); return f.measure:GetStringWidth(); end);
   f.visibleLines=math.max(3,math.floor((UIParent:GetHeight()*0.6-th-40)/14));
   f.maxScroll=math.max(0,#f.lines-f.visibleLines)*14; f.scrollOffset=0;
   f.UpdateBody=function(self)

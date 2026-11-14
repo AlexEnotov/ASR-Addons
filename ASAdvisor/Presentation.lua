@@ -9,6 +9,36 @@ end
 function A.SetClassText(font,row,token)
   local hex=A.ClassHex(row,token); font:SetTextColor(tonumber(string.sub(hex,1,2),16)/255,tonumber(string.sub(hex,3,4),16)/255,tonumber(string.sub(hex,5,6),16)/255,1);
 end
+function A.WrapTooltipText(text,width,measure)
+  local lines={}; width=math.max(1,width);
+  local units={['м']=true,['сек']=true,['с']=true,['ед']=true,['%']=true,yd=true,yds=true,sec=true,secs=true,s=true,m=true};
+  for paragraph in string.gmatch(A.Plain(text).."\n","(.-)\n") do
+    local tokens={};
+    for word in string.gmatch(paragraph,"%S+") do
+      local unit=A.Lower((string.gsub(word,"[.,;:!?)]+$","")));
+      if #tokens>0 and units[unit] and string.match(tokens[#tokens],"^[%+%-]?%d+[.,]?%d*$") then tokens[#tokens]=tokens[#tokens].." "..word;
+      else tokens[#tokens+1]=word; end
+    end
+    if #tokens==0 then lines[#lines+1]="";
+    else
+      local current="";
+      for _,word in ipairs(tokens) do
+        local candidate=current=="" and word or current.." "..word;
+        if current~="" and measure(candidate)>width then lines[#lines+1]=current; current=""; end
+        if measure(word)>width then
+          -- Only an individual overlong word can be split; preserve UTF-8.
+          for char in string.gmatch(word,".[\128-\191]*") do
+            if current~="" and measure(current..char)>width then lines[#lines+1]=current; current=""; end
+            current=current..char;
+          end
+        else current=current=="" and word or current.." "..word; end
+      end
+      if current~="" then lines[#lines+1]=current; end
+    end
+  end
+  if text=="" then return {}; end
+  return lines;
+end
 function A.SpellTags(row)
   local m=ASAdvisorMechanics.spells and ASAdvisorMechanics.spells[row.key]; if not m then return ""; end
   local shape=m.shape; local tags={};

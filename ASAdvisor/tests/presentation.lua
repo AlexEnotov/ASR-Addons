@@ -1,4 +1,12 @@
 local A=ASAdvisor; local n=0; local function check(ok,label) assert(ok,label); n=n+1; end
+local measureFont=CreateFrame("Frame",nil,UIParent):CreateFontString(nil); measureFont:SetFont("Fonts\\FRIZQT__.TTF",11,"");
+local function measure(value) measureFont:SetText(value); return measureFont:GetStringWidth(); end
+local wrapped=A.WrapTooltipText("Создаёт область периодического урона радиусом 8 м на 8 сек. Каждый противник получает 48 ед. урона.",290,measure);
+local safe=true; for i,line in ipairs(wrapped) do if measure(line)>290 or string.match(line,"^м[%s%.]") or string.match(line,"^сек%.") or string.match(line,"^ед%.") then safe=false; end end
+check(safe and string.find(table.concat(wrapped,"\n"),"8 м",1,true) and string.find(table.concat(wrapped,"\n"),"48 ед.",1,true),"pixel-based wrapping keeps numbers and units together and fits the available width");
+local long=A.WrapTooltipText(string.rep("Ж",100),90,measure); safe=true;
+for _,line in ipairs(long) do if measure(line)>90 or not utf8.len(line) then safe=false; end end
+check(safe and #long>1,"an overlong word can wrap without breaking UTF-8 characters");
 local oldLanguage=ASAdvisorDB.options.language; A.SetLanguage("ru");
 local cons=A.byKey["PALADIN:consecration"]; local exorcism=A.byKey["PALADIN:exorcism"]; local shock=A.byKey["PALADIN:holy_shock"];
 check(ASAdvisorMechanics.spells.consecration.school=="holy","spell school comes from game metadata");

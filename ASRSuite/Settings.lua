@@ -19,7 +19,7 @@ end
 local function Percent(v) return math.floor(v*100+0.5).."%"; end
 local specs={{"fontSize","Размер текста",10,36,2},{"scrollSpeed","Скорость прокрутки",0,300,10},{"lifetime","Время показа",0.6,4,0.2},{"rise","Высота движения",20,200,10},{"merge","Объединять за",0,1,0.05},{"spacing","Мин. отступ между числами",0,80,1}};
 local function StyleRows(page,get,y,available)
- local out={}; for i,s in ipairs(specs) do local key=s[1]; out[key]=Step(page,s[2],function() return get()[key]; end,function(v) get()[key]=v; end,y+(i-1)*29,s[3],s[4],s[5],function(v)
+ local out={}; for i,s in ipairs(specs) do local key=s[1]; out[key]=Step(page,s[2],function() return get()[key]; end,function(v) get()[key]=v; end,y+(i-1)*28,s[3],s[4],s[5],function(v)
   if key=="scrollSpeed" then return string.format(A.T("%.0f ед/с"),v); elseif key=="lifetime" or key=="merge" then return string.format(A.T("%.2f с"),v); end; return tostring(math.floor(v*100+0.5)/100);
  end,available); end
  if out.merge then out.merge.minus:SetScript("OnEnter",function(self) GameTooltip:SetOwner(self,"ANCHOR_RIGHT"); GameTooltip:SetText(A.T("Объединять за")); GameTooltip:AddLine(A.T("657 ×3 — суммарный урон трёх попаданий, а не урон каждого."),0.8,0.8,0.82,true); GameTooltip:Show(); end); out.merge.minus:SetScript("OnLeave",function() GameTooltip:Hide(); end); end
@@ -64,91 +64,91 @@ function A.ToggleSettings() if window:IsShown() then window:Hide(); else window:
 local function RegisterBuiltins()
  A.RegisterSettingsPage("general","Общие",function(page)
   L(page,"Настройки комплекса",16,8,0,480);
-  local lang=B(page,"",210,27,266,48,function() end); A.controls.language=lang; ASRLocale.Bind(lang,function() return ASRSuiteDB.language; end,A.SetLanguage); L(page,"Язык комплекса",11,8,52,250); records[#records+1]=function() lang.text:SetText(ASRLocale.Name(ASRSuiteDB.language)); end
-  Step(page,"Фон настроек",function() return ASRSuiteDB.opacity; end,function(v) ASRSuiteDB.opacity=v; end,90,0.2,1,0.05,Percent);
-  Step(page,"Фон трекеров",function() return ASRSuiteDB.trackerOpacity; end,function(v) ASRSuiteDB.trackerOpacity=v; end,126,0,1,0.05,Percent);
-  Step(page,"Прозрачность чисел",function() return ASRSuiteDB.textOpacity; end,function(v) ASRSuiteDB.textOpacity=v; end,162,0,1,0.05,Percent);
-  Note(page,"Модули используют общую прозрачность, пока не включена своя. Индивидуальные значения сохраняются.",204);
-  Check(page,"Закрепить все панели",function() return ASRSuiteDB.lockPanels; end,function(v) ASRSuiteDB.lockPanels=v; end,253);
-  B(page,"Изменить интерфейс",468,29,8,293,function() A.ToggleEdit(); end);
-  Check(page,"Магнитная стыковка панелей",function() return ASRSuiteDB.dockingEnabled~=false; end,function(v) ASRSuiteDB.dockingEnabled=v; end,331);
-  Note(page,"В режиме изменения интерфейса подведи панель к краю другой. Главная двигает всю цепочку; дочерняя отделяется вместе со своей цепочкой. Shift — без стыковки.",365):SetHeight(54);
-  B(page,"Разъединить панели",468,27,8,428,function() if A.ClearDocking then A.ClearDocking(); end end);
+  local lang=B(page,"",210,27,266,34,function() end); A.controls.language=lang; ASRLocale.Bind(lang,function() return ASRSuiteDB.language; end,A.SetLanguage); L(page,"Язык комплекса",11,8,38,250); records[#records+1]=function() lang.text:SetText(ASRLocale.Name(ASRSuiteDB.language)); end
+  Step(page,"Фон настроек",function() return ASRSuiteDB.opacity; end,function(v) ASRSuiteDB.opacity=v; end,70,0.2,1,0.05,Percent);
+  Step(page,"Фон трекеров",function() return ASRSuiteDB.trackerOpacity; end,function(v) ASRSuiteDB.trackerOpacity=v; end,102,0,1,0.05,Percent);
+  Step(page,"Прозрачность чисел",function() return ASRSuiteDB.textOpacity; end,function(v) ASRSuiteDB.textOpacity=v; end,134,0,1,0.05,Percent);
+  Note(page,"Модули используют общую прозрачность, пока не включена своя. Индивидуальные значения сохраняются.",168);
+  Check(page,"Закрепить все панели",function() return ASRSuiteDB.lockPanels; end,function(v) ASRSuiteDB.lockPanels=v; end,211);
+  B(page,"Изменить интерфейс",468,29,8,245,function() A.ToggleEdit(); end);
+  Check(page,"Магнитная стыковка панелей",function() return ASRSuiteDB.dockingEnabled~=false; end,function(v) ASRSuiteDB.dockingEnabled=v; end,282);
+  Note(page,"В режиме изменения интерфейса подведи панель к краю другой. Главная двигает всю цепочку; дочерняя отделяется вместе со своей цепочкой. Shift — без стыковки.",314):SetHeight(42);
+  B(page,"Разъединить панели",468,27,8,366,function() if A.ClearDocking then A.ClearDocking(); end end);
  end);
  A.RegisterSettingsPage("endless","Endless",function(page)
   L(page,"Бесконечный режим",16,8,0,480);
-  A.controls.endlessEnabled=Check(page,"Показывать трекер Endless",function() return ASRSuiteDB.endlessEnabled~=false; end,function(v) ASRSuiteDB.endlessEnabled=v; A.UpdateEndless(0,true); end,40);
-  Note(page,"Автоматически заменяет штатный трекер только в бесконечном режиме. Выключение возвращает штатный интерфейс.",82):SetHeight(54);
-  Note(page,"Враги — за весь забег. Боссы — только в бесконечном режиме.",146);
-  Note(page,"Боссы повторяются в порядке карты.",196);
-  B(page,"Изменить интерфейс",468,29,8,260,function() A.ToggleEdit(); end);
-  B(page,"Сбросить положение Endless",468,29,8,304,function() ASRSuiteDB.endlessPosition=nil; if A.endlessFrame then A.endlessFrame.placed=nil; end; A.UpdateEndless(0,true); end);
+  A.controls.endlessEnabled=Check(page,"Показывать трекер Endless",function() return ASRSuiteDB.endlessEnabled~=false; end,function(v) ASRSuiteDB.endlessEnabled=v; A.UpdateEndless(0,true); end,30);
+  Note(page,"Автоматически заменяет штатный трекер только в бесконечном режиме. Выключение возвращает штатный интерфейс.",64):SetHeight(40);
+  Note(page,"Враги — за весь забег. Боссы — только в бесконечном режиме.",114):SetHeight(30);
+  Note(page,"Боссы повторяются в порядке карты.",150):SetHeight(24);
+  B(page,"Изменить интерфейс",468,29,8,190,function() A.ToggleEdit(); end);
+  B(page,"Сбросить положение Endless",468,29,8,227,function() ASRSuiteDB.endlessPosition=nil; if A.endlessFrame then A.endlessFrame.placed=nil; end; A.UpdateEndless(0,true); end);
  end);
  A.RegisterSettingsPage("combat","Текст урона",function(page)
   L(page,"Общие настройки текста",16,8,0,480);
-  A.controls.enabled=Check(page,"Текст урона",function() return A.IsModuleEnabled("combat"); end,function(v) A.SetModuleEnabled("combat",v); end,38);
-  local mode=B(page,"",468,25,8,69,function() A.CombatConfig().mode=A.CombatConfig().mode=="columns" and "enemies" or "columns"; A.ClearCombat(); Changed(); end);
+  A.controls.enabled=Check(page,"Текст урона",function() return A.IsModuleEnabled("combat"); end,function(v) A.SetModuleEnabled("combat",v); end,26);
+  local mode=B(page,"",468,25,8,56,function() A.CombatConfig().mode=A.CombatConfig().mode=="columns" and "enemies" or "columns"; A.ClearCombat(); Changed(); end);
   records[#records+1]=function() mode.text:SetText(A.T("Расположение: ")..A.T(A.CombatConfig().mode=="columns" and "Колонки" or "Над врагами")); end
-  A.controls.mode=mode; A.controls.steps=StyleRows(page,function() return A.CombatConfig(); end,106);
-  Check(page,"Иконки",function() return A.CombatConfig().icons; end,function(v) A.CombatConfig().icons=v; end,289);
-  Check(page,"Короткие числа",function() return A.CombatConfig().short; end,function(v) A.CombatConfig().short=v; end,319);
-  OverrideOpacity(page,"combat",349,"text");
-  Step(page,"Прозрачность чисел",function() return A.CombatConfig().combatOpacity; end,function(v) A.CombatConfig().combatOpacity=v; end,382,0,1,0.05,Percent,function() return OwnOpacity("combat"); end);
+  A.controls.mode=mode; A.controls.steps=StyleRows(page,function() return A.CombatConfig(); end,90);
+  Check(page,"Иконки",function() return A.CombatConfig().icons; end,function(v) A.CombatConfig().icons=v; end,265);
+  Check(page,"Короткие числа",function() return A.CombatConfig().short; end,function(v) A.CombatConfig().short=v; end,295);
+  OverrideOpacity(page,"combat",325,"text");
+  Step(page,"Прозрачность чисел",function() return A.CombatConfig().combatOpacity; end,function(v) A.CombatConfig().combatOpacity=v; end,357,0,1,0.05,Percent,function() return OwnOpacity("combat"); end);
  end);
  local titles={normal="Обычный урон",critical="Критические удары",heal="Исцеление",taken="Полученный урон",periodic="Периодический урон"};
  for _,k in ipairs(A.typeKeys) do local kind=k;
   A.RegisterSettingsPage(kind,titles[kind],function(page)
    L(page,titles[kind],16,8,0,480);
    A.controls.types=A.controls.types or {}; local c={}; A.controls.types[kind]=c;
-   c.shown=Check(page,"Показывать этот тип",function() return A.TypeShown(kind); end,function(v) A.SetTypeShown(kind,v); end,37);
-   c.custom=Check(page,"Использовать свои настройки",function() return A.CombatConfig().types[kind].custom; end,function(v) A.SetCustom(kind,v); end,68);
-   local help=S.Label(page,"",10,8,103+(page.contentOffset or 0),468,S.muted); help:SetHeight(32);
+   c.shown=Check(page,"Показывать этот тип",function() return A.TypeShown(kind); end,function(v) A.SetTypeShown(kind,v); end,26);
+   c.custom=Check(page,"Использовать свои настройки",function() return A.CombatConfig().types[kind].custom; end,function(v) A.SetCustom(kind,v); end,56);
+   local help=S.Label(page,"",10,8,90+(page.contentOffset or 0),468,S.muted); help:SetHeight(32);
    records[#records+1]=function() help:SetText(A.T(A.CombatConfig().types[kind].custom and "Используются индивидуальные значения этого типа." or "Используются общие значения. Включи галочку, чтобы изменить их только для этого типа.")); end
-   c.steps=StyleRows(page,function() return A.CombatConfig().types[kind].custom and A.CombatConfig().types[kind].values or A.CombatConfig(); end,142,function() return A.CombatConfig().types[kind].custom; end);
-   Check(page,"Иконки",function() return A.EffectiveOptions(kind).icons; end,function(v) A.CombatConfig().types[kind].values.icons=v; end,324,function() return A.CombatConfig().types[kind].custom; end);
-   Check(page,"Короткие числа",function() return A.EffectiveOptions(kind).short; end,function(v) A.CombatConfig().types[kind].values.short=v; end,354,function() return A.CombatConfig().types[kind].custom; end);
+   c.steps=StyleRows(page,function() return A.CombatConfig().types[kind].custom and A.CombatConfig().types[kind].values or A.CombatConfig(); end,128,function() return A.CombatConfig().types[kind].custom; end);
+   Check(page,"Иконки",function() return A.EffectiveOptions(kind).icons; end,function(v) A.CombatConfig().types[kind].values.icons=v; end,303,function() return A.CombatConfig().types[kind].custom; end);
+   Check(page,"Короткие числа",function() return A.EffectiveOptions(kind).short; end,function(v) A.CombatConfig().types[kind].values.short=v; end,333,function() return A.CombatConfig().types[kind].custom; end);
   end);
  end
  A.RegisterSettingsPage("stats","Stats",function(page)
   L(page,"Stats",16,8,0,480);
-  Check(page,"Модуль включён",function() return A.IsModuleEnabled("stats"); end,function(v) A.SetModuleEnabled("stats",v); end,36);
+  Check(page,"Модуль включён",function() return A.IsModuleEnabled("stats"); end,function(v) A.SetModuleEnabled("stats",v); end,30);
   local function Have() return ASRStatsDB and ASRStats; end
-  Note(page,"Настройки панели характеристик. Расположение меняется в общем режиме редактирования.",64);
-  Step(page,"Масштаб",function() return ASRStatsDB and ASRStatsDB.scale or 0.7; end,function(v) ASRStatsDB.scale=v; end,108,0.5,1.5,0.05,Percent,Have);
-  Check(page,"Скрывать нули",function() return ASRStatsDB and ASRStatsDB.hideZeros; end,function(v) ASRStatsDB.hideZeros=v; end,145,Have);
-  Check(page,"Закрепить",function() return ASRStatsDB and ASRStatsDB.locked; end,function(v) ASRStatsDB.locked=v; end,181,Have);
-  OverrideOpacity(page,"stats",207);
-  Step(page,"Непрозрачность",function() return ASRStatsDB and ASRStatsDB.opacity or 0.9; end,function(v) ASRStatsDB.opacity=v; end,243,0,1,0.05,Percent,function() return Have() and OwnOpacity("stats"); end);
-  OverrideOpacity(page,"stats",285,"menu");
-  Step(page,"Фон настроек",function() return ASRStatsDB and ASRStatsDB.menuOpacity or 0.95; end,function(v) ASRStatsDB.menuOpacity=v; end,321,0,1,0.05,Percent,function() return Have() and OwnOpacity("stats","menu"); end);
-  B(page,"Изменить интерфейс",468,28,8,378,function() A.ToggleEdit(); end);
+  Note(page,"Настройки панели характеристик. Расположение меняется в общем режиме редактирования.",60);
+  Step(page,"Масштаб",function() return ASRStatsDB and ASRStatsDB.scale or 0.7; end,function(v) ASRStatsDB.scale=v; end,98,0.5,1.5,0.05,Percent,Have);
+  Check(page,"Скрывать нули",function() return ASRStatsDB and ASRStatsDB.hideZeros; end,function(v) ASRStatsDB.hideZeros=v; end,130,Have);
+  Check(page,"Закрепить",function() return ASRStatsDB and ASRStatsDB.locked; end,function(v) ASRStatsDB.locked=v; end,160,Have);
+  OverrideOpacity(page,"stats",190);
+  Step(page,"Непрозрачность",function() return ASRStatsDB and ASRStatsDB.opacity or 0.9; end,function(v) ASRStatsDB.opacity=v; end,220,0,1,0.05,Percent,function() return Have() and OwnOpacity("stats"); end);
+  OverrideOpacity(page,"stats",254,"menu");
+  Step(page,"Фон настроек",function() return ASRStatsDB and ASRStatsDB.menuOpacity or 0.95; end,function(v) ASRStatsDB.menuOpacity=v; end,284,0,1,0.05,Percent,function() return Have() and OwnOpacity("stats","menu"); end);
+  B(page,"Изменить интерфейс",468,28,8,326,function() A.ToggleEdit(); end);
  end);
  A.RegisterSettingsPage("builder","Билдер",function(page)
   L(page,"Билдер",16,8,0,480);
   local function Have() return ASAdvisor and ASAdvisorDB and ASAdvisorDB.options; end
-  Check(page,"Модуль включён",function() return A.IsModuleEnabled("builder"); end,function(v) A.SetModuleEnabled("builder",v); end,36);
+  Check(page,"Модуль включён",function() return A.IsModuleEnabled("builder"); end,function(v) A.SetModuleEnabled("builder",v); end,30);
   local function Opt() return Have() or {}; end
-  B(page,"Открыть редактор билдов",468,28,8,73,function() if ASAdvisor and ASAdvisor.ToggleUI then ASAdvisor.ToggleUI(); window:Hide(); end end);
-  Check(page,"Показывать трекер",function() return Have() and not Opt().trackerHidden; end,function(v) Opt().trackerHidden=not v; end,109,Have);
-  local mode=B(page,"",468,25,8,143,function() if Have() then Opt().trackerMode=Opt().trackerMode=="compact" and "detailed" or "compact"; Changed(); end end);
+  B(page,"Открыть редактор билдов",468,28,8,62,function() if ASAdvisor and ASAdvisor.ToggleUI then ASAdvisor.ToggleUI(); window:Hide(); end end);
+  Check(page,"Показывать трекер",function() return Have() and not Opt().trackerHidden; end,function(v) Opt().trackerHidden=not v; end,98,Have);
+  local mode=B(page,"",468,25,8,130,function() if Have() then Opt().trackerMode=Opt().trackerMode=="compact" and "detailed" or "compact"; Changed(); end end);
   records[#records+1]=function() mode.text:SetText(A.T(Opt().trackerMode=="detailed" and "Трекер: подробный" or "Трекер: компактный")); end
-  Step(page,"Масштаб редактора",function() return Opt().scale or 0.85; end,function(v) Opt().scale=v; end,181,0.55,1.3,0.05,Percent,Have);
-  Step(page,"Масштаб трекера",function() return Opt().trackerScale or 0.85; end,function(v) Opt().trackerScale=v; end,215,0.5,1.3,0.05,Percent,Have);
-  OverrideOpacity(page,"builder",251,"menu");
+  Step(page,"Масштаб редактора",function() return Opt().scale or 0.85; end,function(v) Opt().scale=v; end,164,0.55,1.3,0.05,Percent,Have);
+  Step(page,"Масштаб трекера",function() return Opt().trackerScale or 0.85; end,function(v) Opt().trackerScale=v; end,196,0.5,1.3,0.05,Percent,Have);
+  OverrideOpacity(page,"builder",228,"menu");
   local function Own() return Have() and OwnOpacity("builder","menu"); end
-  Step(page,"Фон редактора",function() return Opt().opacity or 0.84; end,function(v) Opt().opacity=v; end,284,0.15,1,0.05,Percent,Own);
-  OverrideOpacity(page,"builder",318);
-  Step(page,"Фон трекера",function() return Opt().trackerOpacity or 0.42; end,function(v) Opt().trackerOpacity=v; end,351,0.1,1,0.05,Percent,function() return Have() and OwnOpacity("builder"); end);
-  Note(page,"Билды, требования и импорт/экспорт доступны в редакторе билдов.",388);
+  Step(page,"Фон редактора",function() return Opt().opacity or 0.84; end,function(v) Opt().opacity=v; end,258,0.15,1,0.05,Percent,Own);
+  OverrideOpacity(page,"builder",290);
+  Step(page,"Фон трекера",function() return Opt().trackerOpacity or 0.42; end,function(v) Opt().trackerOpacity=v; end,320,0.1,1,0.05,Percent,function() return Have() and OwnOpacity("builder"); end);
+  Note(page,"Билды, требования и импорт/экспорт доступны в редакторе билдов.",356);
  end);
  A.RegisterSettingsPage("compat","Совместимость",function(page)
   L(page,"Совместимость",16,8,0,480);
-  Note(page,"Галочка включает элемент аддона. Стандартный вариант игры — рядом. Наведи курсор для пояснения.",35);
-  local current=S.Label(page,"",10,8,77,468,S.muted); current:SetHeight(22);
-  local scroll=CreateFrame("ScrollFrame",nil,page); scroll:SetSize(448,344); scroll:SetPoint("TOPLEFT",page,"TOPLEFT",8,-106); scroll:EnableMouseWheel(true);
+  Note(page,"Галочка включает элемент аддона. Стандартный вариант игры — рядом. Наведи курсор для пояснения.",28);
+  local current=S.Label(page,"",10,8,70,468,S.muted); current:SetHeight(22);
+  local scroll=CreateFrame("ScrollFrame",nil,page); scroll:SetSize(448,344); scroll:SetPoint("TOPLEFT",page,"TOPLEFT",8,-96); scroll:EnableMouseWheel(true);
   local list=CreateFrame("Frame",nil,scroll); list:SetSize(448,344); scroll:SetScrollChild(list);
   local groups={}; local maximum=0;
-  local bar=CreateFrame("Frame",nil,page); bar:SetSize(20,344); bar:SetPoint("TOPLEFT",page,"TOPLEFT",476,-106);
+  local bar=CreateFrame("Frame",nil,page); bar:SetSize(20,344); bar:SetPoint("TOPLEFT",page,"TOPLEFT",476,-96);
   local slider=CreateFrame("Slider",nil,bar); slider:SetSize(14,292); slider:SetPoint("TOPLEFT",bar,"TOPLEFT",3,-26); slider:SetOrientation("VERTICAL"); slider:SetValueStep(1); slider:SetMinMaxValues(0,0);
   slider:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8"}); slider:SetBackdropColor(0.12,0.13,0.15,1); slider:SetThumbTexture("Interface\\Buttons\\UI-ScrollBar-Knob"); slider:GetThumbTexture():SetSize(14,28);
   local syncing=false;
@@ -178,7 +178,7 @@ local function RegisterBuiltins()
      group.title=S.Label(group.frame,"",12,0,0,448);
     end
     group.title:SetText(A.T(spec.title));
-    local rowY=20;
+    local rowY=18;
     for _,feature in ipairs(spec.features) do
      group.features[feature.id]=feature;
      local row=group.rows[feature.id];
@@ -198,9 +198,9 @@ local function RegisterBuiltins()
        Explain(fallback,function() return "Использовать стандартный текст игры вместо текста аддона."; end);
       end
      end
-     row:ClearAllPoints(); row:SetPoint("TOPLEFT",group.frame,"TOPLEFT",0,-rowY); row:SetHeight(28); rowY=rowY+30;
+     row:ClearAllPoints(); row:SetPoint("TOPLEFT",group.frame,"TOPLEFT",0,-rowY); row:SetHeight(26); rowY=rowY+28;
     end
-    group.frame:SetHeight(rowY+8);
+    group.frame:SetHeight(rowY+4);
     if not spec.available or spec.available() then group.frame:Show(); group.frame:ClearAllPoints(); group.frame:SetPoint("TOPLEFT",list,"TOPLEFT",0,-y); y=y+group.frame:GetHeight(); else group.frame:Hide(); end
    end
    local source=ASRSuiteDB.sources.combat; local names={asr="Текст ASR",game="Стандартный текст игры",survivor="Текст SurvivorUI",previous="Как было до ASR"};

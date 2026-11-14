@@ -180,17 +180,17 @@ end
 function A.InitEndless()
  if ASRSuiteDB.endlessEnabled==nil then ASRSuiteDB.endlessEnabled=true; end
  if A.endlessFrame then return; end
- local f=CreateFrame("Frame","ASREndlessTracker",UIParent); A.endlessFrame=f; f:SetSize(270,254); f:SetFrameStrata("MEDIUM"); f:SetFrameLevel(20); f:Hide();
- f.head=CreateFrame("Frame",nil,f); f.head:SetPoint("TOPLEFT",f,"TOPLEFT",0,0); f.head:SetSize(270,78);
+ local f=CreateFrame("Frame","ASREndlessTracker",UIParent); A.endlessFrame=f; f:SetSize(270,244); f:SetFrameStrata("MEDIUM"); f:SetFrameLevel(20); f:Hide();
+ f.head=CreateFrame("Frame",nil,f); f.head:SetPoint("TOPLEFT",f,"TOPLEFT",0,0); f.head:SetSize(270,68);
  f.head:SetBackdrop({bgFile="Interface\\Tooltips\\UI-Tooltip-Background",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",edgeSize=14,tile=true,tileSize=16,insets={left=3,right=3,top=3,bottom=3}});
  f.head:SetBackdropColor(0.16,0.12,0.09,0.92); f.head:SetBackdropBorderColor(0.55,0.5,0.45,1);
- f.title=Label(f.head,"ENDLESS",11,16,10,90,GREEN); Font(f.title,11);
- f.round=Label(f.head,"",11,106,10,148); f.round:SetJustifyH("RIGHT");
- f.levelText=Label(f.head,"",13,16,30,148); f.time=Label(f.head,"",14,168,30,86); f.time:SetJustifyH("RIGHT"); Font(f.time,14);
- f.zone=Label(f.head,"",15,16,51,238,{1,0.82,0,1});
- f.difficulty=Label(f.head,"",15,16,51,100,{0.73,0.73,0.73,1});
- f.enemy=Objective(f,122); f.counts=f.enemy.name; f.rows={};
- f.slot=CreateFrame("Frame",nil,f); f.slot:SetPoint("TOPLEFT",f,"TOPLEFT",4,-86); f.slot:SetSize(262,28);
+ f.title=Label(f.head,"ENDLESS",11,12,8,90,GREEN); Font(f.title,11);
+ f.round=Label(f.head,"",11,106,8,152); f.round:SetJustifyH("RIGHT");
+ f.levelText=Label(f.head,"",13,12,26,148); f.time=Label(f.head,"",14,172,26,86); f.time:SetJustifyH("RIGHT"); Font(f.time,14);
+ f.zone=Label(f.head,"",15,12,45,246,{1,0.82,0,1});
+ f.difficulty=Label(f.head,"",15,12,45,100,{0.73,0.73,0.73,1});
+ f.enemy=Objective(f,112); f.counts=f.enemy.name; f.rows={};
+ f.slot=CreateFrame("Frame",nil,f); f.slot:SetPoint("TOPLEFT",f,"TOPLEFT",4,-76); f.slot:SetSize(262,28);
  f.bar=CreateFrame("StatusBar",nil,f.slot); f.bar:SetPoint("CENTER",f.slot,"CENTER",0,0); f.bar:SetSize(262,12);
  if f.bar.SetStatusBarTexture then f.bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8"); f.bar:SetStatusBarColor(unpack(GREEN)); end
  f.bar:SetMinMaxValues(0,1); local bg=f.bar:CreateTexture(nil,"BACKGROUND"); bg:SetAllPoints(f.bar); bg:SetTexture(0.12,0.14,0.10,1);
@@ -218,17 +218,17 @@ local function Place(f)
 end
 function A.DrawEndless(m)
  local f=A.endlessFrame; if not f or not m then return; end
- local objectivesY=m.nextIn~=nil and 122 or 86;
+ local objectivesY=m.nextIn~=nil and 112 or 76;
  if m.nextIn~=nil then f.slot:Show(); else f.slot:Hide(); end
  objectivesY=objectivesY+Affixes(f,m,objectivesY);
  f.enemy:ClearAllPoints(); f.enemy:SetPoint("TOPLEFT",f,"TOPLEFT",20,-objectivesY);
  f:SetHeight(objectivesY+22+#m.bossRows*22); Place(f);
- Fit(f.round,string.format(A.T("Круг %d · Боссы: %d"),m.round,m.killed),11,148);
+ Fit(f.round,string.format(A.T("Круг %d · Боссы: %d"),m.round,m.killed),11,152);
  Fit(f.levelText,string.format(A.T("Уровень %d"),m.level),13,148); f.time:SetText(Clock(math.floor(m.time)));
  Fit(f.difficulty,A.EndlessDifficulty(m),13,100);
  local difficultyWidth=f.difficulty:GetStringWidth();
- Fit(f.zone,A.EndlessName(m.zone),13,math.max(80,238-difficultyWidth-6));
- f.difficulty:ClearAllPoints(); f.difficulty:SetPoint("TOPLEFT",f.head,"TOPLEFT",16+f.zone:GetStringWidth()+6,-51);
+ Fit(f.zone,A.EndlessName(m.zone),13,math.max(80,246-difficultyWidth-6));
+ f.difficulty:ClearAllPoints(); f.difficulty:SetPoint("TOPLEFT",f.head,"TOPLEFT",12+f.zone:GetStringWidth()+6,-45);
  Fit(f.counts,string.format(A.T("Убито врагов %d"),m.kills),12,210); Mark(f.enemy,"next");
  if not f.charge and AZS_BuildBossChargeBar then
   f.chargeHolder=CreateFrame("Frame",nil,f.slot);

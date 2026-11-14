@@ -48,17 +48,17 @@ check(A.endlessFrame.zone:GetText()=="Elwynn Forest" and A.endlessFrame.rows[2].
 check(A.endlessFrame.levelText.fontSize==13 and A.endlessFrame.rows[1].name.fontSize==12,"level and boss labels use smaller type");
 check(#A.endlessFrame.rows==5 and A.endlessFrame.rows[2].dot:IsShown() and not A.endlessFrame.rows[3].dot:IsShown(),"full boss list uses native filled and empty objective sockets");
 check(not A.endlessFrame.backdrop and A.endlessFrame.head.backdrop and not A.endlessFrame.viewport,"only the native-style header has a background and frame");
-check(A.endlessFrame:GetHeight()==254,"five native-sized boss rows and enemy objective fit the tracker");
+check(A.endlessFrame:GetHeight()==244,"five native-sized boss rows fit below the compact header");
 check(A.endlessFrame.difficulty:GetText()=="Normal","map caption includes normal difficulty in English");
 check(A.EndlessDifficulty({heroic=1})=="Heroic" and A.EndlessDifficulty({difficulty="Heroic 5"})=="Heroic 5","heroic flag and named tiers are retained");
 local charge;
 function AZS_BuildBossChargeBar(holder) return function(value,text) charge={value=value,text=text}; end,293; end
 A.UpdateEndless(0,true); check(charge and charge.text=="0%" and not A.endlessFrame.bar:IsShown(),"native charge bar shows percentages only");
 A.endlessModel.zone=string.rep("Очень длинное имя карты ",8); A.DrawEndless(A.endlessModel);
-check(A.endlessFrame.zone:GetStringWidth()+A.endlessFrame.difficulty:GetStringWidth()+6<=238,"map and gray difficulty caption fit together without wrapping");
+check(A.endlessFrame.zone:GetStringWidth()+A.endlessFrame.difficulty:GetStringWidth()+6<=246,"map and gray difficulty caption fit together without wrapping");
 zone.zname="Naxxramas"; zone.diff="Heroic V"; zone.affixes="Bolstering,Sanguine"; A.UpdateEndless(0,true);
 check(A.endlessFrame.zone:GetText()=="Naxxramas" and A.endlessFrame.difficulty:GetText()=="Heroic V","other maps retain the server's Roman-numeral heroic tier");
-check(#A.endlessFrame.affixIcons==2 and A.endlessFrame.affixIcons[1]:IsShown() and A.endlessFrame:GetHeight()==290,"heroic affix icons have their own space above objectives");
+check(#A.endlessFrame.affixIcons==2 and A.endlessFrame.affixIcons[1]:IsShown() and A.endlessFrame:GetHeight()==280,"heroic affix icons have their own space above objectives");
 zone.affixes=nil; zone.diff=nil; A.UpdateEndless(0,true); check(not A.endlessFrame.affixIcons[1]:IsShown(),"obsolete affix icons are removed");
 A.SetLanguage("ru"); A.UpdateEndless(0,true);
 check(A.endlessFrame.round:GetText():find("Круг 2",1,true),"Russian labels follow suite language");

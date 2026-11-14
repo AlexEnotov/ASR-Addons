@@ -1,6 +1,6 @@
 # Endless tracker
 
-ASR Suite 0.5.3 includes a tracker that replaces the native run tracker only in
+ASR Suite 0.5.4 includes a tracker that replaces the native run tracker only in
 endless mode. Enable or disable it in **ASR Suite → Endless**. Disabling it or
 leaving endless mode restores the previous native clock/tracker visibility.
 The native boss health bars are not replaced. The display uses the suite language

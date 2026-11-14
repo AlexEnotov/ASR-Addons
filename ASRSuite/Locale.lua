@@ -71,6 +71,18 @@ local EN={
  ["ЛКМ — настройки комплекса\nПКМ — режим редактирования\nПеретащи кнопку вокруг миникарты"]="Left click: suite settings\nRight click: edit layout\nDrag the button around the minimap",
  ["ASR Advisor не установлен."]="ASR Advisor is not installed.", ["Собственный текст SurvivorUI не обнаружен."]="SurvivorUI combat text was not found.",
 };
+EN["Бесконечный режим"]="Endless mode";
+EN["Показывать трекер Endless"]="Show Endless tracker";
+EN["Автоматически заменяет штатный трекер только в бесконечном режиме. Выключение возвращает штатный интерфейс."]="Automatically replaces the native tracker in endless mode. Disable to restore the native interface.";
+EN["Враги — за весь забег. Боссы — только в бесконечном режиме."]="Enemies count the entire run. Bosses count endless mode only.";
+EN["Таймер приходит из игры. Следующий босс определяется по очереди карты."]="The countdown comes from the game. The next boss follows the map's boss order.";
+EN["Сбросить положение Endless"]="Reset Endless position";
+EN["Круг %d"]="Round %d"; EN["Уровень %d"]="Level %d";
+EN["Враги: %d  ·  Боссы: %d"]="Enemies: %d  ·  Bosses: %d";
+EN["Круг %d · %s"]="Round %d · %s";
+EN["В бою"]="Alive"; EN["Убит"]="Defeated"; EN["Следующий"]="Next"; EN["Далее"]="Later";
+EN["Живых боссов: %d"]="Bosses alive: %d";
+EN["Следующий: круг %d"]="Next: round %d";
 ASRLocale.RegisterTranslations("suite","en",EN);
 ASRLocale.RegisterTranslations("suite","ru",{["Stats"]="Статы",["ASR Stats"]="ASR Статы"});
 function A.T(value) return ASRLocale.Text("suite",ASRSuiteDB and ASRSuiteDB.language or "en",value); end

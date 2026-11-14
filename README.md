@@ -7,7 +7,7 @@ Independent addons for **Azeroth Survivors Reborn**, with an optional shared set
 | ASR Advisor | `ASAdvisor` | `/asr` | Build planner, tracker and card recommendations |
 | ASR Stats | `ASRStats` | `/asrstats config` | Current character stats |
 | ASR Combat Text | `ASRCombatText` | `/asrtext` | Movable combat numbers with per-type settings |
-| ASR Suite | `ASRSuite` | `/asrhub` | Shared settings, compatibility controls and interface editor |
+| ASR Suite | `ASRSuite` | `/asrhub` | Shared settings, compatibility controls, interface editor and automatic Endless tracker |
 
 Install only what you need. Advisor, Stats and Combat Text work without Suite. Suite discovers installed modules; it does not require all three. All modules require the game's native AzerothSurvivors addon; some also use AzerothSurvivorsAPI as declared in their TOCs. These native game components are not bundled.
 

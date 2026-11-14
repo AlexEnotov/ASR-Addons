@@ -75,6 +75,15 @@ local function RegisterBuiltins()
   Note(page,"В режиме изменения интерфейса подведи панель к краю другой. Главная двигает всю цепочку; дочерняя отделяется вместе со своей цепочкой. Shift — без стыковки.",365):SetHeight(54);
   B(page,"Разъединить панели",468,27,8,428,function() if A.ClearDocking then A.ClearDocking(); end end);
  end);
+ A.RegisterSettingsPage("endless","Endless",function(page)
+  L(page,"Бесконечный режим",16,8,0,480);
+  A.controls.endlessEnabled=Check(page,"Показывать трекер Endless",function() return ASRSuiteDB.endlessEnabled~=false; end,function(v) ASRSuiteDB.endlessEnabled=v; A.UpdateEndless(0,true); end,40);
+  Note(page,"Автоматически заменяет штатный трекер только в бесконечном режиме. Выключение возвращает штатный интерфейс.",82):SetHeight(54);
+  Note(page,"Враги — за весь забег. Боссы — только в бесконечном режиме.",146);
+  Note(page,"Таймер приходит из игры. Следующий босс определяется по очереди карты.",196);
+  B(page,"Изменить интерфейс",468,29,8,260,function() A.ToggleEdit(); end);
+  B(page,"Сбросить положение Endless",468,29,8,304,function() ASRSuiteDB.endlessPosition=nil; if A.endlessFrame then A.endlessFrame.placed=nil; end; A.UpdateEndless(0,true); end);
+ end);
  A.RegisterSettingsPage("combat","Текст урона",function(page)
   L(page,"Общие настройки текста",16,8,0,480);
   A.controls.enabled=Check(page,"Текст урона",function() return A.IsModuleEnabled("combat"); end,function(v) A.SetModuleEnabled("combat",v); end,38);

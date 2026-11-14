@@ -46,7 +46,7 @@ AZSCardsFrame:Show(); local candidates=A.BanishCandidates(active,offer,live); lo
 check(candidates[2] and action.kind=="card" and action.index==1,"ban hints do not replace the normal higher-priority upgrade recommendation");
 AZS_CARDS=offer; AZS_SPELLS={}; for _,pick in ipairs(active.spells) do AZS_SPELLS[#AZS_SPELLS+1]={key=pick.key,rank=5,cdmax=1}; end
 AZS_RUN.ph="playing"; ASAdvisorDB.options.enabled=true; A.offer=true; A.RefreshUI();
-check(ASAdvisorCardMark1:IsShown() and ASAdvisorBanishMark2:IsShown(),"ordinary choice and independent ban button are highlighted at the same time");
+check(ASAdvisorCardMark1:IsShown() and not ASAdvisorBanishMark2:IsShown(),"primary card recommendation suppresses secondary ban highlighting");
 check(not ASAdvisorBanishMark1:IsShown(),"an unselected spell does not receive a ban indicator");
 offer.bn=0; check(next(A.BanishCandidates(active,offer,live))==nil,"no ban indicators without charges");
 offer.bn=3; offer.cards[2].new=1; check(not A.BanishCandidates(active,offer,live)[2],"new-spell acquisition cards never receive a ban indicator");

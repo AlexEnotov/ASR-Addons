@@ -71,6 +71,7 @@ function A.ScoreSpell(b,card,live,index)
   local p,priority=A.MatchSpell(b,card.key,live);
   local r={index=index,card=card,score=0,reason=A.T("Вне выбранного билда"),kind="off"};
   if not p then return r; end
+  if live.banned and live.banned[card.key] then r.reason=A.T("Забанены"); r.kind="banish"; return r; end
   r.any=p.any==true;
   local current=live.spells[card.key];
   local cap=tonumber(AZS_CARDS and AZS_CARDS.slm) or 6;
@@ -203,7 +204,7 @@ function A.BanishCandidates(b,offer,live)
     local current=live.spells[card.key];
     local p,priority=A.MatchSpell(b,card.key,live);
     local button=_G["AZSCard"..i.."Banish"];
-    if p and current and (tonumber(current.rank) or 0)>0 and tonumber(card.new)~=1 and button and button:IsShown() and not button.off then
+    if p and current and not (live.banned and live.banned[card.key]) and (tonumber(current.rank) or 0)>0 and tonumber(card.new)~=1 and button and button:IsShown() and not button.off then
       if A.BanishReady(p,A.SpellStats(card.key,live),plan[p.key]) then result[i]=priority; end
     end
   end

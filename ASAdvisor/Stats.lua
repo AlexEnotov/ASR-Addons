@@ -372,17 +372,26 @@ function A.TrackerEntries(b,live)
       if stats.radius then parts[#parts+1]=A.StatLabel("area").." "..stats.radius..A.T(" м"); end
       usedSpell[key]=true;
     end
-    spells[#spells+1]={row=row,owned=current~=nil,rank=current and current.rank,detail=table.concat(parts," · "),planned=planned};
+    local banned=key and live.banned and live.banned[key] or false;
+    spells[#spells+1]={row=row,owned=current~=nil,rank=not banned and current and current.rank or nil,detail=not banned and table.concat(parts," · ") or "",planned=planned,banned=banned};
   end
   for _,p in ipairs(b and b.spells or {}) do
     local key=p.any and assignments[p.key] or p.key;
     local row=key and A.byKey[token..":"..key] or A.Info(b,p.key,"spell"); spell(row,key,true);
   end
   for key in pairs(live.spells) do if not usedSpell[key] and A.byKey[token..":"..key] then spell(A.byKey[token..":"..key],key,false); end end
+  local bestAmulet;
+  for _,key in ipairs(b and b.items or {}) do
+    local info=A.ItemInfo(b,key); local worn=info and info.group=="amulet" and A.WornForKey(b,key,live);
+    local priority=worn and A.ItemPriority(b,key,"amulet");
+    if priority and (not bestAmulet or priority<bestAmulet) then bestAmulet=priority; end
+  end
   for _,key in ipairs(b and b.items or {}) do
     local row=A.ItemInfo(b,key); local g=A.WornForKey(b,key,live);
+    local amuletPriority=row and row.group=="amulet" and A.ItemPriority(b,key,"amulet");
+    local obsolete=not g and bestAmulet and amuletPriority and amuletPriority>bestAmulet;
     if g then usedGear[g]=true; if row.any then row=A.ResolveItem(g,token) or {name=g.name,icon=g.icon,group=g.slot}; end end
-    items[#items+1]={row=row,owned=g~=nil,detail=g and A.ShortItem(g) or "",planned=true};
+    if not obsolete then items[#items+1]={row=row,owned=g~=nil,detail=g and A.ShortItem(g) or "",planned=true}; end;
   end
   for _,g in ipairs(live.gear) do if not usedGear[g] then
     local row=A.ResolveItem(g,token) or {name=g.name,icon=g.icon,group=g.slot};

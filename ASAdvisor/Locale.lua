@@ -1,5 +1,6 @@
 local A=ASAdvisor;
 local EN={
+ ["Забанены"]="Banished",
  ["Все улучшения, кроме уже достигнутых целей."]="All upgrades except goals already reached.",
  ["Только заданные параметры до достижения целей."]="Only configured stats until their goals are reached.",
  ["Любые улучшения до заданного ранга."]="Any upgrades until the target rank.",

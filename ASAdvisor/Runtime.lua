@@ -14,7 +14,7 @@ local function register()
     AZS.On(eventPrefix,function(msg)
       trace(eventPrefix,msg);
       if not A.ready then return; end
-      if eventPrefix=="AZSCARDS" then A.offer=true;
+      if eventPrefix=="AZSCARDS" then A.offer=true; A.ConfirmBanish();
       elseif eventPrefix=="AZSEND" or eventPrefix=="AZSZONE" then A.offer=false;
       elseif eventPrefix=="AZSRUN" and AZS_RUN and AZS_RUN.ph~="choosing" then A.offer=false; end
       if eventPrefix=="AZSGEAR" then
@@ -27,6 +27,7 @@ end
 clock:SetScript("OnEvent",function(self,event,name)
   if event=="ADDON_LOADED" and name=="ASAdvisor" then
     A.Init(); register();
+    if hooksecurefunc and SendAddonMessage then hooksecurefunc("SendAddonMessage",A.ObserveBanishCommand); end
     if AZS_SetOnTopOfScreens then
       -- Register only the editor root. Child pages render in that hierarchy, never as separate top-level windows.
       AZS_SetOnTopOfScreens("ASAdvisorPlanner",true);

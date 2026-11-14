@@ -144,6 +144,7 @@ local function hint(b,key)
   b:SetScript("OnLeave",function() hideTip(main); hideTip(tracker); end);
 end
 local function itemTip(root,cell,row)
+  if cell.banned then tip(root,cell,row.name,A.T("Забанены"),row); return; end
   if row.addAny then tip(root,cell,"Any",A.T("Любой вариант или выбранный список взаимозаменяемых вариантов.")); return; end
   if row.any then
     local b=root==main and edited() or A.Active(); local p=b and (row.group=="spell" and A.FindPick(b,row.key) or A.ItemRule(b,row.key)); local names={};
@@ -816,8 +817,8 @@ local function createTracker()
     end
   end
   tracker.itemLabel=label(tracker,"",9,8,-60,200,muted); tracker.spellLabel=label(tracker,"",9,24,-56,200,muted);
-  tracker.extraIcons={};
-  tracker.sectionLabels={}; for _,key in ipairs({"spell","jewel","extra"}) do tracker.sectionLabels[key]=label(tracker.content,"",10,0,0,200,muted); end
+  tracker.extraIcons={}; tracker.bannedIcons={}; tracker.bannedLabel=label(tracker,"",10,20,-45,156,{0.85,0.45,0.45,1});
+  tracker.sectionLabels={}; for _,key in ipairs({"spell","jewel","extra","banned"}) do tracker.sectionLabels[key]=label(tracker.content,"",10,0,0,200,muted); end
   tracker:EnableMouseWheel(true); tracker.offset=0;
   tracker.Scroll=function(delta)
     if ASAdvisorDB.options.trackerMode~="detailed" then return; end
@@ -906,38 +907,45 @@ function A.RefreshUI()
   end end
   local bans=visible and A.BanishCandidates(b,AZS_CARDS,live) or {};
   for i=1,4 do local mark=actionMark("banish",i); if mark then
-    if not editorOpen and bans[i] then mark:SetAlpha(0.88+0.12*math.sin(GetTime()*4)); mark:Show(); else mark:Hide(); end
+    if not editorOpen and action and action.kind=="banish" and action.index==i and bans[i] then mark:SetAlpha(0.88+0.12*math.sin(GetTime()*4)); mark:Show(); else mark:Hide(); end
   end end
   tracker:SetBackdropColor(0.04,0.04,0.045,panelOpacity(ASAdvisorDB.options.trackerOpacity));
   tracker.builds.text:SetText(b and b.name or A.T("Выбрать билд")); tracker.builds.text:SetJustifyH("LEFT"); tracker.builds.text:SetHeight(14);
   if not A.suiteEditing and (editorOpen or visible or ASAdvisorDB.options.trackerHidden or not live.inRun) then stopInteraction(tracker); hideTip(tracker); tracker:Hide(); return; end
   local anchor=trackerAnchor();
-  tracker:Show(); tracker.empty:Hide(); tracker.itemLabel:Hide(); tracker.spellLabel:Hide(); for _,heading in pairs(tracker.sectionLabels) do heading:Hide(); end; tracker.scrollHint:Hide(); tracker:SetScale(math.min(ASAdvisorDB.options.trackerScale,(UIParent:GetWidth()-24)/ASAdvisorDB.options.trackerWidth,(UIParent:GetHeight()-24)/ASAdvisorDB.options.trackerHeight));
+  tracker:Show(); tracker.empty:Hide(); tracker.bannedLabel:Hide(); tracker.itemLabel:Hide(); tracker.spellLabel:Hide(); for _,heading in pairs(tracker.sectionLabels) do heading:Hide(); end; tracker.scrollHint:Hide(); tracker:SetScale(math.min(ASAdvisorDB.options.trackerScale,(UIParent:GetWidth()-24)/ASAdvisorDB.options.trackerWidth,(UIParent:GetHeight()-24)/ASAdvisorDB.options.trackerHeight));
   trackerLayoutBusy=true;
   local spells,items=A.TrackerEntries(b,live); local entries={}; for _,v in ipairs(spells) do entries[#entries+1]=v; end; for _,v in ipairs(items) do entries[#entries+1]=v; end
   for _,f in ipairs(tracker.icons) do f:Hide(); end; for _,r in ipairs(tracker.rows) do r:Hide(); end
-  for _,icon in ipairs(tracker.extraIcons) do icon:Hide(); end
+  for _,icon in ipairs(tracker.extraIcons) do icon:Hide(); end; for _,icon in ipairs(tracker.bannedIcons) do icon:Hide(); end
   tracker.brand:ClearAllPoints(); tracker.brand:SetPoint("TOPLEFT",tracker,"TOPLEFT",20,-23); tracker.brand:SetHeight(16); tracker.brand:SetJustifyV("MIDDLE"); tracker.brand:SetFont(FONT,9,""); tracker.builds:SetHeight(16);
   if ASAdvisorDB.options.trackerMode=="detailed" then
     local width=ASAdvisorDB.options.trackerWidth; local bodyHeight=0; local inset=20; local contentWidth=width-2*inset; local bodyTop=45;
     tracker.resize:Show(); tracker.viewport:Show();
-    local planned,extras={},{};
-    for _,entry in ipairs(entries) do if b and not entry.planned then extras[#extras+1]=entry; else planned[#planned+1]=entry; end end
+    local planned,extras,banned={},{},{};
+    for _,entry in ipairs(entries) do if entry.banned then banned[#banned+1]=entry; elseif b and not entry.planned then extras[#extras+1]=entry; else planned[#planned+1]=entry; end end
     table.sort(extras,function(x,y) return tostring(x.row.key or x.row.name)<tostring(y.row.key or y.row.name); end);
-    if #extras>0 then
-      local heading=tracker.sectionLabels.extra; heading:SetText(A.T("Вне билда").." · "..#extras); heading:SetTextColor(1,0.68,0.28,1); heading:SetWidth(contentWidth); heading:SetHeight(14); move(heading,0,0); heading:Show();
+    local function Strip(rows,key,store,title,color)
+      if #rows==0 then return; end
+      if bodyHeight>0 then bodyHeight=bodyHeight+3; end
+      local heading=tracker.sectionLabels[key]; heading:SetText(A.T(title).." · "..#rows); heading:SetTextColor(unpack(color)); heading:SetWidth(contentWidth); heading:SetHeight(14); move(heading,0,bodyHeight); heading:Show();
       local columns=math.max(1,math.floor(contentWidth/24));
-      for i,entry in ipairs(extras) do
-        local icon=tracker.extraIcons[i];
+      for i,entry in ipairs(rows) do
+        local icon=store[i];
         if not icon then
           icon=CreateFrame("Frame",nil,tracker.content); icon:SetSize(18,18); icon:EnableMouse(true); icon:EnableMouseWheel(true); icon.icon=texture(icon,nil,18,0,0);
           icon:SetScript("OnMouseWheel",function(self,delta) tracker.Scroll(delta); end);
-          icon:SetScript("OnEnter",function(self) if self.row then itemTip(tracker,self,self.row); end end); icon:SetScript("OnLeave",function() hideTip(tracker); end); tracker.extraIcons[i]=icon;
+          icon:SetScript("OnEnter",function(self) if self.row then itemTip(tracker,self,self.row); end end); icon:SetScript("OnLeave",function() hideTip(tracker); end); store[i]=icon;
         end
-        icon.outside=true; icon.row=entry.row; icon.icon:SetTexture(A.Icon(entry.row.icon)); move(icon,((i-1)%columns)*24,16+math.floor((i-1)/columns)*20); icon:Show();
+        icon.outside=key=="extra"; icon.banned=entry.banned; icon.row=entry.row; icon.icon:SetTexture(A.Icon(entry.row.icon));
+        icon.icon:SetVertexColor(entry.banned and 0.9 or 1,entry.banned and 0.5 or 1,entry.banned and 0.5 or 1,1);
+        if entry.banned then icon:SetBackdrop({edgeFile="Interface\\Buttons\\WHITE8X8",edgeSize=1}); icon:SetBackdropBorderColor(0.7,0.25,0.25,0.8); end
+        move(icon,((i-1)%columns)*24,bodyHeight+16+math.floor((i-1)/columns)*20); icon:Show();
       end
-      bodyHeight=16+math.ceil(#extras/columns)*20;
+      bodyHeight=bodyHeight+16+math.ceil(#rows/columns)*20;
     end
+    Strip(banned,"banned",tracker.bannedIcons,"Забанены",{0.85,0.45,0.45,1});
+    Strip(extras,"extra",tracker.extraIcons,"Вне билда",{1,0.68,0.28,1});
     local lastGroup;
     for i,entry in ipairs(planned) do
       entry.trackerGroup=entry.row.group=="spell" and "spell" or "jewel";
@@ -967,19 +975,26 @@ function A.RefreshUI()
     tracker:SetScale(math.min(ASAdvisorDB.options.trackerScale,(UIParent:GetWidth()-24)/width,(UIParent:GetHeight()-24)/height));
   else
     tracker.viewport:Hide(); tracker.resize:Hide(); tracker:SetWidth(196); move(tracker.builds,50,23); tracker.builds:SetWidth(98); tracker.builds.text:SetWidth(88); move(tracker.mode,156,23); tracker.mode:SetSize(20,16);
-    local spellRows=math.ceil(#spells/6); local itemRows=math.ceil(#items/6); local spellStart=59; local itemStart=#spells>0 and (spellStart+spellRows*29+7) or 59;
-    if #spells>0 then tracker.spellLabel:SetWidth(156); tracker.spellLabel:SetText(A.T("Умения")); move(tracker.spellLabel,20,45); tracker.spellLabel:SetHeight(13); tracker.spellLabel:Show(); end
-    if #items>0 then tracker.itemLabel:SetWidth(156); tracker.itemLabel:SetText(A.T("Бижутерия")); move(tracker.itemLabel,20,itemStart-14); tracker.itemLabel:Show(); end
-    local bottom=#items>0 and (itemStart+math.max(0,itemRows-1)*29+23) or (spellStart+math.max(0,spellRows-1)*29+23);
-    tracker:SetHeight(math.max(86,bottom+20));
-    for i,entry in ipairs(entries) do local f=tracker.icons[i]; if f then
-      local index=i<=#spells and i-1 or i-#spells-1; local y=i<=#spells and (spellStart+math.floor(index/6)*29) or (itemStart+math.floor(index/6)*29);
-      move(f,20+(index%6)*26,y); f.outside=b and not entry.planned;
-      if not f.warning then f.warning=label(f,"!",9,16,0,8,{1,0.68,0.28,1}); end
-      if f.outside then f.warning:Show(); else f.warning:Hide(); end
-      f.row=entry.row; f.icon:SetTexture(A.Icon(entry.row.icon)); f:SetAlpha(entry.owned and 1 or 0.25); f.rank:SetText(entry.rank and tostring(entry.rank) or "");
-      if entry.rank and entry.rank>0 then local badgeWidth=math.max(14,f.rank:GetStringWidth()+4); f.rankBadge:SetWidth(badgeWidth); f.rank:SetWidth(badgeWidth); f.rankBadge:Show(); else f.rankBadge:Hide(); end; f:Show();
-    end end
+    local banned,normal={},{ }; for _,entry in ipairs(spells) do if entry.banned then banned[#banned+1]=entry; else normal[#normal+1]=entry; end end
+    local y=45; local iconIndex=0;
+    local function CompactGroup(rows,heading,title,color)
+      if #rows==0 then return; end
+      heading:SetWidth(156); heading:SetText(A.T(title)); heading:SetTextColor(unpack(color)); heading:SetHeight(13); move(heading,20,y); heading:Show(); y=y+14;
+      for i,entry in ipairs(rows) do
+        iconIndex=iconIndex+1; local f=tracker.icons[iconIndex]; if f then
+          move(f,20+((i-1)%6)*26,y+math.floor((i-1)/6)*29); f.outside=b and not entry.planned; f.banned=entry.banned;
+          if not f.warning then f.warning=label(f,"!",9,16,0,8,{1,0.68,0.28,1}); end
+          if f.outside and not entry.banned then f.warning:Show(); else f.warning:Hide(); end
+          f.row=entry.row; f.icon:SetTexture(A.Icon(entry.row.icon)); f.icon:SetVertexColor(entry.banned and 0.9 or 1,entry.banned and 0.5 or 1,entry.banned and 0.5 or 1,1); f:SetAlpha(entry.owned and 1 or 0.25); f.rank:SetText(entry.rank and tostring(entry.rank) or "");
+          if entry.rank and entry.rank>0 then local badgeWidth=math.max(14,f.rank:GetStringWidth()+4); f.rankBadge:SetWidth(badgeWidth); f.rank:SetWidth(badgeWidth); f.rankBadge:Show(); else f.rankBadge:Hide(); end; f:Show();
+        end
+      end
+      y=y+(math.ceil(#rows/6)-1)*29+23+7;
+    end
+    CompactGroup(banned,tracker.bannedLabel,"Забанены",{0.85,0.45,0.45,1});
+    CompactGroup(normal,tracker.spellLabel,"Умения",muted);
+    CompactGroup(items,tracker.itemLabel,"Бижутерия",muted);
+    tracker:SetHeight(math.max(86,y-7+20));
   end
   if #entries==0 then tracker.empty:SetText(A.T("Открой /asa и выбери билд")); tracker.empty:Show(); end
   if anchor then

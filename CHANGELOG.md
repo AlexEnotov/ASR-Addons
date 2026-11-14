@@ -27,6 +27,14 @@ are summarized with the feature they improve rather than listed individually.
 
 ### ASR Advisor
 
+- Hide lower-priority backup amulets after a preferred amulet is equipped.
+  Move confirmed banned spells into a separate muted-red icon group without
+  stats/ranks in both tracker modes. Persist observed bans across reloads, reset
+  them per run, and require a sent ban command plus server charge confirmation.
+  Earlier bans are unavailable from current public spell snapshots.
+- Show one primary action: a useful card suppresses ban highlighting; otherwise
+  highlight only the selected ban candidate before reroll/skip alternatives.
+
 - Use total character stats for jewelry build goals and current values in the
   editor, rather than the bonus printed on an individual item. Missing totals
   remain unknown. Preserve per-item goals, priority and global-cap rules.
@@ -44,7 +52,7 @@ are summarized with the feature they improve rather than listed individually.
   priority spell with a stat goal no longer automatically outranks an uncapped
   higher priority spell, including the Consecration/Divine Storm case.
 - Add ban planning: choose up to three spells manually; remaining slots are
-  filled from the lowest build priorities. Independent ban hints appear after
+  filled from the lowest build priorities. Ban hints appear when no useful pick remains, after
   acquisition and fulfillment of configured goals. No actions are automated.
 - Present base spell mechanics as readable descriptions before acquisition,
   alongside current descriptions when available. Include targeting range and

@@ -62,9 +62,10 @@ function A.EndlessStep(r,z,schedule,units,state)
   if serial==nextSerial then status="next"; end
   bossRows[i]={name=b.name,status=status,serial=serial};
  end
- return {time=now,level=Count(r.lvl),zone=z.zname or z.zone or "",difficulty=z.diff,heroic=z.heroic,tier=z.dt,kills=Count(r.kills),endlessKills=math.max(0,Count(r.kills)-Count(state.baseKills)),
+ return {time=now,level=Count(r.lvl),zone=z.zname or z.zone or "",difficulty=z.diff,heroic=z.heroic,tier=z.dt,affixes=z.affixes,kills=Count(r.kills),endlessKills=math.max(0,Count(r.kills)-Count(state.baseKills)),
   killed=done,spawned=spawned,round=displayRound,nextRound=math.floor(spawned/n)+1,bossRows=bossRows,
   nextName=order[(nextSerial-1)%n+1].name,nextIn=nb and nb>=0 and nb or nil,
+  nextAt=state.nextAt,interval=state.interval,
   progress=nb and nb>=0 and math.max(0,math.min(1,1-nb/math.max(1,state.interval or nb))) or 0,
   live=live,rows=rows,start=start},state;
 end
@@ -85,13 +86,63 @@ local function HideNative()
  return true;
 end
 local function Label(parent,text,size,x,y,w,color) return S.Label(parent,text,size,x,y,w,color); end
+local function Font(label,size)
+ local template=_G["AzeriteFont"..tostring(size).."Outline"];
+ if template and template.GetFont then local path,actual,flags=template:GetFont(); label:SetFont(path,actual or size,flags or "");
+ else label:SetFont(S.font,size,""); end
+end
 local function Fit(label,text,size,width)
- text=tostring(text or ""); label:SetWidth(width); label:SetFont(S.font,size,""); label:SetText(text);
- while size>9 and label:GetStringWidth()>width do size=size-0.5; label:SetFont(S.font,size,""); end
+ text=tostring(text or ""); label:SetWidth(width); Font(label,size); label:SetText(text);
+ while size>9 and label:GetStringWidth()>width do size=size-1; Font(label,size); end
  if label:GetStringWidth()>width then
   local chars={}; for c in string.gmatch(text,"[%z\1-\127\194-\244][\128-\191]*") do chars[#chars+1]=c; end
   repeat table.remove(chars); label:SetText(table.concat(chars).."…"); until #chars==0 or label:GetStringWidth()<=width;
  end
+end
+local function Objective(parent,y)
+ local row=CreateFrame("Frame",nil,parent); row:SetSize(246,22); row:SetPoint("TOPLEFT",parent,"TOPLEFT",20,-y);
+ row.mark=CreateFrame("Frame",nil,row); row.mark:SetSize(14,14); row.mark:SetPoint("LEFT",row,"LEFT",0,0);
+ local skin=IsAddOnLoaded and IsAddOnLoaded("AzerothSurvivorsUI"); local base="Interface\\AddOns\\AzerothSurvivorsUI\\Assets\\";
+ row.ring=row:CreateTexture(nil,"BACKGROUND"); row.ring:SetTexture(skin and base.."point_plate" or "Interface\\CharacterFrame\\TempPortraitAlphaMaskSmall"); row.ring:SetSize(skin and 41 or 14,skin and 41 or 14); row.ring:SetPoint("CENTER",row.mark,"CENTER",0,0);
+ row.dot=row:CreateTexture(nil,"ARTWORK"); row.dot:SetTexture(skin and base.."point_crystal" or "Interface\\CharacterFrame\\TempPortraitAlphaMaskSmall"); row.dot:SetSize(10,10); row.dot:SetPoint("CENTER",row.mark,"CENTER",0,0);
+ row.name=Label(row,"",13,24,2,222); row.name:SetHeight(18); return row;
+end
+local function Mark(row,status)
+ if status=="future" then row.dot:Hide(); else row.dot:Show();
+  local c=status=="dead" and {0.45,0.85,0.1} or {1,0.6,0.1}; row.dot:SetVertexColor(unpack(c)); end
+end
+function A.EndlessDisplayClock(m)
+ local now=AZS_GetRunTime and tonumber(AZS_GetRunTime()) or m.time;
+ if not now or now~=now or math.abs(now)==math.huge then now=m.time; end
+ if m.nextIn~=nil and m.nextAt then
+  m.nextIn=math.max(0,m.nextAt-now); m.progress=math.max(0,math.min(1,1-m.nextIn/math.max(1,m.interval or m.nextIn)));
+ end
+ m.time=now; return m;
+end
+local AFFIX_ICONS={Bolstering="Spell_Nature_Strength",Sanguine="Spell_Shadow_LifeDrain",Explosive="Spell_Fire_SelfDestruct"};
+local HEX_ICONS={frenzy="Spell_Shadow_UnholyFrenzy",surge="Spell_Shadow_AuraOfDarkness",frailty="Spell_Shadow_FingerOfDeath",wither="Ability_Warrior_SavageBlow"};
+local function Affixes(f,m,y)
+ local entries={};
+ for name in string.gmatch(m.affixes or "","[^,]+") do entries[#entries+1]={name=name,icon=AFFIX_ICONS[name] or "INV_Misc_QuestionMark"}; end
+ for _,hex in ipairs(AZS_HEXES or {}) do
+  local left=(tonumber(hex["until"]) or 0)-m.time;
+  if left>0 and HEX_ICONS[hex.key] then entries[#entries+1]={name=hex.key,icon=HEX_ICONS[hex.key],left=left}; end
+ end
+ f.affixIcons=f.affixIcons or {};
+ for i=1,math.min(8,#entries) do
+  local entry=entries[i]; local icon=f.affixIcons[i];
+  if not icon then
+   icon=CreateFrame("Frame",nil,f); icon:SetSize(24,24); icon:EnableMouse(true); f.affixIcons[i]=icon;
+   icon.texture=icon:CreateTexture(nil,"ARTWORK"); icon.texture:SetAllPoints(icon); icon.texture:SetTexCoord(0.08,0.92,0.08,0.92);
+   icon:SetBackdrop({edgeFile="Interface\\AddOns\\AzerothSurvivorsUI\\Assets\\border-aura",edgeSize=12}); icon:SetBackdropBorderColor(69/255,59/255,49/255,1);
+   icon.time=Label(icon,"",11,0,5,24); icon.time:SetJustifyH("CENTER");
+   icon:SetScript("OnEnter",function(self) GameTooltip:SetOwner(self,"ANCHOR_RIGHT"); GameTooltip:SetText(AZS_L and AZS_L[self.caption] or self.caption); GameTooltip:Show(); end);
+   icon:SetScript("OnLeave",function() GameTooltip:Hide(); end);
+  end
+  icon:SetPoint("TOPLEFT",f,"TOPLEFT",10+(i-1)*32,-y); icon.caption=entry.name; icon.texture:SetTexture("Interface\\Icons\\"..entry.icon); icon.time:SetText(entry.left and math.ceil(entry.left) or ""); icon:Show();
+ end
+ for i=math.min(8,#entries)+1,#f.affixIcons do f.affixIcons[i]:Hide(); end
+ return #entries>0 and 36 or 0;
 end
 function A.EndlessDifficulty(m)
  local d=m.difficulty;
@@ -106,12 +157,17 @@ end
 function A.InitEndless()
  if ASRSuiteDB.endlessEnabled==nil then ASRSuiteDB.endlessEnabled=true; end
  if A.endlessFrame then return; end
- local f=CreateFrame("Frame","ASREndlessTracker",UIParent); A.endlessFrame=f; f:SetSize(270,207); f:SetFrameStrata("MEDIUM"); f:SetFrameLevel(20); f:Hide();
- f.title=Label(f,"ENDLESS",12,8,0,110,GREEN); f.round=Label(f,"",11,120,1,142); f.round:SetJustifyH("RIGHT");
- f.levelText=Label(f,"",13,8,20,144); f.time=Label(f,"",13,158,20,104); f.time:SetJustifyH("RIGHT");
- f.zone=Label(f,"",12,8,41,254,{1,0.82,0,1});
- f.counts=Label(f,"",11,8,61,254,S.muted); f.rows={};
- f.slot=CreateFrame("Frame",nil,f); f.slot:SetPoint("TOPLEFT",f,"TOPLEFT",4,-80); f.slot:SetSize(262,28);
+ local f=CreateFrame("Frame","ASREndlessTracker",UIParent); A.endlessFrame=f; f:SetSize(270,254); f:SetFrameStrata("MEDIUM"); f:SetFrameLevel(20); f:Hide();
+ f.head=CreateFrame("Frame",nil,f); f.head:SetPoint("TOPLEFT",f,"TOPLEFT",0,0); f.head:SetSize(270,78);
+ f.head:SetBackdrop({bgFile="Interface\\Tooltips\\UI-Tooltip-Background",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",edgeSize=14,tile=true,tileSize=16,insets={left=3,right=3,top=3,bottom=3}});
+ f.head:SetBackdropColor(0.16,0.12,0.09,0.92); f.head:SetBackdropBorderColor(0.55,0.5,0.45,1);
+ f.title=Label(f.head,"ENDLESS",11,16,10,90,GREEN); Font(f.title,11);
+ f.round=Label(f.head,"",11,106,10,148); f.round:SetJustifyH("RIGHT");
+ f.levelText=Label(f.head,"",15,16,30,148); f.time=Label(f.head,"",15,168,30,86); f.time:SetJustifyH("RIGHT"); Font(f.time,15);
+ f.zone=Label(f.head,"",15,16,51,238,{1,0.82,0,1});
+ f.difficulty=Label(f.head,"",15,16,51,100,{0.73,0.73,0.73,1});
+ f.enemy=Objective(f,122); f.counts=f.enemy.name; f.rows={};
+ f.slot=CreateFrame("Frame",nil,f); f.slot:SetPoint("TOPLEFT",f,"TOPLEFT",4,-86); f.slot:SetSize(262,28);
  f.bar=CreateFrame("StatusBar",nil,f.slot); f.bar:SetPoint("CENTER",f.slot,"CENTER",0,0); f.bar:SetSize(262,12);
  if f.bar.SetStatusBarTexture then f.bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8"); f.bar:SetStatusBarColor(unpack(GREEN)); end
  f.bar:SetMinMaxValues(0,1); local bg=f.bar:CreateTexture(nil,"BACKGROUND"); bg:SetAllPoints(f.bar); bg:SetTexture(0.12,0.14,0.10,1);
@@ -139,11 +195,18 @@ local function Place(f)
 end
 function A.DrawEndless(m)
  local f=A.endlessFrame; if not f or not m then return; end
- f:SetHeight(112+#m.bossRows*19); Place(f);
- f.round:SetText(string.format(A.T("Круг %d"),m.round));
- Fit(f.levelText,string.format(A.T("Уровень %d"),m.level),13,144); f.time:SetText(Clock(math.floor(m.time)));
- Fit(f.zone,m.zone.." · "..A.EndlessDifficulty(m),12,254);
- Fit(f.counts,string.format(A.T("Враги: %d  ·  Боссы: %d"),m.kills,m.killed),11,254);
+ local objectivesY=m.nextIn~=nil and 122 or 86;
+ if m.nextIn~=nil then f.slot:Show(); else f.slot:Hide(); end
+ objectivesY=objectivesY+Affixes(f,m,objectivesY);
+ f.enemy:ClearAllPoints(); f.enemy:SetPoint("TOPLEFT",f,"TOPLEFT",20,-objectivesY);
+ f:SetHeight(objectivesY+22+#m.bossRows*22); Place(f);
+ Fit(f.round,string.format(A.T("Круг %d · Боссы: %d"),m.round,m.killed),11,148);
+ Fit(f.levelText,string.format(A.T("Уровень %d"),m.level),15,148); f.time:SetText(Clock(math.floor(m.time)));
+ Fit(f.difficulty,A.EndlessDifficulty(m),15,100);
+ local difficultyWidth=f.difficulty:GetStringWidth();
+ Fit(f.zone,m.zone,15,math.max(80,238-difficultyWidth-6));
+ f.difficulty:ClearAllPoints(); f.difficulty:SetPoint("TOPLEFT",f.head,"TOPLEFT",16+f.zone:GetStringWidth()+6,-51);
+ Fit(f.counts,string.format(A.T("Убито врагов %d"),m.kills),13,222); Mark(f.enemy,"next");
  if not f.charge and AZS_BuildBossChargeBar then
   f.chargeHolder=CreateFrame("Frame",nil,f.slot);
   local fill,width=AZS_BuildBossChargeBar(f.chargeHolder); f.charge=fill;
@@ -151,15 +214,12 @@ function A.DrawEndless(m)
  end
  for i,b in ipairs(m.bossRows) do
   local row=f.rows[i];
-  if not row then
-   row=CreateFrame("Frame",nil,f); row:SetSize(254,19); row:SetPoint("TOPLEFT",f,"TOPLEFT",8,-(108+(i-1)*19)); f.rows[i]=row;
-   row.marker=Label(row,"",11,0,0,16,GREEN); row.name=Label(row,"",12,19,0,179); row.right=Label(row,"",11,202,0,52); row.right:SetJustifyH("RIGHT");
-  end
-  row:Show(); Fit(row.name,b.name,12,179);
-  local color=b.status=="up" and {1,0.65,0.2,1} or (b.status=="next" and GREEN or S.muted);
-  row.name:SetTextColor(unpack(color)); row.marker:SetText(b.status=="dead" and "✓" or b.status=="up" and "!" or b.status=="next" and "›" or "·"); row.marker:SetTextColor(unpack(color));
-  local right=b.status=="next" and (m.nextIn and Clock(m.nextIn) or "—") or A.T(b.status=="dead" and "Убит" or b.status=="up" and "В бою" or "");
-  Fit(row.right,right,10,52); row.right:SetTextColor(unpack(color));
+  if not row then row=Objective(f,144+(i-1)*22); f.rows[i]=row; end
+  row:ClearAllPoints(); row:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(objectivesY+i*22));
+  row:Show(); Mark(row,b.status);
+  local text=string.format(A.T("%s убит %d / 1"),b.name,b.status=="dead" and 1 or 0);
+  if b.status=="next" then text=b.name.." · "..(m.nextIn and Clock(m.nextIn) or "—"); elseif b.status=="up" then text=b.name.." · "..A.T("В бою"); end
+  Fit(row.name,text,13,222); local shade=b.status=="dead" and 0.75 or 1; row.name:SetTextColor(shade,shade,shade,1);
  end
  for i=#m.bossRows+1,#f.rows do f.rows[i]:Hide(); end
  if f.charge then f.charge(m.progress,m.nextIn and Clock(m.nextIn).." · "..math.floor(m.progress*100).."%" or A.T("В бою"),not f:IsShown()); else f.bar:SetValue(m.progress); end
@@ -179,6 +239,7 @@ function A.UpdateEndless(dt,force)
   return;
  end
  local model,state=A.EndlessStep(r,AZS_ZONE,AZS_SCHEDULE,AZS_UNITS,ASRSuiteDB.endlessState);
+ if model then A.EndlessDisplayClock(model); end
  ASRSuiteDB.endlessState=state; A.endlessModel=model;
  if model and ASRSuiteDB.endlessEnabled~=false and HideNative() then A.DrawEndless(model);
  else f:Hide(); A.EndlessRestoreHud(); end

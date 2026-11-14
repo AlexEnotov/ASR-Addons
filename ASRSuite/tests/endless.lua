@@ -42,19 +42,23 @@ AZS_RUN={t=900,bk=11,nb=85,endless=1,ph="playing",kills=36068,lvl=59}; AZS_ZONE=
 ASRSuiteDB.endlessEnabled=true; ASRSuiteDB.endlessState=nil; A.SetLanguage("en");
 A.UpdateEndless(0,true);
 check(A.endlessFrame:IsShown() and not shown,"endless tracker atomically replaces native tracker");
-check(A.endlessFrame.rows[2].right:GetText()=="1:25","next boss displays real countdown");
-check(#A.endlessFrame.rows==5 and A.endlessFrame.rows[2].marker:GetText()=="›","compact tracker keeps the full map list and marks the next boss");
-check(not A.endlessFrame.backdrop and not A.endlessFrame.viewport and not A.endlessFrame.footer,"tracker has no panel background, border or clipped scrolling footer");
-check(A.endlessFrame:GetHeight()==207,"five bosses fit in a compact native-sized layout");
-check(A.endlessFrame.zone:GetText():find("Normal",1,true),"map caption includes normal difficulty in English");
+check(A.endlessFrame.rows[2].name:GetText():find("1:25",1,true),"next boss displays real countdown");
+check(#A.endlessFrame.rows==5 and A.endlessFrame.rows[2].dot:IsShown() and not A.endlessFrame.rows[3].dot:IsShown(),"full boss list uses native filled and empty objective sockets");
+check(not A.endlessFrame.backdrop and A.endlessFrame.head.backdrop and not A.endlessFrame.viewport,"only the native-style header has a background and frame");
+check(A.endlessFrame:GetHeight()==254,"five native-sized boss rows and enemy objective fit the tracker");
+check(A.endlessFrame.difficulty:GetText()=="Normal","map caption includes normal difficulty in English");
 check(A.EndlessDifficulty({heroic=1})=="Heroic" and A.EndlessDifficulty({difficulty="Heroic 5"})=="Heroic 5","heroic flag and named tiers are retained");
 local charge;
 function AZS_BuildBossChargeBar(holder) return function(value,text) charge={value=value,text=text}; end,293; end
 A.UpdateEndless(0,true); check(charge and charge.text=="1:25 · 0%" and not A.endlessFrame.bar:IsShown(),"native charge bar is used with the authoritative countdown");
 A.endlessModel.zone=string.rep("Очень длинное имя карты ",8); A.DrawEndless(A.endlessModel);
-check(A.endlessFrame.zone:GetStringWidth()<=254,"long map and difficulty caption fits without wrapping");
+check(A.endlessFrame.zone:GetStringWidth()+A.endlessFrame.difficulty:GetStringWidth()+6<=238,"map and gray difficulty caption fit together without wrapping");
+zone.zname="Naxxramas"; zone.diff="Heroic V"; zone.affixes="Bolstering,Sanguine"; A.UpdateEndless(0,true);
+check(A.endlessFrame.zone:GetText()=="Naxxramas" and A.endlessFrame.difficulty:GetText()=="Heroic V","other maps retain the server's Roman-numeral heroic tier");
+check(#A.endlessFrame.affixIcons==2 and A.endlessFrame.affixIcons[1]:IsShown() and A.endlessFrame:GetHeight()==290,"heroic affix icons have their own space above objectives");
+zone.affixes=nil; zone.diff=nil; A.UpdateEndless(0,true); check(not A.endlessFrame.affixIcons[1]:IsShown(),"obsolete affix icons are removed");
 A.SetLanguage("ru"); A.UpdateEndless(0,true);
-check(A.endlessFrame.round:GetText()=="Круг 2","Russian labels follow suite language");
+check(A.endlessFrame.round:GetText():find("Круг 2",1,true),"Russian labels follow suite language");
 check(A.controls.endlessEnabled~=nil,"Endless section contains a visibility checkbox");
 A.controls.endlessEnabled.scripts.OnClick();
 check(not A.endlessFrame:IsShown() and shown and ASRSuiteDB.endlessEnabled==false,"settings checkbox restores native HUD immediately");
@@ -70,5 +74,16 @@ check(not shown and AZS_API_HUD.clock=="OtherAddon","pre-existing hidden clock i
 -- Reload may leave API ownership in saved variables; a non-endless load must release it.
 ASRSuiteDB.endlessHud={previous=true}; AZS_API_HUD.clock="ASRSuite"; AZS_RUN={}; A.UpdateEndless(0,true);
 check(shown and ASRSuiteDB.endlessHud==nil,"reload outside endless releases persisted HUD suppression");
+local displayTime=100; function AZS_GetRunTime() return displayTime; end
+local function clockModel() return {time=100,nextIn=10,nextAt=110,interval=10,progress=0}; end
+local last=11;
+for i=0,19 do
+ displayTime=100+i*0.5; local display=A.EndlessDisplayClock(clockModel()); local seconds=math.ceil(display.nextIn);
+ check(seconds==10-math.floor(i/2) and last-seconds<=1,"interpolated countdown ticks once per second between protocol packets"); last=seconds;
+end
+displayTime=105; local paused=A.EndlessDisplayClock(clockModel()); local pausedAgain=A.EndlessDisplayClock(clockModel());
+check(paused.nextIn==pausedAgain.nextIn and paused.progress==0.5,"frozen game clock freezes the countdown and progress bar");
+check(A.EndlessDisplayClock({time=100}).nextIn==nil,"missing server countdown is never invented");
+AZS_GetRunTime=nil;
 ASRSuiteDB.endlessEnabled=true; A.SetLanguage("en");
 print("PASS: "..checks.." endless tracker checks");

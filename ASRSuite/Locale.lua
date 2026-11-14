@@ -73,6 +73,9 @@ local EN={
 };
 EN["Бесконечный режим"]="Endless mode";
 EN["Обычный"]="Normal"; EN["Героический"]="Heroic";
+EN["Убито врагов %d"]="Enemies slain  %d";
+EN["%s убит %d / 1"]="%s slain  %d / 1";
+EN["Круг %d · Боссы: %d"]="Round %d · Bosses: %d";
 EN["Показывать трекер Endless"]="Show Endless tracker";
 EN["Автоматически заменяет штатный трекер только в бесконечном режиме. Выключение возвращает штатный интерфейс."]="Automatically replaces the native tracker in endless mode. Disable to restore the native interface.";
 EN["Враги — за весь забег. Боссы — только в бесконечном режиме."]="Enemies count the entire run. Bosses count endless mode only.";

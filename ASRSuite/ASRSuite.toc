@@ -2,7 +2,7 @@
 ## Title: |cff8cd123ASR|r Suite
 ## Author: AlexEnotov
 ## X-License: GPL-3.0-only
-## Version: 0.5.1
+## Version: 0.5.2
 ## Notes: Shared ASR settings, interface editor and Endless tracker. /asrhub
 ## Dependencies: AzerothSurvivors, AzerothSurvivorsAPI
 ## OptionalDeps: AzerothSurvivorsUI, ASRStats, ASAdvisor, ASRCombatText, SurvivorUI

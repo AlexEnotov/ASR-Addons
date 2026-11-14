@@ -11,6 +11,10 @@ check(string.find(A.SpellTags(A.byKey["PALADIN:sacred_shield"]),"Щит",1,true)
 local description=A.SpellDescription(exorcism,true);
 check(string.find(description,"Поражает до 1",1,true) and string.find(description,"Урон от светлой магии: 135",1,true),"base action and school-specific values are available before acquiring the spell");
 check(not string.find(description,"Точное описание с эффектами",1,true),"base description does not claim that description is unavailable");
+local hammer=A.byKey["PALADIN:hammer_of_the_righteous"];
+check(string.find(A.SpellDescription(hammer,true),"Дальность: 6 м",1,true) and string.find(A.BaseFacts(hammer),"Дальность 6 м",1,true),"Hammer of the Righteous includes its six-unit target range in full and compact base descriptions");
+local ground=A.SpellDescription(A.byKey["HUNTER:frost_trap"],true);
+check(string.find(ground,"Радиус: 10 м",1,true) and not string.find(ground,"Дальность: 6 м",1,true),"ground effect radius remains distinct from its placement range");
 local line="Урон от светлой магии: 135 · Урон горением: 50"; local painted=A.ColorTooltipLine(line,exorcism);
 check(A.Plain(painted)==line and string.find(painted,"|cffffe58a",1,true) and string.find(painted,"|cffff9360",1,true),"school and burning colors preserve all displayed text");
 check(string.find(A.ColorTooltipLine("Текущие значения",cons),"|cff8cd123",1,true) and string.find(A.ColorTooltipLine("Базовые параметры · без улучшений",cons),"|cffd5bc83",1,true),"base and current sections have distinct heading colors");

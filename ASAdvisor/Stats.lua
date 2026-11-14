@@ -154,7 +154,8 @@ function A.SpellDescription(row,baseOnly)
   local damageNames={holy="Урон от светлой магии",fire="Урон огнём",frost="Урон холодом",nature="Урон силами природы",shadow="Урон тёмной магией",arcane="Урон тайной магией",physical="Физический урон"};
   if m.hit and m.hit>0 then parts[#parts+1]=A.T(damageNames[m.school] or "Урон")..": "..fmt(m.hit); end
   if m.cooldown then parts[#parts+1]=A.T("перезарядка")..": "..fmt(m.cooldown)..A.T(" сек."); end
-  if m.radius then parts[#parts+1]=A.T("Радиус")..": "..fmt(m.radius)..A.T(" м"); end
+  if m.radius then parts[#parts+1]=A.T("Радиус")..": "..fmt(m.radius)..A.T(" м");
+  elseif m.range and m.range>0 then parts[#parts+1]=A.T("Дальность")..": "..fmt(m.range)..A.T(" м"); end
   if m.targets then parts[#parts+1]=A.T("число целей")..": "..m.targets; end
   local timed=m.shapeData and m.shapeData[m.shape]; if timed and timed.secs then parts[#parts+1]=A.T("Длительность")..": "..fmt(timed.secs)..A.T(" сек."); end
   return table.concat(parts,"\n");
@@ -167,7 +168,8 @@ function A.BaseFacts(row)
     if m then
       if m.cooldown then parts[#parts+1]=A.StatLabel("cooldown").." "..fmt(m.cooldown)..A.T(" сек."); end
       if m.hit and m.hit>0 then parts[#parts+1]=A.StatLabel("damage").." "..fmt(m.hit); end
-      if m.radius then parts[#parts+1]=A.StatLabel("area").." "..fmt(m.radius)..A.T(" м"); end
+      if m.radius then parts[#parts+1]=A.StatLabel("area").." "..fmt(m.radius)..A.T(" м");
+      elseif m.range and m.range>0 then parts[#parts+1]=A.T("Дальность").." "..fmt(m.range)..A.T(" м"); end
       if m.targets then parts[#parts+1]="×"..m.targets; end
       local timed=m.shapeData and m.shapeData[m.shape]; if timed and timed.secs then parts[#parts+1]=A.T("Длительность").." "..fmt(timed.secs)..A.T(" сек."); end
     end

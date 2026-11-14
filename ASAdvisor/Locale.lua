@@ -1,5 +1,6 @@
 local A=ASAdvisor;
 local EN={
+  ["Дальность"]="Range",
   ["Таргетное"]="Targeted",["Массовое"]="AOE",["Снарядов"]="Projectiles",["Цепь"]="Chain",
   ["Область на земле"]="Ground area",["Периодическое"]="Damage over time",["Конус"]="Cone",["Круговая область"]="Circular area",["Вокруг персонажа"]="Around the character",
   ["Исцеление"]="Healing",["Щит"]="Shield",["Поглощение"]="Absorption",["Усиление"]="Buff",["Невосприимчивость"]="Immunity",["Ответный урон"]="Retaliation",["Питомцы"]="Pets",["Пассивное"]="Passive",["Тотем"]="Totem",["Снаряды"]="Projectiles",

@@ -222,13 +222,28 @@ function A.aliasItem(key)
   for _,g in ipairs({"ring","trinket","amulet","unknown"}) do local r=A.byKey[g..":"..key]; if r then return r; end end
 end
 function A.RunBans()
-  local id=AZS_ZONE and AZS_ZONE.run; local saved=ASAdvisorDB.runBans;
+  local db=ASAdvisorDB; local saved=db.runBans;
+  if type(db.banRuns)~="table" then db.banRuns={}; end
+  if type(db.banRunOrder)~="table" then db.banRunOrder={}; end
+  local runs,order=db.banRuns,db.banRunOrder;
+  -- Preserve the old single-run journal before considering a new zone snapshot.
+  if type(saved)=="table" and type(saved.id)=="string" and not runs[saved.id] then
+    runs[saved.id]=saved; order[#order+1]=saved.id;
+  end
+  local id=AZS_ZONE and AZS_ZONE.run;
   if id and tostring(id)~="" then
     id=tostring(id);
-    if type(saved)~="table" or saved.id~=id then saved={id=id,spells={}}; ASAdvisorDB.runBans=saved; A.pendingBanish=nil; end
+    if not runs[id] then runs[id]={id=id,spells={}}; order[#order+1]=id; end
+    saved=runs[id]; db.runBans=saved;
   end
-  if type(saved)=="table" and type(saved.spells)~="table" then saved.spells={}; end
-  return type(saved)=="table" and saved or nil;
+  -- A transient reload zone must not destroy the journal for the actual run.
+  -- Keep only a small set of recent server IDs; a genuine new run starts empty.
+  while #order>4 do local old=table.remove(order,1); runs[old]=nil; end
+  if type(saved)=="table" then
+    if type(saved.spells)~="table" then saved.spells={}; end
+    A.pendingBanish=saved.pending;
+    return saved;
+  end
 end
 function A.ObserveBanishCommand(prefix,command)
   if prefix~="AZSCMD" or not A.ready then return; end
@@ -236,14 +251,15 @@ function A.ObserveBanishCommand(prefix,command)
   if not index then return; end
   local offer=AZS_CARDS; local card=offer and offer.cards and offer.cards[index]; local run=A.RunBans();
   if not run or not card or offer.kind~="spell" or (tonumber(offer.bn) or 0)<=0 then return; end
-  A.pendingBanish={id=run.id,key=card.key,before=tonumber(offer.bn),at=GetTime()};
+  run.pending={id=run.id,key=card.key,before=tonumber(offer.bn),at=GetTime()}; A.pendingBanish=run.pending;
 end
 function A.ConfirmBanish()
   local run=A.RunBans(); local pending=A.pendingBanish; if not pending then return; end
-  if not run or run.id~=pending.id or GetTime()-pending.at>30 then A.pendingBanish=nil; return; end
+  if not run or run.id~=pending.id then A.pendingBanish=nil; return; end
+  if type(pending.key)~="string" or type(pending.before)~="number" then run.pending=nil; A.pendingBanish=nil; return; end
   local offer=AZS_CARDS; local left=offer and tonumber(offer.bn);
   if offer and offer.kind=="spell" and left and left==pending.before-1 then
-    run.spells[pending.key]=true; A.pendingBanish=nil; A.dirty=true;
+    run.spells[pending.key]=true; run.pending=nil; A.pendingBanish=nil; A.dirty=true;
   end
 end
 function A.Snapshot()

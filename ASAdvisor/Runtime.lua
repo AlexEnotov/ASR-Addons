@@ -1,6 +1,6 @@
 local A=ASAdvisor;
 local clock=CreateFrame("Frame","ASAdvisorRuntime");
-clock:RegisterEvent("ADDON_LOADED"); clock:RegisterEvent("PLAYER_ENTERING_WORLD");
+clock:RegisterEvent("ADDON_LOADED"); clock:RegisterEvent("PLAYER_ENTERING_WORLD"); clock:RegisterEvent("PLAYER_LOGOUT");
 local elapsed=0;
 local function trace(prefix,msg)
   if A.ready and ASAdvisorDB.options.debug then
@@ -33,6 +33,7 @@ clock:SetScript("OnEvent",function(self,event,name)
       AZS_SetOnTopOfScreens("ASAdvisorPlanner",true);
     end
     A.Print(A.VERSION.." · /asr");
+  elseif event=="PLAYER_LOGOUT" and A.ready then A.ConfirmBanish();
   elseif event=="PLAYER_ENTERING_WORLD" and A.ready then
     A.offer=AZSCardsFrame and AZSCardsFrame:IsShown() or false; A.dirty=true;
   end

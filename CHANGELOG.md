@@ -31,7 +31,9 @@ are summarized with the feature they improve rather than listed individually.
   Move confirmed banned spells into a separate muted-red icon group without
   stats/ranks in both tracker modes. Persist observed bans across reloads, reset
   them per run, and require a sent ban command plus server charge confirmation.
-  Earlier bans are unavailable from current public spell snapshots.
+  Keep a bounded set of run journals through transient reload IDs and persist
+  pending ban confirmations across reloads. Earlier unobserved bans are
+  unavailable from current public spell snapshots.
 - Show one primary action: a useful card suppresses ban highlighting; otherwise
   highlight only the selected ban candidate before reroll/skip alternatives.
 
@@ -75,6 +77,10 @@ are summarized with the feature they improve rather than listed individually.
 - Accept very large finite combat amounts and handle aggregation overflow safely.
 
 ### ASR Suite
+
+- Simplify the shared language picker to full-width language tiles without an
+  outer frame. Prevent the opening mouse press from dismissing the list, and
+  close other ASR language pickers when opening a new one.
 
 - Add complete settings export/import under General, including per-module
   preferences, panel positions/scales, docking links, Endless options and saved

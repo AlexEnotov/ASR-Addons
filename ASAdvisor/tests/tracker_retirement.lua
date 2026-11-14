@@ -6,7 +6,16 @@ A.ObserveBanishCommand("OTHER","banish 1"); check(not A.pendingBanish,"unrelated
 A.ObserveBanishCommand("AZSCMD","banish 1"); check(A.pendingBanish and not A.RunBans().spells.aimed_shot,"clicking ban waits for server confirmation");
 A.ConfirmBanish(); check(not A.RunBans().spells.aimed_shot,"unchanged charge count never confirms a rejected command");
 AZS_CARDS.bn=2; A.ConfirmBanish(); check(A.RunBans().spells.aimed_shot and not A.pendingBanish,"decreased count confirms actual banned spell");
-local record=A.RunBans(); AZS_ZONE={}; check(A.RunBans()==record,"partial reload snapshot does not erase run bans"); AZS_ZONE={run="tracking-1",hub=0};
+local record=A.RunBans();
+AZS_ZONE={run="reload-bootstrap"}; check(not A.RunBans().spells.aimed_shot,"transient zone has its own empty journal");
+AZS_ZONE={run="tracking-1",hub=0}; A.pendingBanish=nil;
+check(A.RunBans()==record and A.RunBans().spells.aimed_shot,"returning from reload bootstrap restores the original confirmed ban");
+AZS_CARDS.bn=2; A.ObserveBanishCommand("AZSCMD","banish 2"); A.pendingBanish=nil;
+check(record.pending and not record.spells.rapid_fire,"pending command survives runtime reset without pretending confirmation");
+AZS_CARDS.bn=1; A.ConfirmBanish(); check(record.spells.rapid_fire and not record.pending,"late server confirmation after reload commits the pending spell");
+-- Preserve the subsequent tracker fixture's one banned spell.
+record.spells.rapid_fire=nil;
+AZS_ZONE={}; check(A.RunBans()==record,"partial reload snapshot does not erase run bans"); AZS_ZONE={run="tracking-1",hub=0};
 local live={inRun=true,spells={aimed_shot={rank=2,cdmax=1},rapid_fire={rank=1,cdmax=10}},gear={},banned=record.spells};
 local b={class="HUNTER",spells={{key="aimed_shot",rank=0},{key="rapid_fire",rank=0,banish=true}},items={"south_seas_kelp","enlightenment","jeklik"},itemRules={}};
 local spells=A.TrackerEntries(b,live); check(spells[1].banned and spells[1].detail=="" and spells[1].rank==nil,"actual ban entry has neither stat line nor rank"); check(not spells[2].banned,"manual plan checkbox is not a completed ban");

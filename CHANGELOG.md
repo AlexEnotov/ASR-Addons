@@ -76,6 +76,12 @@ are summarized with the feature they improve rather than listed individually.
 
 ### ASR Suite
 
+- Add complete settings export/import under General, including per-module
+  preferences, panel positions/scales, docking links, Endless options and saved
+  builder libraries/active selections. Validate a bounded data-only code before
+  applying all sections, then reload the UI. Preserve live run records and HUD
+  restoration state; reject incomplete profiles and missing required modules.
+
 - Standardize Stats, Loot and both Advisor tracker modes on a 196-unit base
   width, with one-percent scale controls. Existing Advisor widths reset once;
   manual detailed-mode resizing remains available. Align tracker side padding

@@ -62,7 +62,8 @@ function A.DrawSettings()
 end
 function A.ToggleSettings() if window:IsShown() then window:Hide(); else window:Show(); A.DrawSettings(); end end
 local function RegisterBuiltins()
- A.RegisterSettingsPage("general","Общие",function(page)
+ A.RegisterSettingsPage("general","Общие",function(root)
+  local page=CreateFrame("Frame",nil,root); page:SetSize(500,465); page:SetPoint("TOPLEFT",root,"TOPLEFT",0,0); root.generalOptions=page;
   L(page,"Настройки комплекса",16,8,0,480);
   local lang=B(page,"",210,27,266,34,function() end); A.controls.language=lang; ASRLocale.Bind(lang,function() return ASRSuiteDB.language; end,A.SetLanguage); L(page,"Язык комплекса",11,8,38,250); records[#records+1]=function() lang.text:SetText(ASRLocale.Name(ASRSuiteDB.language)); end
   Step(page,"Фон настроек",function() return ASRSuiteDB.opacity; end,function(v) ASRSuiteDB.opacity=v; end,70,0.2,1,0.05,Percent);
@@ -75,6 +76,10 @@ local function RegisterBuiltins()
   Step(page,"Зазор между панелями",function() return ASRSuiteDB.dockingGap or 4; end,function(v) ASRSuiteDB.dockingGap=v; if A.ApplyDocking then A.ApplyDocking(); end end,314,1,16,1);
   Note(page,"В режиме изменения интерфейса подведи панель к краю другой. Главная двигает всю цепочку; дочерняя отделяется вместе со своей цепочкой. Shift — без стыковки.",350):SetHeight(42);
   B(page,"Разъединить панели",468,27,8,402,function() if A.ClearDocking then A.ClearDocking(); end end);
+  root.transfer=A.CreateSettingsTransfer(root,function() page:Show(); end);
+  root.exportSettings=B(page,"Экспорт настроек",226,27,8,437,function() page:Hide(); root.transfer:Open("export"); end);
+  root.importSettings=B(page,"Импорт настроек",226,27,250,437,function() page:Hide(); root.transfer:Open("import"); end);
+  records[#records+1]=function() root.transfer:Draw(); end
  end);
  A.RegisterSettingsPage("endless","Endless",function(page)
   L(page,"Бесконечный режим",16,8,0,480);
@@ -242,9 +247,10 @@ local function RegisterBuiltins()
 end
 function A.CreateSettings()
  window=CreateFrame("Frame","ASRSuiteSettings",UIParent); window:SetSize(740,610); window:SetPoint("CENTER",UIParent,"CENTER",0,0); window:SetFrameStrata("FULLSCREEN_DIALOG"); window:SetFrameLevel(400); window:SetClampedToScreen(true); window:EnableMouse(true); window:SetMovable(true); window:RegisterForDrag("LeftButton");
+ local saved=ASRSuiteDB.settingsPosition; if saved and A.Number(saved.x) and A.Number(saved.y) then window:ClearAllPoints(); window:SetPoint(saved.point,UIParent,saved.relative,saved.x,saved.y); end
  if AZS_SetOnTopOfScreens then AZS_SetOnTopOfScreens("ASRSuiteSettings",true); end
  window:SetScript("OnShow",function(self) self:SetFrameStrata("FULLSCREEN_DIALOG"); self:SetFrameLevel(400); if self.Raise then self:Raise(); end; S.SyncChildren(self); end);
- window:SetScript("OnDragStart",function(self) self:StartMoving(); end); window:SetScript("OnDragStop",function(self) self:StopMovingOrSizing(); end);
+ window:SetScript("OnDragStart",function(self) self:StartMoving(); end); window:SetScript("OnDragStop",function(self) self:StopMovingOrSizing(); local point,_,relative,x,y=self:GetPoint(); ASRSuiteDB.settingsPosition={point=point,relative=relative,x=x,y=y}; end);
  window:SetScale(math.min(1,(UIParent:GetWidth()-24)/740,(UIParent:GetHeight()-24)/610)); S.Panel(window,ASRSuiteDB.opacity);
  local title=L(window,"ASR / КОМПЛЕКС",17,24,24,420); records[#records+1]=function() title:SetText((string.gsub(A.T("ASR / КОМПЛЕКС"),"^ASR","|cff8cd123ASR|r",1))); end; L(window,"by AlexEnotov",9,25,47,250,S.muted);
  A.controls={}; A.controls.edit=B(window,"Изменить интерфейс",230,26,456,24,function() A.ToggleEdit(); end);

@@ -41,5 +41,8 @@ run(fs.readFileSync(path.join(__dirname,'ban_plan.lua'),'utf8'),'ban_plan');
 run(fs.readFileSync(path.join(__dirname,'presentation.lua'),'utf8'),'presentation');
 run(fs.readFileSync(path.join(__dirname,'goal_modes.lua'),'utf8'),'goal modes');
 run(fs.readFileSync(path.join(__dirname,'tracker_retirement.lua'),'utf8'),'tracker retirement');
+run('ASRSuite={}; ASRSuiteDB={language="en",opacity=0.95};','settings transfer context');
+run(fs.readFileSync(path.resolve(__dirname,'../../ASRSuite/Transfer.lua'),'utf8'),'suite transfer codec');
+run(fs.readFileSync(path.join(__dirname,'settings_transfer.lua'),'utf8'),'builder settings transfer');
 console.log('PASS: Lua 5.1 syntax, game catalog integration, recommendation scenarios, import validation and UI smoke.');
 

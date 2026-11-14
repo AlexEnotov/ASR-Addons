@@ -17,5 +17,6 @@ Docking.lua
 Locale.lua
 WorldNames.lua
 Endless.lua
+Transfer.lua
 Settings.lua
 UI.lua

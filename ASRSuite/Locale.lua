@@ -1,5 +1,14 @@
 local A=ASRSuite;
 local EN={
+ ["Экспорт настроек"]="Export settings",["Импорт настроек"]="Import settings",["Выделить всё"]="Select all",["Импортировать и перезагрузить"]="Import and reload",
+ ["Все настройки ASR, расположение панелей и сохранённые билды. Выдели код и скопируй Ctrl+C."]="All ASR settings, panel layout and saved builds. Select the code and copy with Ctrl+C.",
+ ["Вставь код через Ctrl+V. Импорт заменит настройки и билды из кода и перезагрузит интерфейс."]="Paste with Ctrl+V. Import replaces settings and builds from the code and reloads the interface.",
+ ["Не удалось экспортировать настройки."]="Could not export settings.",
+ ["Некорректный код настроек."]="Invalid settings code.",
+ ["Код настроек повреждён или скопирован не полностью."]="Settings code is damaged or incomplete.",
+ ["Некорректные настройки или несовместимая версия аддонов."]="Invalid settings or incompatible addon version.",
+ ["Сначала установи все аддоны, указанные в коде."]="Install all addons included in this code first.",
+ ["Настройки импортированы. Перезагрузка интерфейса…"]="Settings imported. Reloading interface…",
  ["Назад"]="Back",
  ["Показываемые параметры"]="Visible stats",["Включить все"]="Enable all",["Выключить все"]="Disable all",
  ["Выбери характеристики для трекера. Пустые категории скрываются автоматически."]="Choose which stats appear in the tracker. Empty categories are hidden automatically.",

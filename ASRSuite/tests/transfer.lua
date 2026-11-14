@@ -1,0 +1,34 @@
+local A=ASRSuite; local count=0; local function check(ok,name) assert(ok,name); count=count+1; end
+local savedSuite,savedStats,savedCombat,savedLoot,savedBuilder=ASRSuiteDB,ASRStatsDB,ASRCombatTextDB,ASRLootDB,ASAdvisorDB;
+ASRSuiteDB.endlessState={kills=123}; ASRSuiteDB.endlessHud={previous=true};
+ASRSuiteDB.docking={loot={parent="stats",side="bottom",offset=0,align="start"}};
+ASRSuiteDB.settingsPosition={point="CENTER",relative="CENTER",x=-44,y=20};
+ASRSuiteDB.endlessPosition={"TOPLEFT","TOPLEFT",-123,45};
+ASRStatsDB.position={point="TOPLEFT",relative="BOTTOMLEFT",x=17,y=600}; ASRStatsDB.hiddenStats={crit=true};
+ASRCombatTextDB.types.heal.custom=true; ASRCombatTextDB.types.heal.values.fontSize=28; ASRCombatTextDB.positions.heal={x=-300,y=20};
+ASRCombatTextDB.nativeDamage="1"; ASRCombatTextDB.previousSurvivorMode="columns";
+ASRLootDB={enabled=true,mode="all",language="ru",scale=0.67,position={point="TOPLEFT",relative="TOPLEFT",x=21,y=-90},run={gold=321},items={cached={name="Current run item"}},nativeLoot={previous=true}};
+local captured=A.CaptureSettings(); check(not captured.suite.endlessState and not captured.combat.nativeDamage and not captured.loot.run and not captured.loot.items,"export excludes run statistics and native HUD ownership");
+local code=assert(A.ExportSettings()); local decoded,err=A.DecodeSettings(code); check(decoded and decoded.stats.hiddenStats.crit and decoded.loot.scale==0.67,err or "settings roundtrip retains module preferences");
+check(decoded.suite.settingsPosition.x==-44 and decoded.suite.docking.loot.parent=="stats" and decoded.suite.endlessPosition[3]==-123 and decoded.combat.positions.heal.x==-300,"positions and docking survive codec without losing signed coordinates");
+check(A.DecodeSettings(code)==nil or code==A.ExportSettings(),"export is deterministic");
+ASRStatsDB.scale=0.5; ASRStatsDB.hiddenStats={}; ASRLootDB.run.gold=999; ASRSuiteDB.endlessState.kills=999;
+check(A.ImportSettings(code),"valid profile applies atomically");
+check(ASRStatsDB.scale==decoded.stats.scale and ASRStatsDB.hiddenStats.crit and ASRCombatTextDB.types.heal.values.fontSize==28,"import restores shared and per-type settings");
+check(ASRLootDB.run.gold==999 and ASRSuiteDB.endlessState.kills==999 and ASRCombatTextDB.nativeDamage=="1","import preserves current run and HUD restoration data");
+local before=ASRSuiteDB; check(not A.ImportSettings(code:sub(1,-4)) and ASRSuiteDB==before,"truncated code never partially applies");
+check(not A.ImportSettings("ASRSET2:12345678:1234") and not A.ImportSettings("return os.execute('anything')"),"version mismatch and executable text are rejected");
+local function Package(data) local capture=A.CaptureSettings; A.CaptureSettings=function() return data; end; local result=A.ExportSettings(); A.CaptureSettings=capture; return result; end
+local bad=A.CaptureSettings(); bad.stats.hiddenStats.crit={}; check(not A.ImportSettings(Package(bad)),"invalid stat visibility map is rejected even with a correct checksum");
+bad=A.CaptureSettings(); bad.stats.position.point="NOT_AN_ANCHOR"; check(not A.ImportSettings(Package(bad)),"invalid frame anchors cannot corrupt positions");
+bad=A.CaptureSettings(); bad.suite.opacity="wrong"; check(not A.ImportSettings(Package(bad)),"wrong numeric setting type cannot be applied");
+local loot=ASRLootDB; ASRLootDB=nil; check(not A.ImportSettings(code),"missing modules block import before any settings change"); ASRLootDB=loot;
+local window=A.pages.general; A.settings:Show(); A.SelectSettingsPage("general"); window.exportSettings.scripts.OnClick();
+check(window.transfer:IsShown() and not window.generalOptions:IsShown() and window.transfer.edit:GetText():find("ASRSET1:",1,true)==1,"export button opens a copyable complete code");
+window.transfer.back.scripts.OnClick(); window.importSettings.scripts.OnClick();
+check(window.transfer.edit:GetText()=="" and window.transfer.apply:IsShown(),"import opens an empty field and an explicit apply action");
+local reloads=0; local originalReload=ReloadUI; ReloadUI=function() reloads=reloads+1; end;
+window.transfer.edit:SetText("invalid"); window.transfer.apply.scripts.OnClick(); check(reloads==0,"invalid code never reloads the UI");
+window.transfer.edit:SetText(code); window.transfer.apply.scripts.OnClick(); check(reloads==1,"explicit valid import reloads after applying settings"); ReloadUI=originalReload;
+ASRSuiteDB,ASRStatsDB,ASRCombatTextDB,ASRLootDB,ASAdvisorDB=savedSuite,savedStats,savedCombat,savedLoot,savedBuilder;
+print("Passed "..count.." complete settings transfer checks");

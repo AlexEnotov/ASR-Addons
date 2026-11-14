@@ -19,7 +19,8 @@ m=step(386.4,6,-1,{boss(2)}); check(m.spawned==2 and m.live[1].serial==2,"live c
 m=step(388.4,7,117); check(m.killed==2 and m.nextName=="Рахк'Зор","live capture: second kill");
 m=step(506,7,-1,{boss(3)}); check(m.spawned==3 and m.rows[2].name=="Мистер Смайт","live capture: third boss");
 step(507.3,8,118); m=step(625.9,9,119); check(m.spawned==4 and m.killed==4,"boss killed between polls still advances the queue");
-m=step(746.9,10,119); check(m.round==1 and m.nextRound==2 and m.nextName=="Хоггер","fifth kill points to first boss of next round");
+m=step(746.9,10,119); check(m.round==2 and m.nextRound==2 and m.nextName=="Хоггер","fifth kill prepares the next round");
+check(m.bossRows[1].status=="next" and m.bossRows[2].status=="future","completed round resets all old defeated markers");
 m=step(866.7,11,119); check(m.spawned==6 and m.round==2 and m.nextName=="Матушка Клык","live capture: first kill in the next round");
 local saved=state; local before=m.spawned; m,state=A.EndlessStep({t=873.3,bk=11,nb=112,endless=1},zone,schedule,{},saved);
 check(m.spawned==before and m.round==2,"saved reducer state survives reload");
@@ -42,7 +43,16 @@ ASRSuiteDB.endlessEnabled=true; ASRSuiteDB.endlessState=nil; A.SetLanguage("en")
 A.UpdateEndless(0,true);
 check(A.endlessFrame:IsShown() and not shown,"endless tracker atomically replaces native tracker");
 check(A.endlessFrame.rows[2].right:GetText()=="1:25","next boss displays real countdown");
-check(A.endlessFrame.rows[2].note:GetText():find("Next",1,true),"English labels follow suite language");
+check(#A.endlessFrame.rows==5 and A.endlessFrame.rows[2].marker:GetText()=="›","compact tracker keeps the full map list and marks the next boss");
+check(not A.endlessFrame.backdrop and not A.endlessFrame.viewport and not A.endlessFrame.footer,"tracker has no panel background, border or clipped scrolling footer");
+check(A.endlessFrame:GetHeight()==207,"five bosses fit in a compact native-sized layout");
+check(A.endlessFrame.zone:GetText():find("Normal",1,true),"map caption includes normal difficulty in English");
+check(A.EndlessDifficulty({heroic=1})=="Heroic" and A.EndlessDifficulty({difficulty="Heroic 5"})=="Heroic 5","heroic flag and named tiers are retained");
+local charge;
+function AZS_BuildBossChargeBar(holder) return function(value,text) charge={value=value,text=text}; end,293; end
+A.UpdateEndless(0,true); check(charge and charge.text=="1:25 · 0%" and not A.endlessFrame.bar:IsShown(),"native charge bar is used with the authoritative countdown");
+A.endlessModel.zone=string.rep("Очень длинное имя карты ",8); A.DrawEndless(A.endlessModel);
+check(A.endlessFrame.zone:GetStringWidth()<=254,"long map and difficulty caption fits without wrapping");
 A.SetLanguage("ru"); A.UpdateEndless(0,true);
 check(A.endlessFrame.round:GetText()=="Круг 2","Russian labels follow suite language");
 check(A.controls.endlessEnabled~=nil,"Endless section contains a visibility checkbox");

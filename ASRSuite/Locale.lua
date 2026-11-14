@@ -72,6 +72,7 @@ local EN={
  ["ASR Advisor не установлен."]="ASR Advisor is not installed.", ["Собственный текст SurvivorUI не обнаружен."]="SurvivorUI combat text was not found.",
 };
 EN["Бесконечный режим"]="Endless mode";
+EN["Обычный"]="Normal"; EN["Героический"]="Heroic";
 EN["Показывать трекер Endless"]="Show Endless tracker";
 EN["Автоматически заменяет штатный трекер только в бесконечном режиме. Выключение возвращает штатный интерфейс."]="Automatically replaces the native tracker in endless mode. Disable to restore the native interface.";
 EN["Враги — за весь забег. Боссы — только в бесконечном режиме."]="Enemies count the entire run. Bosses count endless mode only.";

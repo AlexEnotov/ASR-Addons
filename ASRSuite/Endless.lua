@@ -100,12 +100,13 @@ local function Fit(label,text,size,width)
  end
 end
 local function Objective(parent,y)
- local row=CreateFrame("Frame",nil,parent); row:SetSize(246,22); row:SetPoint("TOPLEFT",parent,"TOPLEFT",20,-y);
+ local row=CreateFrame("Frame",nil,parent); row:SetSize(234,22); row:SetPoint("TOPLEFT",parent,"TOPLEFT",20,-y);
  row.mark=CreateFrame("Frame",nil,row); row.mark:SetSize(14,14); row.mark:SetPoint("LEFT",row,"LEFT",0,0);
  local skin=IsAddOnLoaded and IsAddOnLoaded("AzerothSurvivorsUI"); local base="Interface\\AddOns\\AzerothSurvivorsUI\\Assets\\";
  row.ring=row:CreateTexture(nil,"BACKGROUND"); row.ring:SetTexture(skin and base.."point_plate" or "Interface\\CharacterFrame\\TempPortraitAlphaMaskSmall"); row.ring:SetSize(skin and 41 or 14,skin and 41 or 14); row.ring:SetPoint("CENTER",row.mark,"CENTER",0,0);
  row.dot=row:CreateTexture(nil,"ARTWORK"); row.dot:SetTexture(skin and base.."point_crystal" or "Interface\\CharacterFrame\\TempPortraitAlphaMaskSmall"); row.dot:SetSize(10,10); row.dot:SetPoint("CENTER",row.mark,"CENTER",0,0);
- row.name=Label(row,"",13,24,2,222); row.name:SetHeight(18); return row;
+ row.name=Label(row,"",12,24,2,210); row.name:SetHeight(18);
+ row.status=Label(row,"",11,176,2,58); row.status:SetJustifyH("RIGHT"); row.status:SetHeight(18); return row;
 end
 local function Mark(row,status)
  if status=="future" then row.dot:Hide(); else row.dot:Show();
@@ -150,9 +151,31 @@ function A.EndlessDifficulty(m)
   local lower=string.lower(tostring(d));
   if lower=="normal" or d=="Обычный" then return A.T("Обычный"); end
   if lower=="heroic" or d=="Героический" then return A.T("Героический"); end
+  local tier=string.match(d,"^[Hh]eroic%s+(.+)$") or string.match(d,"^Героический%s+(.+)$") or string.match(d,"^Героик%s+(.+)$");
+  if tier then return A.T("Героический").." "..tier; end
   return tostring(d);
  end
  return A.T(((tonumber(m.heroic) or 0)>0 or (tonumber(m.tier) or 0)>0) and "Героический" or "Обычный");
+end
+local worldAliases,worldLanguage,worldNative,worldCatalog;
+function A.EndlessName(source)
+ local language=ASRSuiteDB and ASRSuiteDB.language or "en"; local catalog=AZS_GEN and AZS_GEN.zones;
+ if not worldAliases or worldLanguage~=language or worldNative~=AZS_L or worldCatalog~=catalog then
+  worldAliases={}; worldLanguage=language; worldNative=AZS_L; worldCatalog=catalog;
+  local function Add(english)
+   if type(english)~="string" then return; end
+   worldAliases[english]=english;
+   if AZS_L and type(AZS_L[english])=="string" then worldAliases[AZS_L[english]]=english; end
+  end
+  for _,dictionary in pairs(ASRLocale.translations.world or {}) do
+   for english,localized in pairs(dictionary) do Add(english); worldAliases[localized]=english; end
+  end
+  for _,zone in ipairs(catalog or {}) do
+   Add(zone.name); Add(zone.boss); for _,boss in ipairs(zone.bosses or {}) do Add(boss.name); end
+  end
+ end
+ local english=worldAliases[source]; if not english then return source; end
+ return ASRLocale.Text("world",language,english,english);
 end
 function A.InitEndless()
  if ASRSuiteDB.endlessEnabled==nil then ASRSuiteDB.endlessEnabled=true; end
@@ -163,7 +186,7 @@ function A.InitEndless()
  f.head:SetBackdropColor(0.16,0.12,0.09,0.92); f.head:SetBackdropBorderColor(0.55,0.5,0.45,1);
  f.title=Label(f.head,"ENDLESS",11,16,10,90,GREEN); Font(f.title,11);
  f.round=Label(f.head,"",11,106,10,148); f.round:SetJustifyH("RIGHT");
- f.levelText=Label(f.head,"",15,16,30,148); f.time=Label(f.head,"",15,168,30,86); f.time:SetJustifyH("RIGHT"); Font(f.time,15);
+ f.levelText=Label(f.head,"",13,16,30,148); f.time=Label(f.head,"",14,168,30,86); f.time:SetJustifyH("RIGHT"); Font(f.time,14);
  f.zone=Label(f.head,"",15,16,51,238,{1,0.82,0,1});
  f.difficulty=Label(f.head,"",15,16,51,100,{0.73,0.73,0.73,1});
  f.enemy=Objective(f,122); f.counts=f.enemy.name; f.rows={};
@@ -201,12 +224,12 @@ function A.DrawEndless(m)
  f.enemy:ClearAllPoints(); f.enemy:SetPoint("TOPLEFT",f,"TOPLEFT",20,-objectivesY);
  f:SetHeight(objectivesY+22+#m.bossRows*22); Place(f);
  Fit(f.round,string.format(A.T("Круг %d · Боссы: %d"),m.round,m.killed),11,148);
- Fit(f.levelText,string.format(A.T("Уровень %d"),m.level),15,148); f.time:SetText(Clock(math.floor(m.time)));
- Fit(f.difficulty,A.EndlessDifficulty(m),15,100);
+ Fit(f.levelText,string.format(A.T("Уровень %d"),m.level),13,148); f.time:SetText(Clock(math.floor(m.time)));
+ Fit(f.difficulty,A.EndlessDifficulty(m),13,100);
  local difficultyWidth=f.difficulty:GetStringWidth();
- Fit(f.zone,m.zone,15,math.max(80,238-difficultyWidth-6));
+ Fit(f.zone,A.EndlessName(m.zone),13,math.max(80,238-difficultyWidth-6));
  f.difficulty:ClearAllPoints(); f.difficulty:SetPoint("TOPLEFT",f.head,"TOPLEFT",16+f.zone:GetStringWidth()+6,-51);
- Fit(f.counts,string.format(A.T("Убито врагов %d"),m.kills),13,222); Mark(f.enemy,"next");
+ Fit(f.counts,string.format(A.T("Убито врагов %d"),m.kills),12,210); Mark(f.enemy,"next");
  if not f.charge and AZS_BuildBossChargeBar then
   f.chargeHolder=CreateFrame("Frame",nil,f.slot);
   local fill,width=AZS_BuildBossChargeBar(f.chargeHolder); f.charge=fill;
@@ -217,12 +240,12 @@ function A.DrawEndless(m)
   if not row then row=Objective(f,144+(i-1)*22); f.rows[i]=row; end
   row:ClearAllPoints(); row:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(objectivesY+i*22));
   row:Show(); Mark(row,b.status);
-  local text=string.format(A.T("%s убит %d / 1"),b.name,b.status=="dead" and 1 or 0);
-  if b.status=="next" then text=b.name.." · "..(m.nextIn and Clock(m.nextIn) or "—"); elseif b.status=="up" then text=b.name.." · "..A.T("В бою"); end
-  Fit(row.name,text,13,222); local shade=b.status=="dead" and 0.75 or 1; row.name:SetTextColor(shade,shade,shade,1);
+  local status=b.status=="next" and (m.nextIn and Clock(m.nextIn) or "—") or b.status=="dead" and A.T("Убит") or b.status=="up" and A.T("В бою") or "";
+  Fit(row.name,A.EndlessName(b.name),12,144); Fit(row.status,status,11,58);
+  local shade=b.status=="dead" and 0.75 or 1; row.name:SetTextColor(shade,shade,shade,1); row.status:SetTextColor(shade,shade,shade,1);
  end
  for i=#m.bossRows+1,#f.rows do f.rows[i]:Hide(); end
- if f.charge then f.charge(m.progress,m.nextIn and Clock(m.nextIn).." · "..math.floor(m.progress*100).."%" or A.T("В бою"),not f:IsShown()); else f.bar:SetValue(m.progress); end
+ if f.charge then f.charge(m.progress,math.floor(m.progress*100).."%",not f:IsShown()); else f.bar:SetValue(m.progress); end
  f:Show();
 end
 local tick=0;

@@ -6,7 +6,7 @@ run(fs.readFileSync(path.resolve(__dirname,'../../ASAdvisor/tests/mock.lua'),'ut
 run(fs.readFileSync(path.join(__dirname,'environment.lua'),'utf8'),'suite mock');
 for(const file of ['Language.lua','Style.lua','Core.lua','CombatText.lua','UI.lua'])run(fs.readFileSync(path.resolve(__dirname,'../../ASRCombatText',file),'utf8'),'combat '+file);
 for(const file of ['Language.lua','Style.lua','Data.lua','Main.lua'])run(fs.readFileSync(path.resolve(__dirname,'../../ASRStats',file),'utf8'),'stats '+file);
-for(const file of ['Language.lua','Style.lua','Core.lua','CombatBridge.lua','Profiles.lua','Integration.lua','Docking.lua','Locale.lua','Endless.lua','Settings.lua','UI.lua']){const code=fs.readFileSync(path.resolve(__dirname,'..',file),'utf8');parser.parse(code,{luaVersion:'5.1'});run(code,file);}
+for(const file of ['Language.lua','Style.lua','Core.lua','CombatBridge.lua','Profiles.lua','Integration.lua','Docking.lua','Locale.lua','WorldNames.lua','Endless.lua','Settings.lua','UI.lua']){const code=fs.readFileSync(path.resolve(__dirname,'..',file),'utf8');parser.parse(code,{luaVersion:'5.1'});run(code,file);}
 run(fs.readFileSync(path.join(__dirname,'scenarios.lua'),'utf8'),'suite tests');
 
 const disk=fs.readFileSync(path.resolve(__dirname,'../media/minimap.tga'));

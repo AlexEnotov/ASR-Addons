@@ -1,4 +1,5 @@
 local Frame=getmetatable(UIParent);
+function Frame:SetJustifyH(value) self.justifyH=value; end
 function Frame:SetOrientation(value) self.orientation=value; end
 function Frame:SetValueStep(value) self.valueStep=value; end
 function Frame:SetMinMaxValues(low,high) self.minimum=low; self.maximum=high; end

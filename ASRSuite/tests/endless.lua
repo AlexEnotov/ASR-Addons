@@ -42,7 +42,10 @@ AZS_RUN={t=900,bk=11,nb=85,endless=1,ph="playing",kills=36068,lvl=59}; AZS_ZONE=
 ASRSuiteDB.endlessEnabled=true; ASRSuiteDB.endlessState=nil; A.SetLanguage("en");
 A.UpdateEndless(0,true);
 check(A.endlessFrame:IsShown() and not shown,"endless tracker atomically replaces native tracker");
-check(A.endlessFrame.rows[2].name:GetText():find("1:25",1,true),"next boss displays real countdown");
+check(A.endlessFrame.rows[2].status:GetText()=="1:25" and A.endlessFrame.rows[2].status.justifyH=="RIGHT","next boss displays countdown in the right status column");
+check(A.endlessFrame.rows[1].name:GetText()=="Hogger" and A.endlessFrame.rows[1].status:GetText()=="Defeated","boss name and defeated status follow suite English without kill fractions");
+check(A.endlessFrame.zone:GetText()=="Elwynn Forest" and A.endlessFrame.rows[2].name:GetText()=="Mother Fang","Russian API map and boss names display in English");
+check(A.endlessFrame.levelText.fontSize==13 and A.endlessFrame.rows[1].name.fontSize==12,"level and boss labels use smaller type");
 check(#A.endlessFrame.rows==5 and A.endlessFrame.rows[2].dot:IsShown() and not A.endlessFrame.rows[3].dot:IsShown(),"full boss list uses native filled and empty objective sockets");
 check(not A.endlessFrame.backdrop and A.endlessFrame.head.backdrop and not A.endlessFrame.viewport,"only the native-style header has a background and frame");
 check(A.endlessFrame:GetHeight()==254,"five native-sized boss rows and enemy objective fit the tracker");
@@ -50,7 +53,7 @@ check(A.endlessFrame.difficulty:GetText()=="Normal","map caption includes normal
 check(A.EndlessDifficulty({heroic=1})=="Heroic" and A.EndlessDifficulty({difficulty="Heroic 5"})=="Heroic 5","heroic flag and named tiers are retained");
 local charge;
 function AZS_BuildBossChargeBar(holder) return function(value,text) charge={value=value,text=text}; end,293; end
-A.UpdateEndless(0,true); check(charge and charge.text=="1:25 · 0%" and not A.endlessFrame.bar:IsShown(),"native charge bar is used with the authoritative countdown");
+A.UpdateEndless(0,true); check(charge and charge.text=="0%" and not A.endlessFrame.bar:IsShown(),"native charge bar shows percentages only");
 A.endlessModel.zone=string.rep("Очень длинное имя карты ",8); A.DrawEndless(A.endlessModel);
 check(A.endlessFrame.zone:GetStringWidth()+A.endlessFrame.difficulty:GetStringWidth()+6<=238,"map and gray difficulty caption fit together without wrapping");
 zone.zname="Naxxramas"; zone.diff="Heroic V"; zone.affixes="Bolstering,Sanguine"; A.UpdateEndless(0,true);
@@ -59,6 +62,15 @@ check(#A.endlessFrame.affixIcons==2 and A.endlessFrame.affixIcons[1]:IsShown() a
 zone.affixes=nil; zone.diff=nil; A.UpdateEndless(0,true); check(not A.endlessFrame.affixIcons[1]:IsShown(),"obsolete affix icons are removed");
 A.SetLanguage("ru"); A.UpdateEndless(0,true);
 check(A.endlessFrame.round:GetText():find("Круг 2",1,true),"Russian labels follow suite language");
+check(A.endlessFrame.zone:GetText()=="Наксрамас" and A.endlessFrame.rows[1].name:GetText()=="Хоггер","switching back to Russian translates English catalog names");
+check(A.EndlessName("My custom community map")=="My custom community map","unknown community names are preserved");
+A.SetLanguage("en"); check(A.EndlessDifficulty({difficulty="Героический V"})=="Heroic V","localized heroic tier also follows suite language");
+local oldNative,oldCatalog=AZS_L,AZS_GEN;
+AZS_L={Hogger="Hogger-fr"}; AZS_GEN={zones={{name="Elwynn Forest",bosses={{name="Hogger"}}}}};
+check(A.EndlessName("Hogger-fr")=="Hogger","native catalog resolves names received in another game language");
+ASRLocale.RegisterTranslations("world","test-locale",{Hogger="Test Hogger"}); A.SetLanguage("test-locale");
+check(A.EndlessName("Hogger-fr")=="Test Hogger","world-name translations support additional registered languages");
+AZS_L,AZS_GEN=oldNative,oldCatalog; A.SetLanguage("ru");
 check(A.controls.endlessEnabled~=nil,"Endless section contains a visibility checkbox");
 A.controls.endlessEnabled.scripts.OnClick();
 check(not A.endlessFrame:IsShown() and shown and ASRSuiteDB.endlessEnabled==false,"settings checkbox restores native HUD immediately");

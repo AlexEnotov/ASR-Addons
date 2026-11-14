@@ -2,6 +2,20 @@
 
 This document prepares publication; running the checks or packager does not publish anything.
 
+## Changelog and version cadence
+
+Maintain `CHANGELOG.md` during development. Accumulate meaningful changes under
+`Unreleased`, grouped by addon/module; summarize iterative UI fixes together.
+Do not increment versions for individual edits, local test deployments or minor
+wording changes. Existing development module counters are frozen until release
+preparation; they are not additional published releases.
+
+When an actual release is ready, select the next common distribution version
+once, review module TOC/runtime version consistency, move `Unreleased` entries
+into that release's section, and build the artifacts from the reviewed source.
+Player announcements should use the common release tag. Module versions must
+never be mistaken for successive values of the common release version.
+
 ## Distribution model
 
 Use one GitHub repository and one release containing four assets:

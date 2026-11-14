@@ -15,10 +15,10 @@ check(n==13,"all compact spell and jewelry icons fit inside the panel");
 o.trackerMode="detailed"; o.trackerHeight=110; A.RefreshUI();
 n=0; local bottom=0; for _,row in ipairs(t.rows) do if row:IsShown() then n=n+1; bottom=math.max(bottom,-row.point[5]+row:GetHeight()); end end
 check(n==13,"detailed mode shows every entry even with an old short-height preference");
-check(bottom<=t.content:GetHeight() and 53+t.viewport:GetHeight()<=t:GetHeight()-16,"detailed content fits its scroll child and viewport stays within the frame");
+check(bottom<=t.content:GetHeight() and 45+t.viewport:GetHeight()<=t:GetHeight()-16,"detailed content fits its scroll child and viewport stays within the frame");
 check(t.scrollHint:IsShown() and t.maxOffset>0,"short detailed mode advertises scrolling");
 t.scripts.OnMouseWheel(t,-100); check(t.offset==t.maxOffset and t.rows[13]:IsShown() and t.rows[1]:IsShown(),"mouse wheel reaches the bottom without dropping entries from scroll content");
-check(t:GetHeight()*(t.scale or 1)<=UIParent:GetHeight()-24,"complete detailed tracker scales to screen height");
+check(t:GetHeight()*(t.scale or 1)<=UIParent:GetHeight()-20,"complete detailed tracker scales to screen height");
 check(t.sizeDirection=="BOTTOMRIGHT","tracker resize controls both width and maximum height");
 A.ToggleUI(); if p.preview:IsShown() then click(p.preview.back); end
 check(p.work.point[5]==-84 and p.side.point[5]==-84,"editor content begins below padded header");

@@ -31,8 +31,8 @@ function A.Refresh()
  local run=A.InRun() and A.EnsureRun() or ASRLootDB.run or {};
  local rows=A.Rows(); local visible=enabled and (A.InRun() and run.panelOpen or A.inspect or editing);
  if not visible then panel:Hide(); return; end
- local count=math.min(15,#rows); local gridHeight=count>0 and math.ceil(count/5)*30 or 14;
- panel:SetWidth(196); panel:SetScale(ASRLootDB.scale); panel:SetHeight(64+gridHeight+(ASRLootDB.mode=="all" and 14 or 0)); panel:Show();
+ local count=math.min(15,#rows); local gridHeight=count>0 and (math.ceil(count/5)-1)*30+24 or 14;
+ panel:SetWidth(196); panel:SetScale(ASRLootDB.scale); panel:SetHeight(48+gridHeight+20+(ASRLootDB.mode=="all" and 18 or 0)); panel:Show();
  S.Panel(panel,ASRSuite and ASRSuiteDB and ASRSuiteDB.trackerOpacity or 0.9);
  panel.title:SetText("|cff8cd123ASR|r / "..A.T("Добыча"));
  panel.empty:SetText(A.T("Пока нет предметов")); if count==0 then panel.empty:Show(); else panel.empty:Hide(); end
@@ -50,7 +50,7 @@ function A.Refresh()
    else row:Hide(); row.item=nil; end
   end
  end
- panel.footer:ClearAllPoints(); panel.footer:SetPoint("TOPLEFT",panel,"TOPLEFT",20,-(50+gridHeight));
+ panel.footer:ClearAllPoints(); panel.footer:SetPoint("TOPLEFT",panel,"TOPLEFT",20,-(52+gridHeight));
  panel.footer:SetText(ASRLootDB.mode=="all" and string.format(A.T("Золото: %d"),run.gold or 0) or "");
  if S.SyncChildren then S.SyncChildren(panel); end
 end
@@ -60,7 +60,7 @@ function A.CreateUI()
  panel.asrDockInsets=IsAddOnLoaded and IsAddOnLoaded("AzerothSurvivorsUI") and {left=1.5,right=1.5,top=10,bottom=11} or nil; A.frame=panel; panel:SetSize(196,78); panel:SetScale(ASRLootDB.scale); panel:SetFrameStrata("HIGH"); panel:SetFrameLevel(10); panel:SetClampedToScreen(true);
  local p=ASRLootDB.position;
  if p then panel:SetPoint(p.point or "TOPLEFT",UIParent,p.relative or "TOPLEFT",tonumber(p.x) or 330,tonumber(p.y) or -80); else panel:SetPoint("TOPLEFT",UIParent,"TOPLEFT",330,-80); end
- panel.title=S.Label(panel,"",9,20,23,129); panel.close=S.Button(panel,"×",20,16,156,22,A.Close);
+ panel.title=S.Label(panel,"",9,20,23,129); panel.close=S.Button(panel,"×",20,16,156,23,A.Close);
  panel.empty=S.Label(panel,"",9,20,48,156,S.muted); panel.rows={};
  panel.titleHit=CreateFrame("Frame",nil,panel); panel.titleHit:SetSize(132,20); panel.titleHit:SetPoint("TOPLEFT",panel,"TOPLEFT",20,-20); panel.titleHit:EnableMouse(true);
  panel.titleHit:SetScript("OnEnter",function(self)

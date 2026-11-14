@@ -49,7 +49,9 @@ are summarized with the feature they improve rather than listed individually.
 
 - Standardize Stats, Loot and both Advisor tracker modes on a 196-unit base
   width, with one-percent scale controls. Existing Advisor widths reset once;
-  manual detailed-mode resizing remains available. Unify visible docking gaps
+  manual detailed-mode resizing remains available. Align tracker side padding
+  and compact vertical layout; measure colored stat text without counting
+  formatting codes as visible characters. Unify visible docking gaps
   on every side with an adjustable gap, including Loot texture padding.
 - Apply the lime ASR prefix consistently to module headings.
 

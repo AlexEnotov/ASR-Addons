@@ -468,7 +468,7 @@ local function measured(t,minHeight)
   if value=="" then local h=minHeight or 0; t:SetHeight(h); return h; end
   t:SetHeight(0); local h=t.GetStringHeight and t:GetStringHeight() or minHeight or 14;
   local size=t.asFontSize or 11; local capacity=math.max(1,math.floor(t:GetWidth()/(size*0.62))); local lines=0;
-  for line in string.gmatch(value.."\n","(.-)\n") do
+  for line in string.gmatch(string.gsub(string.gsub(value,"|c%x%x%x%x%x%x%x%x",""),"|r","").."\n","(.-)\n") do
     local _,chars=string.gsub(line,"[^\128-\191]",""); lines=lines+math.max(1,math.ceil(chars/capacity));
   end
   h=math.ceil(math.max(minHeight or 14,h,lines*(size+3)))+2; t:SetHeight(h); return h;
@@ -912,16 +912,16 @@ function A.RefreshUI()
   local spells,items=A.TrackerEntries(b,live); local entries={}; for _,v in ipairs(spells) do entries[#entries+1]=v; end; for _,v in ipairs(items) do entries[#entries+1]=v; end
   for _,f in ipairs(tracker.icons) do f:Hide(); end; for _,r in ipairs(tracker.rows) do r:Hide(); end
   for _,icon in ipairs(tracker.extraIcons) do icon:Hide(); end
-  tracker.brand:ClearAllPoints(); tracker.brand:SetPoint("TOPLEFT",tracker,"TOPLEFT",20,-23); tracker.brand:SetHeight(tracker.builds:GetHeight()); tracker.brand:SetJustifyV("MIDDLE"); tracker.brand:SetFont(FONT,10,"");
+  tracker.brand:ClearAllPoints(); tracker.brand:SetPoint("TOPLEFT",tracker,"TOPLEFT",20,-23); tracker.brand:SetHeight(16); tracker.brand:SetJustifyV("MIDDLE"); tracker.brand:SetFont(FONT,9,""); tracker.builds:SetHeight(16);
   if ASAdvisorDB.options.trackerMode=="detailed" then
-    local width=ASAdvisorDB.options.trackerWidth; local bodyHeight=0;
+    local width=ASAdvisorDB.options.trackerWidth; local bodyHeight=0; local inset=20; local contentWidth=width-2*inset; local bodyTop=45;
     tracker.resize:Show(); tracker.viewport:Show();
     local planned,extras={},{};
     for _,entry in ipairs(entries) do if b and not entry.planned then extras[#extras+1]=entry; else planned[#planned+1]=entry; end end
     table.sort(extras,function(x,y) return tostring(x.row.key or x.row.name)<tostring(y.row.key or y.row.name); end);
     if #extras>0 then
-      local heading=tracker.sectionLabels.extra; heading:SetText(A.T("Вне билда").." · "..#extras); heading:SetTextColor(1,0.68,0.28,1); heading:SetWidth(width-48); heading:SetHeight(14); move(heading,0,0); heading:Show();
-      local columns=math.max(1,math.floor((width-48)/24));
+      local heading=tracker.sectionLabels.extra; heading:SetText(A.T("Вне билда").." · "..#extras); heading:SetTextColor(1,0.68,0.28,1); heading:SetWidth(contentWidth); heading:SetHeight(14); move(heading,0,0); heading:Show();
+      local columns=math.max(1,math.floor(contentWidth/24));
       for i,entry in ipairs(extras) do
         local icon=tracker.extraIcons[i];
         if not icon then
@@ -929,9 +929,9 @@ function A.RefreshUI()
           icon:SetScript("OnMouseWheel",function(self,delta) tracker.Scroll(delta); end);
           icon:SetScript("OnEnter",function(self) if self.row then itemTip(tracker,self,self.row); end end); icon:SetScript("OnLeave",function() hideTip(tracker); end); tracker.extraIcons[i]=icon;
         end
-        icon.outside=true; icon.row=entry.row; icon.icon:SetTexture(A.Icon(entry.row.icon)); move(icon,((i-1)%columns)*24,18+math.floor((i-1)/columns)*20); icon:Show();
+        icon.outside=true; icon.row=entry.row; icon.icon:SetTexture(A.Icon(entry.row.icon)); move(icon,((i-1)%columns)*24,16+math.floor((i-1)/columns)*20); icon:Show();
       end
-      bodyHeight=18+math.ceil(#extras/columns)*20;
+      bodyHeight=16+math.ceil(#extras/columns)*20;
     end
     local lastGroup;
     for i,entry in ipairs(planned) do
@@ -941,32 +941,32 @@ function A.RefreshUI()
       if entry.trackerGroup~=lastGroup then
         local group=entry.trackerGroup; lastGroup=group; local heading=tracker.sectionLabels[group];
         if bodyHeight>0 then bodyHeight=bodyHeight+3; end
-        heading:SetText(A.T(group=="spell" and "Умения" or "Бижутерия")); heading:SetWidth(width-48); heading:SetHeight(14); move(heading,0,bodyHeight); heading:Show(); bodyHeight=bodyHeight+16;
+        heading:SetText(A.T(group=="spell" and "Умения" or "Бижутерия")); heading:SetWidth(contentWidth); heading:SetHeight(14); move(heading,0,bodyHeight); heading:Show(); bodyHeight=bodyHeight+14;
       end
       local r=tracker.rows[i]; if not r then break end
-      r.row=entry.row; r:SetWidth(width-48); local nameWidth=width-(entry.rank and 119 or 77); r.name:SetWidth(nameWidth); r.detail:SetWidth(width-77);
-      if entry.rank then r.rank:SetText("R"..tostring(entry.rank)); move(r.rank,width-86,0); r.rank:Show(); else r.rank:Hide(); end
+      r.row=entry.row; r:SetWidth(contentWidth); local nameWidth=contentWidth-24-(entry.rank and 30 or 0); r.name:SetWidth(nameWidth); r.detail:SetWidth(contentWidth-24);
+      if entry.rank then r.rank:SetText("R"..tostring(entry.rank)); r.rank:SetWidth(28); move(r.rank,contentWidth-28,0); r.rank:Show(); else r.rank:Hide(); end
       r.name:SetFont(FONT,9,""); r.name.asFontSize=9; r.detail:SetFont(FONT,8,""); r.detail.asFontSize=8; r.icon:SetSize(18,18);
       local chars={}; for char in string.gmatch(entry.row.name,".[\128-\191]*") do chars[#chars+1]=char; end
       local limit=math.max(10,math.floor(nameWidth/5.6)); local name=#chars>limit and table.concat(chars,"",1,limit-3).."..." or entry.row.name;
-      r.icon:SetTexture(A.Icon(entry.row.icon)); r.name:SetText(name); A.SetClassText(r.name,entry.row,b and b.class); move(r.name,27,0); r.name:SetHeight(13);
-      r.detail:SetText(A.ColorTooltipLine(entry.detail,entry.row)); move(r.detail,27,14); local detailH=0;
-      if entry.owned and entry.detail~="" then r.detail:Show(); detailH=measured(r.detail,10); else r.detail:Hide(); end
-      local rowH=entry.owned and math.max(24,15+detailH) or 19; move(r,0,bodyHeight); r:SetHeight(rowH); r:SetAlpha(entry.owned and 1 or 0.45); r:Show(); bodyHeight=bodyHeight+rowH;
+      r.icon:SetTexture(A.Icon(entry.row.icon)); r.name:SetText(name); A.SetClassText(r.name,entry.row,b and b.class); move(r.name,24,0); r.name:SetHeight(13);
+      r.detail:SetText(A.ColorTooltipLine(entry.detail,entry.row)); move(r.detail,24,14); local detailH=0;
+      if entry.owned and entry.detail~="" then r.detail:Show(); r.detail:SetHeight(0); detailH=math.ceil(math.max(10,r.detail:GetStringHeight()))+1; r.detail:SetHeight(detailH); else r.detail:Hide(); end
+      local rowH=entry.owned and math.max(24,15+detailH) or 20; move(r,0,bodyHeight); r:SetHeight(rowH); r:SetAlpha(entry.owned and 1 or 0.45); r:Show(); bodyHeight=bodyHeight+rowH;
     end
-    local height=math.min(math.max(110,53+bodyHeight+30),ASAdvisorDB.options.trackerHeight); tracker:SetSize(width,height);
-    local available=math.max(1,height-53-30); tracker.maxOffset=math.max(0,bodyHeight-available); tracker.offset=math.min(tracker.offset or 0,tracker.maxOffset);
-    tracker.viewport:ClearAllPoints(); tracker.viewport:SetPoint("TOPLEFT",tracker,"TOPLEFT",24,-53); tracker.viewport:SetSize(width-48,available); tracker.content:SetSize(width-48,math.max(1,bodyHeight)); tracker.viewport:SetVerticalScroll(tracker.offset);
-    if tracker.maxOffset>0 then tracker.scrollHint:ClearAllPoints(); tracker.scrollHint:SetPoint("BOTTOMLEFT",tracker,"BOTTOMLEFT",24,12); tracker.scrollHint:SetHeight(13); tracker.scrollHint:SetWidth(width-48); tracker.scrollHint:SetText(A.T("Прокрутка колёсиком")); tracker.scrollHint:Show(); end
+    local height=math.min(math.max(82,bodyTop+bodyHeight+20),ASAdvisorDB.options.trackerHeight); tracker:SetSize(width,height);
+    local available=math.max(1,height-bodyTop-20); if bodyHeight>available then available=math.max(1,available-14); end; tracker.maxOffset=math.max(0,bodyHeight-available); tracker.offset=math.min(tracker.offset or 0,tracker.maxOffset);
+    tracker.viewport:ClearAllPoints(); tracker.viewport:SetPoint("TOPLEFT",tracker,"TOPLEFT",inset,-bodyTop); tracker.viewport:SetSize(contentWidth,available); tracker.content:SetSize(contentWidth,math.max(1,bodyHeight)); tracker.viewport:SetVerticalScroll(tracker.offset);
+    if tracker.maxOffset>0 then tracker.scrollHint:ClearAllPoints(); tracker.scrollHint:SetPoint("BOTTOMLEFT",tracker,"BOTTOMLEFT",inset,20); tracker.scrollHint:SetHeight(13); tracker.scrollHint:SetWidth(contentWidth); tracker.scrollHint:SetText(A.T("Прокрутка колёсиком")); tracker.scrollHint:Show(); end
     move(tracker.builds,50,23); tracker.builds:SetWidth(width-98); tracker.builds.text:SetWidth(width-108); move(tracker.mode,width-40,23); tracker.mode:SetSize(20,16);
     tracker:SetScale(math.min(ASAdvisorDB.options.trackerScale,(UIParent:GetWidth()-24)/width,(UIParent:GetHeight()-24)/height));
   else
     tracker.viewport:Hide(); tracker.resize:Hide(); tracker:SetWidth(196); move(tracker.builds,50,23); tracker.builds:SetWidth(98); tracker.builds.text:SetWidth(88); move(tracker.mode,156,23); tracker.mode:SetSize(20,16);
-    local spellRows=math.ceil(#spells/6); local itemRows=math.ceil(#items/6); local spellStart=69; local itemStart=#spells>0 and (spellStart+spellRows*29+17) or 69;
-    if #spells>0 then tracker.spellLabel:SetWidth(156); tracker.spellLabel:SetText(A.T("Умения")); move(tracker.spellLabel,24,51); tracker.spellLabel:SetHeight(13); tracker.spellLabel:Show(); end
-    if #items>0 then tracker.itemLabel:SetWidth(156); tracker.itemLabel:SetText(A.T("Бижутерия")); move(tracker.itemLabel,24,itemStart-16); tracker.itemLabel:Show(); end
+    local spellRows=math.ceil(#spells/6); local itemRows=math.ceil(#items/6); local spellStart=59; local itemStart=#spells>0 and (spellStart+spellRows*29+7) or 59;
+    if #spells>0 then tracker.spellLabel:SetWidth(156); tracker.spellLabel:SetText(A.T("Умения")); move(tracker.spellLabel,20,45); tracker.spellLabel:SetHeight(13); tracker.spellLabel:Show(); end
+    if #items>0 then tracker.itemLabel:SetWidth(156); tracker.itemLabel:SetText(A.T("Бижутерия")); move(tracker.itemLabel,20,itemStart-14); tracker.itemLabel:Show(); end
     local bottom=#items>0 and (itemStart+math.max(0,itemRows-1)*29+23) or (spellStart+math.max(0,spellRows-1)*29+23);
-    tracker:SetHeight(math.max(86,bottom+24));
+    tracker:SetHeight(math.max(86,bottom+20));
     for i,entry in ipairs(entries) do local f=tracker.icons[i]; if f then
       local index=i<=#spells and i-1 or i-#spells-1; local y=i<=#spells and (spellStart+math.floor(index/6)*29) or (itemStart+math.floor(index/6)*29);
       move(f,20+(index%6)*26,y); f.outside=b and not entry.planned;

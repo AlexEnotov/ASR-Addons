@@ -37,11 +37,11 @@ function Frame:ClearFocus() local old=self.focus; self.focus=false; if old and s
 function Frame:GetFont() return "Fonts\\FRIZQT__.TTF",12; end
 function Frame:SetFont(path,size) self.fontSize=size; self.fontPath=path; end
 function Frame:GetStringWidth()
- local count=utf8.len(self:GetText()) or #self:GetText(); return count*(self.fontSize or 11)*0.55;
+ local visible=(self:GetText() or ""):gsub("|c%x%x%x%x%x%x%x%x",""):gsub("|r",""); local count=utf8.len(visible) or #visible; return count*(self.fontSize or 11)*0.55;
 end
 function Frame:GetStringHeight()
  local lines=0; local maxChars=math.max(1,math.floor(self:GetWidth()/((self.fontSize or 11)*0.55)));
- for line in string.gmatch((self:GetText() or "").."\n","(.-)\n") do local length=utf8.len(line) or #line; lines=lines+math.max(1,math.ceil(length/maxChars)); end
+ for line in string.gmatch((self:GetText() or ""):gsub("|c%x%x%x%x%x%x%x%x",""):gsub("|r","").."\n","(.-)\n") do local length=utf8.len(line) or #line; lines=lines+math.max(1,math.ceil(length/maxChars)); end
  return lines*((self.fontSize or 11)+2);
 end
 function Frame:SetVerticalScroll(value) self.verticalScroll=value; end

@@ -31,6 +31,11 @@ ASAdvisorDB.options.trackerMode="detailed"; AZS_SPELLS={{key="aimed_shot",rank=6
 AZS_SPELLTIPS.aimed_shot="Поражает до 2 противников, нанося 1815 ед. урона."; A.RefreshUI();
 check(t.rows[1].rank:IsShown() and t.rows[1].rank:GetText()=="R6" and t.rows[1].rank.point[5]==t.rows[1].name.point[5],"rank is aligned with the spell name");
 check(not string.find(t.rows[1].detail:GetText(),"R6",1,true) and string.find(t.rows[1].detail:GetText(),A.T("Цели").." 2",1,true),"stat line spells out target count and does not repeat rank");
+local coloredHeight=t.rows[1]:GetHeight(); local originalColor=A.ColorTooltipLine;
+A.ColorTooltipLine=function(...) return (originalColor(...):gsub("|c%x%x%x%x%x%x%x%x",""):gsub("|r","")); end;
+A.RefreshUI(); check(t.rows[1]:GetHeight()==coloredHeight,"damage-school colors do not reserve invisible extra lines"); A.ColorTooltipLine=originalColor;
+check(t.viewport.point[4]==20 and t.viewport:GetWidth()==t:GetWidth()-40,"detailed tracker has equal twenty-unit side insets");
+check(-t.viewport.point[5]==45,"first heading shares the stats content baseline");
 b.spells={{key="aimed_shot",rank=1},{key="rapid_fire",rank=1}}; b.items={};
 AZS_SPELLS={{key="aimed_shot",rank=1,cdmax=1},{key="auto_shot",rank=2,cdmax=0.8}};
 AZS_GEAR={{slot="ring",name="Band of Accuria",text="+20% damage"}};

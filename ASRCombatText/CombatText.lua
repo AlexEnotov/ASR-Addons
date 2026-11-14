@@ -1,8 +1,23 @@
 local A=ASRCombatText; local root,pool,active,cursor={}, {}, {},nil; local poll=0; local primed=false; local order=0;
 local colors={normal={1,1,1},critical={1,0.78,0.2},heal={0.35,1,0.5},taken={1,0.3,0.3}};
+local units={{1e3,"k"},{1e6,"m"},{1e9,"b"},{1e12,"t"}};
 local function Amount(n,short)
- if short and n>=1e6 then return string.format("%.1fm",n/1e6); elseif ASRCombatTextDB.short and n>=1000 then return string.format("%.1fk",n/1000); end
+ if short then
+  local tier=0;
+  for i,unit in ipairs(units) do if n>=unit[1] then tier=i; end end
+  if tier>0 then
+   local value=n/units[tier][1];
+   if value>=999.95 then
+    if tier==#units then return string.format("%.2e",n); end
+    tier=tier+1; value=n/units[tier][1];
+   end
+   return string.format("%.1f%s",value,units[tier][2]);
+  end
+ end
  return string.format("%.0f",n);
+end
+local function HitNumber(value)
+ local n=tonumber(value); if n and n==n and n>=0 and n<math.huge then return n; end
 end
 local function Caption(t)
  t.text:SetText((t.lane=="taken" and "−" or t.lane=="heal" and "+" or "")..Amount(t.amount,A.EffectiveOptions(t.profile).short)..(t.count>1 and " ×"..t.count or ""));
@@ -39,18 +54,18 @@ local function CanDisplay(t,now)
 end
 function A.AddHit(event,now,example)
  if not A.ready or not ASRCombatTextDB.enabled or not example and not A.InRun() then return; end
- local amount=A.Number(event.amount); if not amount or amount<=0 then return; end
+ local amount=HitNumber(event.amount); if not amount or amount<=0 then return; end
  if event.periodic and not A.TypeShown("periodic") then return; end
  local lane=event.kind=="taken" and "taken" or event.kind=="heal" and "heal" or event.critical and "critical" or "normal";
  local profile=lane=="normal" and event.periodic and "periodic" or lane;
  if not A.TypeShown(profile) then return; end
  local options=A.EffectiveOptions(profile);
- if lane=="heal" then amount=math.max(0,amount-(A.Number(event.overheal) or 0)); if amount<=0 then return; end end
+ if lane=="heal" then amount=math.max(0,amount-(HitNumber(event.overheal) or 0)); if amount<=0 then return; end end
  now=now or GetTime();
  local anchor=ASRCombatTextDB.mode=="enemies" and event.kind=="damage" and event.anchorId or nil;
  local key=profile..":"..tostring(event.spellId or event.abilityName or "attack")..":"..tostring(event.periodic==true)..":"..tostring(anchor or "");
  for _,t in ipairs(active) do
-  if options.merge>0 and t.key==key and not example and not t.example and now-t.started<=options.merge then t.amount=t.amount+amount; t.count=t.count+1; Caption(t); return t; end
+  if options.merge>0 and t.key==key and not example and not t.example and now-t.started<=options.merge and t.amount+amount<math.huge then t.amount=t.amount+amount; t.count=t.count+1; Caption(t); return t; end
  end
  local t=Acquire(); t.live=true; t.key=key; t.lane=lane; t.profile=profile; t.amount=amount; t.count=1; t.started=now; t.anchor=anchor; t.example=example; t.age=0; t.spawnOffset=0; order=order+1; t.order=order; t.displayStarted=nil; t.queued=true; t:Hide();
  t.visualHeight=math.max(options.fontSize+4,options.icons and 20 or 0);

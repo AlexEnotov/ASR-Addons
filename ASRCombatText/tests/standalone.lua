@@ -70,5 +70,20 @@ d.icons=true; d.types.critical.values.icons=false;
 unknown=A.AddHit({kind="damage",amount=10,critical=true}); A.UpdateCombat(0);
 check(not unknown.icon:IsShown() and unknown.text.point[4]==2,"disabled icons do not leave an empty indent");
 GetSpellInfo=savedSpellInfo;
+A.ClearCombat(); d.spacing=0; d.merge=0; d.short=true;
+for _,kind in ipairs(A.typeKeys) do A.SetCustom(kind,false); end
+for _,case in ipairs({{999,"999"},{1000,"1.0k"},{1e6,"1.0m"},{1e9,"1.0b"},{75466500000,"75.5b"},{1e12,"1.0t"},{1e15,"1.00e+15"},{999949,"999.9k"},{999950,"1.0m"},{999950000,"1.0b"}}) do
+ local hit=A.AddHit({kind="damage",amount=case[1],spellId=1});
+ check(hit and hit.text:GetText()==case[2],"large combat amounts use the correct unit: "..case[2]);
+end
+A.ClearCombat(); d.merge=0.5;
+local merged=A.AddHit({kind="damage",amount=37733250000,spellId=1}); A.AddHit({kind="damage",amount=37733250000,spellId=1});
+check(merged.text:GetText()=="75.5b ×2","the screenshot-sized merged total switches from millions to billions");
+d.merge=0; A.SetCustom("heal",true); d.types.heal.values.short=false; d.types.heal.values.merge=0;
+local healing=A.AddHit({kind="heal",amount=1500});
+check(healing.text:GetText()=="+1500","a type can disable abbreviations even when the global option is enabled");
+d.short=false; d.types.heal.values.short=true; healing=A.AddHit({kind="heal",amount=2e12,overheal=1e12});
+check(healing.text:GetText()=="+1.0t","trillion-scale healing subtracts overhealing and respects the type's short-number option");
+check(A.AddHit({kind="damage",amount=math.huge})==nil and A.AddHit({kind="damage",amount=0/0})==nil,"invalid infinite and NaN hits are still rejected");
 A.SetEnabled(false);
 print("Passed "..n.." standalone combat text checks");

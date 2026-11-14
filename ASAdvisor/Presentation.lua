@@ -11,10 +11,10 @@ function A.SetClassText(font,row,token)
 end
 function A.SpellTags(row)
   local m=ASAdvisorMechanics.spells and ASAdvisorMechanics.spells[row.key]; if not m then return ""; end
-  local shape=m.shape; local s=m.shapeData and m.shapeData[shape] or {}; local tags={};
+  local shape=m.shape; local tags={};
   local function add(key) tags[#tags+1]=A.T(key); end
-  if m.targets then add("Таргетное"); tags[#tags+1]=A.T("Целей")..": "..m.targets;
-  elseif shape=="missiles" then add("Таргетное"); tags[#tags+1]=A.T("Снарядов")..": "..(s.count or 1);
+  if m.targets then add("Таргетное");
+  elseif shape=="missiles" then add("Таргетное");
   elseif shape=="ground" or shape=="cone" or shape=="nova" or shape=="orbit" or shape=="proc" and m.radius or shape=="totem" and (m.radius or 0)>0 then add("Массовое");
   elseif shape=="chain" then add("Таргетное"); add("Цепь"); end
   if shape=="ground" then add("Область на земле"); add("Периодическое");

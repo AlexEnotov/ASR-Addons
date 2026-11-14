@@ -3,7 +3,7 @@
 ## Notes: Reborn build planner, Any alternatives and stat targets. /asr
 ## Author: AlexEnotov
 ## X-License: GPL-3.0-only
-## Version: 0.5.17
+## Version: 0.5.18
 ## Dependencies: AzerothSurvivors
 ## OptionalDeps: AzerothSurvivorsAPI
 ## SavedVariables: ASAdvisorDB

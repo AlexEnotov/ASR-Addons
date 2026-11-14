@@ -1,5 +1,5 @@
 -- Original implementation for Reborn's Lua 5.1 interface. No network or executable imports.
-ASAdvisor = { VERSION = "0.5.17", catalog = {}, byKey = {}, aliases = {}, ready = false };
+ASAdvisor = { VERSION = "0.5.18", catalog = {}, byKey = {}, aliases = {}, ready = false };
 local A = ASAdvisor;
 local function trim(s) return (string.gsub(s or "", "^%s*(.-)%s*$", "%1")); end
 A.Trim = trim;

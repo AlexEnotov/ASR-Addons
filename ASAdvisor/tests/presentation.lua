@@ -2,8 +2,8 @@ local A=ASAdvisor; local n=0; local function check(ok,label) assert(ok,label); n
 local oldLanguage=ASAdvisorDB.options.language; A.SetLanguage("ru");
 local cons=A.byKey["PALADIN:consecration"]; local exorcism=A.byKey["PALADIN:exorcism"]; local shock=A.byKey["PALADIN:holy_shock"];
 check(ASAdvisorMechanics.spells.consecration.school=="holy","spell school comes from game metadata");
-check(string.find(A.SpellTags(exorcism),"Таргетное",1,true) and string.find(A.SpellTags(exorcism),"Целей: 1",1,true),"fixed target count is targeted rather than AOE");
-check(string.find(A.SpellTags(shock),"Таргетное",1,true) and string.find(A.SpellTags(shock),"Снарядов: 2",1,true),"limited projectiles are targeted and keep their own projectile count");
+check(string.find(A.SpellTags(exorcism),"Таргетное",1,true) and not string.find(A.SpellTags(exorcism),"%d"),"targeted tags do not duplicate target counts from the description");
+check(string.find(A.SpellTags(shock),"Таргетное",1,true) and not string.find(A.SpellTags(shock),"%d"),"projectile tags retain classification without duplicating numeric counts");
 check(string.find(A.SpellTags(cons),"Массовое",1,true) and string.find(A.SpellTags(cons),"Область на земле",1,true),"ground damage is classified as AOE");
 check(string.find(A.SpellTags(A.byKey["MAGE:cone_of_cold"]),"Конус",1,true),"cone shape is explicit");
 check(string.find(A.SpellTags(A.byKey["PALADIN:holy_light"]),"Исцеление",1,true),"healing is identified without guessing from its icon");

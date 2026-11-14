@@ -2,6 +2,13 @@ local A=ASRLoot; local checks=0; local function check(ok,name) assert(ok,name); 
 AZS_ZONE={run="r1",zone="elwynn",class="hunter"}; AZS_RUN={t=20,ph="playing"};
 ASRLootRuntime.scripts.OnEvent(ASRLootRuntime,"ADDON_LOADED","ASRLoot");
 check(A.ready and ASRLootDB.language=="en" and ASRLootDB.mode=="new","fresh standalone installation defaults to English and new items only");
+check(A.frame:IsShown() and A.frame:GetWidth()==196 and #A.frame.rows==15,"empty run tracker opens with standard width and an icon grid");
+A.Close(); A.Init(); A.Refresh(); check(not A.frame:IsShown() and ASRLootDB.enabled,"closing persists through reload without disabling tracking");
+AZS_ZONE.run="visibility2"; A.EnsureRun(); A.Refresh(); check(A.frame:IsShown(),"next run automatically opens again");
+A.SetAutoOpen("drop"); AZS_ZONE.run="visibility3"; A.EnsureRun(); A.Refresh(); check(not A.frame:IsShown(),"drop-only mode starts closed");
+A.NewDrop({name="Visibility helm",rarity=3,icon="INV_Test"}); check(A.frame:IsShown(),"new drop opens the panel");
+A.Close(); A.Duplicate("Шлем следопыта уже подобрано: +20 золото.","CHAT_MSG_SYSTEM"); check(not A.frame:IsShown(),"filtered duplicate does not reopen new-only panel");
+A.SetAutoOpen("start"); AZS_ZONE.run="r1"; A.EnsureRun(); A.Refresh();
 local p=A.ParseDuplicate("Шлем следопыта уже подобрано: +20 золото.");
 check(p and p.name=="Шлем следопыта" and p.gold==20,"exact user screenshot is parsed");
 p=A.ParseDuplicate("|cffffffffTracker's Helm|r already collected: |cffffff00+1,200 gold.|r");
@@ -16,7 +23,7 @@ check(ASRLootDB.run.newCount==1 and #A.Rows()==1 and A.frame:IsShown(),"new loot
 A.Duplicate("Шлем следопыта уже подобрано: +20 золото.","CHAT_MSG_SYSTEM");
 check(ASRLootDB.run.gold==20 and ASRLootDB.run.duplicateCount==1 and #A.Rows()==1,"new-only mode hides duplicates but keeps their counters");
 A.SetMode("all"); check(#A.Rows()==2 and A.Rows()[1].kind=="duplicate","all mode reveals duplicate items");
-check(A.frame.footer:GetText()=="Duplicate gold: 20","footer sums duplicate gold only");
+check(A.frame.footer:GetText()=="Gold: 20","compact footer sums duplicate gold only");
 A.Duplicate("Шлем следопыта уже подобрано: +20 золото.","CHAT_MSG_LOOT"); check(ASRLootDB.run.duplicateCount==1,"same message delivered through two event channels is counted once");
 Advance(0.5); A.Duplicate("Шлем следопыта уже подобрано: +20 золото.","CHAT_MSG_SYSTEM");
 check(ASRLootDB.run.gold==40 and A.Rows()[1].count==2 and A.Rows()[1].gold==40,"separate identical drops are aggregated without losing gold");
@@ -30,7 +37,7 @@ check(ASRLootDB.run.gold==120,"endless drops continue adding after a map-end rec
 A.Reconcile({dupgold=100}); check(ASRLootDB.run.gold==120,"repeated older end summaries cannot reduce or double-count gold");
 A.Reconcile({dupgold=120}); check(ASRLootDB.run.gold==120,"matching summary does not add the total twice");
 local old=ASRLootDB.run; A.Init(); check(ASRLootDB.run==old and ASRLootDB.mode=="all","reload initialization preserves run entries and selected mode");
-A.SetLanguage("ru"); check(A.frame.footer:GetText()=="Золото за дубликаты: 120","Russian interface follows the selected language");
+A.SetLanguage("ru"); check(A.frame.footer:GetText()=="Золото: 120","Russian interface follows the selected language");
 AZS_ZONE.run="r2"; AZS_RUN.t=0; A.EnsureRun(); check(ASRLootDB.run.gold==0 and #ASRLootDB.run.entries==0,"new run resets session counters");
 for i=1,510 do A.NewDrop({name="Piece "..i,rarity=1,icon="INV_Test"}); end
 check(#ASRLootDB.run.entries==500 and ASRLootDB.run.newCount==510,"retained journal is bounded while totals remain exact");

@@ -14,6 +14,8 @@ are summarized with the feature they improve rather than listed individually.
 - Save the current run across reloads and reconcile duplicate gold against the
   end summary, continuing correctly into Endless. Bound retained entries to 500
   while preserving totals. Ignore coins and unrelated rewards.
+- Use a compact rarity-bordered icon grid with hover details. Open at run start
+  by default, on a matching drop, or manually through Suite controls.
 - Add optional Suite settings, shared language and layout-editor integration;
   standalone controls remain available through `/asrloot`.
 - Use native item metadata and verified equipment hints. Unrecognized duplicate
@@ -44,6 +46,12 @@ are summarized with the feature they improve rather than listed individually.
 - Accept very large finite combat amounts and handle aggregation overflow safely.
 
 ### ASR Suite
+
+- Standardize Stats, Loot and both Advisor tracker modes on a 196-unit base
+  width, with one-percent scale controls. Existing Advisor widths reset once;
+  manual detailed-mode resizing remains available. Unify visible docking gaps
+  on every side with an adjustable gap, including Loot texture padding.
+- Apply the lime ASR prefix consistently to module headings.
 
 - Add **Endless**, a module inside Suite, with an automatic replacement for the
   native run tracker only during endless play. This is not a fifth standalone

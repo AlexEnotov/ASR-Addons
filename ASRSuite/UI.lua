@@ -41,7 +41,7 @@ function A.CreateUI()
    minibutton.disk:SetSize(59,59); minibutton.disk:SetPoint("CENTER",minibutton,"CENTER",0,0); minibutton.disk:SetTexture(art.."actionbutton-backdrop"); minibutton.disk:SetVertexColor(0.67,0.67,0.67,1);
    minibutton.rim=minibutton:CreateTexture(nil,"ARTWORK"); minibutton.rim:SetSize(59,59); minibutton.rim:SetPoint("CENTER",minibutton,"CENTER",0,0); minibutton.rim:SetTexture(art.."actionbutton-border"); minibutton.rim:SetVertexColor(0.9,0.9,0.9,1);
   else minibutton.disk:SetAllPoints(minibutton); minibutton.disk:SetTexture("Interface\\AddOns\\ASRSuite\\media\\minimap.tga"); end
-  local mark=Label(minibutton,"ASR",9,0,0,26); mark:ClearAllPoints(); mark:SetPoint("CENTER",minibutton,"CENTER",0,0); mark:SetHeight(12); mark:SetJustifyH("CENTER"); mark:SetJustifyV("MIDDLE"); mark:SetFont(S.font,9,"OUTLINE"); mark:SetTextColor(1,1,1,1); minibutton.mark=mark;
+  local mark=Label(minibutton,"ASR",9,0,0,26); mark:ClearAllPoints(); mark:SetPoint("CENTER",minibutton,"CENTER",0,0); mark:SetHeight(12); mark:SetJustifyH("CENTER"); mark:SetJustifyV("MIDDLE"); mark:SetFont(S.font,9,"OUTLINE"); mark:SetTextColor(140/255,209/255,35/255,1); minibutton.mark=mark;
   minibutton:SetScript("OnClick",function(self,button) if self.clickAfter and GetTime()<self.clickAfter then return; end; if button=="RightButton" then ToggleEdit(); else A.ToggleSettings(); end end);
   minibutton:SetScript("OnDragStart",function(self) self.dragging=true; self.clickAfter=GetTime()+0.15; end); minibutton:SetScript("OnDragStop",function(self) self.dragging=false; self.clickAfter=GetTime()+0.15; end);
   minibutton:SetScript("OnUpdate",function(self)

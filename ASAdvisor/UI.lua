@@ -182,7 +182,7 @@ function A.ApplyLayout()
 end
 function A.ResetLayout()
   ASAdvisorDB.options.plannerPos=nil; ASAdvisorDB.options.trackerPos=nil; ASAdvisorDB.options.trackerAnchor=nil; if tracker then tracker.restoreAnchor=nil; end
-  ASAdvisorDB.options.plannerWidth=nil; ASAdvisorDB.options.plannerHeight=nil; ASAdvisorDB.options.trackerWidth=280; ASAdvisorDB.options.trackerHeight=280;
+  ASAdvisorDB.options.plannerWidth=nil; ASAdvisorDB.options.plannerHeight=nil; ASAdvisorDB.options.trackerWidth=196; ASAdvisorDB.options.trackerHeight=280;
   if main then main:SetWidth(880); end
   if main then main:ClearAllPoints(); main:SetPoint("CENTER",UIParent,"CENTER",0,0); end
   if tracker then tracker:ClearAllPoints(); tracker:SetPoint("TOPLEFT",UIParent,"TOPLEFT",18,-150); end
@@ -252,7 +252,7 @@ local function createMain()
   main:SetWidth(ASAdvisorDB.options.plannerWidth or 880);
   main:SetScript("OnHide",function() stopInteraction(main); saveInline(); if main.inline then for _,e in pairs(main.inline.fields) do e:ClearFocus(); end end; hideTip(main); end);
   if UISpecialFrames then UISpecialFrames[#UISpecialFrames+1]="ASAdvisorPlanner"; end
-  main.brand=label(main,"ASR / ADVISOR",19,24,-30,240,mint);
+  main.brand=label(main,"|cff8cd123ASR|r / ADVISOR",19,24,-30,240,mint);
   main.credit=label(main,"by AlexEnotov",9,25,-60,240,muted);
   main.brand:SetHeight(26); main.credit:SetHeight(14);
   main.settingsButton=button(main,"",110,28,710,-10,function() saveInline(); showMode(view.mode=="settings" and "editor" or "settings"); end);
@@ -384,7 +384,7 @@ local function createMain()
   ASRLocale.Bind(main.settings.languageSelect,function() return ASAdvisorDB.options.language; end,function(code) if ASRSuite and ASRSuite.ready then ASRSuite.SetLanguage(code); else A.SetLanguage(code); end end);
   main.settings.enabled=button(main.settings,"",160,24,444,-14,function() local on=ASAdvisorDB.options.enabled==false; ASAdvisorDB.options.enabled=on; if ASRSuite and ASRSuite.SetModuleEnabled then ASRSuite.SetModuleEnabled("builder",on); end; refresh(); A.RefreshUI(); end);
   main.settings.steps={};
-  for i,s in ipairs({{"opacity","Фон редактора",0.15,1,0.05},{"trackerOpacity","Фон трекера",0.1,1,0.05},{"scale","Масштаб редактора",0.55,1.3,0.05},{"trackerScale","Масштаб трекера",0.5,1.3,0.05}}) do
+  for i,s in ipairs({{"opacity","Фон редактора",0.15,1,0.05},{"trackerOpacity","Фон трекера",0.1,1,0.05},{"scale","Масштаб редактора",0.55,1.3,0.01},{"trackerScale","Масштаб трекера",0.5,1.3,0.01}}) do
     local key,low,high,step=s[1],s[3],s[4],s[5]; local y=-100-(i-1)*43;
     local r={caption=label(main.settings,"",11,14,y-8,260),value=label(main.settings,"",12,377,y-8,130,mint),translation=s[2]}; r.value:SetJustifyH("CENTER");
     r.minus=button(main.settings,"−",44,30,310,y,function() ASAdvisorDB.options[key]=math.max(low,ASAdvisorDB.options[key]-step); A.ApplyLayout(); refresh(); A.RefreshUI(); end);
@@ -788,7 +788,7 @@ local function createTracker()
   tracker=box(UIParent,"ASAdvisorTracker",220,64,nil,nil,0.42); tracker:SetBackdrop(windowBackdrop()); tracker:SetBackdropBorderColor(0.75,0.75,0.77,1); tracker:SetFrameStrata("HIGH"); movable(tracker,"trackerPos");
   if not ASAdvisorDB.options.trackerPos then tracker:ClearAllPoints(); tracker:SetPoint("TOPLEFT",UIParent,"TOPLEFT",18,-150); end
   tracker.restoreAnchor=ASAdvisorDB.options.trackerAnchor;
-  tracker.brand=label(tracker,"ASR",9,8,-7,30,mint);
+  tracker.brand=label(tracker,"|cff8cd123ASR|r",9,8,-7,30,mint);
   tracker.builds=button(tracker,"",58,19,155,-3,function() A.ToggleUI(); end);
   tracker.icons={};
   for i=1,6 do
@@ -824,7 +824,7 @@ local function createTracker()
   tracker.scrollHint=label(tracker,"",9,8,-260,210,muted);
   tracker.resize=resizeCorner(tracker);
   tracker.sizeDirection="BOTTOMRIGHT";
-  tracker:SetResizable(true); tracker:SetMinResize(240,110); tracker:SetMaxResize(520,600);
+  tracker:SetResizable(true); tracker:SetMinResize(196,110); tracker:SetMaxResize(520,600);
   tracker.SaveSize=function(self) ASAdvisorDB.options.trackerWidth=self:GetWidth(); ASAdvisorDB.options.trackerHeight=self:GetHeight(); A.RefreshUI(); end;
   tracker:SetScript("OnSizeChanged",function(self) if self.sizing and not trackerLayoutBusy then self:SaveSize(); end end);
   tracker:SetScript("OnHide",function(self) stopInteraction(self); hideTip(tracker); end);
@@ -912,7 +912,7 @@ function A.RefreshUI()
   local spells,items=A.TrackerEntries(b,live); local entries={}; for _,v in ipairs(spells) do entries[#entries+1]=v; end; for _,v in ipairs(items) do entries[#entries+1]=v; end
   for _,f in ipairs(tracker.icons) do f:Hide(); end; for _,r in ipairs(tracker.rows) do r:Hide(); end
   for _,icon in ipairs(tracker.extraIcons) do icon:Hide(); end
-  tracker.brand:ClearAllPoints(); tracker.brand:SetPoint("TOPLEFT",tracker,"TOPLEFT",24,-23); tracker.brand:SetHeight(tracker.builds:GetHeight()); tracker.brand:SetJustifyV("MIDDLE"); tracker.brand:SetFont(FONT,10,"");
+  tracker.brand:ClearAllPoints(); tracker.brand:SetPoint("TOPLEFT",tracker,"TOPLEFT",20,-23); tracker.brand:SetHeight(tracker.builds:GetHeight()); tracker.brand:SetJustifyV("MIDDLE"); tracker.brand:SetFont(FONT,10,"");
   if ASAdvisorDB.options.trackerMode=="detailed" then
     local width=ASAdvisorDB.options.trackerWidth; local bodyHeight=0;
     tracker.resize:Show(); tracker.viewport:Show();
@@ -958,18 +958,18 @@ function A.RefreshUI()
     local available=math.max(1,height-53-30); tracker.maxOffset=math.max(0,bodyHeight-available); tracker.offset=math.min(tracker.offset or 0,tracker.maxOffset);
     tracker.viewport:ClearAllPoints(); tracker.viewport:SetPoint("TOPLEFT",tracker,"TOPLEFT",24,-53); tracker.viewport:SetSize(width-48,available); tracker.content:SetSize(width-48,math.max(1,bodyHeight)); tracker.viewport:SetVerticalScroll(tracker.offset);
     if tracker.maxOffset>0 then tracker.scrollHint:ClearAllPoints(); tracker.scrollHint:SetPoint("BOTTOMLEFT",tracker,"BOTTOMLEFT",24,12); tracker.scrollHint:SetHeight(13); tracker.scrollHint:SetWidth(width-48); tracker.scrollHint:SetText(A.T("Прокрутка колёсиком")); tracker.scrollHint:Show(); end
-    move(tracker.builds,54,23); tracker.builds:SetWidth(width-116); tracker.builds.text:SetWidth(width-126); move(tracker.mode,width-48,23);
+    move(tracker.builds,50,23); tracker.builds:SetWidth(width-98); tracker.builds.text:SetWidth(width-108); move(tracker.mode,width-40,23); tracker.mode:SetSize(20,16);
     tracker:SetScale(math.min(ASAdvisorDB.options.trackerScale,(UIParent:GetWidth()-24)/width,(UIParent:GetHeight()-24)/height));
   else
-    tracker.viewport:Hide(); tracker.resize:Hide(); tracker:SetWidth(232); move(tracker.builds,54,23); tracker.builds:SetWidth(116); tracker.builds.text:SetWidth(106); move(tracker.mode,184,23);
+    tracker.viewport:Hide(); tracker.resize:Hide(); tracker:SetWidth(196); move(tracker.builds,50,23); tracker.builds:SetWidth(98); tracker.builds.text:SetWidth(88); move(tracker.mode,156,23); tracker.mode:SetSize(20,16);
     local spellRows=math.ceil(#spells/6); local itemRows=math.ceil(#items/6); local spellStart=69; local itemStart=#spells>0 and (spellStart+spellRows*29+17) or 69;
-    if #spells>0 then tracker.spellLabel:SetText(A.T("Умения")); move(tracker.spellLabel,24,51); tracker.spellLabel:SetHeight(13); tracker.spellLabel:Show(); end
-    if #items>0 then tracker.itemLabel:SetText(A.T("Бижутерия")); move(tracker.itemLabel,24,itemStart-16); tracker.itemLabel:Show(); end
+    if #spells>0 then tracker.spellLabel:SetWidth(156); tracker.spellLabel:SetText(A.T("Умения")); move(tracker.spellLabel,24,51); tracker.spellLabel:SetHeight(13); tracker.spellLabel:Show(); end
+    if #items>0 then tracker.itemLabel:SetWidth(156); tracker.itemLabel:SetText(A.T("Бижутерия")); move(tracker.itemLabel,24,itemStart-16); tracker.itemLabel:Show(); end
     local bottom=#items>0 and (itemStart+math.max(0,itemRows-1)*29+23) or (spellStart+math.max(0,spellRows-1)*29+23);
     tracker:SetHeight(math.max(86,bottom+24));
     for i,entry in ipairs(entries) do local f=tracker.icons[i]; if f then
       local index=i<=#spells and i-1 or i-#spells-1; local y=i<=#spells and (spellStart+math.floor(index/6)*29) or (itemStart+math.floor(index/6)*29);
-      move(f,24+(index%6)*31,y); f.outside=b and not entry.planned;
+      move(f,20+(index%6)*26,y); f.outside=b and not entry.planned;
       if not f.warning then f.warning=label(f,"!",9,16,0,8,{1,0.68,0.28,1}); end
       if f.outside then f.warning:Show(); else f.warning:Hide(); end
       f.row=entry.row; f.icon:SetTexture(A.Icon(entry.row.icon)); f:SetAlpha(entry.owned and 1 or 0.25); f.rank:SetText(entry.rank and tostring(entry.rank) or ""); f:Show();

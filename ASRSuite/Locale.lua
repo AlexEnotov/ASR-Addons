@@ -72,6 +72,7 @@ local EN={
  ["ASR Advisor не установлен."]="ASR Advisor is not installed.", ["Собственный текст SurvivorUI не обнаружен."]="SurvivorUI combat text was not found.",
 };
 EN["Бесконечный режим"]="Endless mode";
+EN["Зазор между панелями"]="Gap between panels";
 EN["Обычный"]="Normal"; EN["Героический"]="Heroic";
 EN["Убито врагов %d"]="Enemies slain  %d";
 EN["%s убит %d / 1"]="%s slain  %d / 1";

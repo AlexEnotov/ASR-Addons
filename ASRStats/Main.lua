@@ -1,5 +1,6 @@
 local A=ASRStats; local S=ASRStyle; local panel,menu,grip,ready,config; local raw,received=false,false;
 local function L(ru,en) return ASRLocale.Text("stats",ASRStatsDB.language,ru,en); end
+local function Brand(text) return (string.gsub(text,"^ASR","|cff8cd123ASR|r",1)); end
 local defaults={language="en",opacity=0.9,menuOpacity=0.95,scale=0.7,hideZeros=true,locked=false,hidden=false,enabled=true};
 local function InRun()
  local phase=AZS_RUN and AZS_RUN.ph;
@@ -35,7 +36,7 @@ function A.Refresh()
  panel:Show(); panel:SetWidth(config and 280 or 196); local ownOpacity=config and ASRStatsDB.menuOpacity or ASRStatsDB.opacity; S.Panel(panel,ASRSuite and ASRSuite.GetPanelOpacity and ASRSuite.GetPanelOpacity("stats",ownOpacity,config and "menu" or "tracker") or ownOpacity);
  panel.title:SetWidth(config and 198 or 129); panel.title:SetFont(S.font,config and 10 or 9,""); panel.title:ClearAllPoints(); panel.title:SetPoint("TOPLEFT",panel,"TOPLEFT",config and 24 or 20,config and -24 or -23); panel.title:SetHeight(config and 20 or 16);
  panel.menu:ClearAllPoints(); panel.menu:SetPoint("TOPLEFT",panel,"TOPLEFT",config and 232 or 156,config and -24 or -23); panel.menu:SetSize(config and 24 or 20,config and 20 or 16);
- grip:SetWidth(config and 200 or 136); grip:SetHeight(config and 24 or 18); grip:ClearAllPoints(); grip:SetPoint("TOPLEFT",panel,"TOPLEFT",config and 22 or 18,config and -22 or -22); panel.title:SetText(config and L("ASR / НАСТРОЙКИ","ASR / SETTINGS") or (A.editing and L("СТАТЫ · ПЕРЕТАЩИ","STATS · DRAG") or L("ASR / СТАТЫ","ASR / STATS")));
+ grip:SetWidth(config and 200 or 136); grip:SetHeight(config and 24 or 18); grip:ClearAllPoints(); grip:SetPoint("TOPLEFT",panel,"TOPLEFT",config and 22 or 18,config and -22 or -22); panel.title:SetText(Brand(config and L("ASR / НАСТРОЙКИ","ASR / SETTINGS") or (A.editing and L("СТАТЫ · ПЕРЕТАЩИ","STATS · DRAG") or L("ASR / СТАТЫ","ASR / STATS"))));
  panel.menu.text:SetText(config and "‹" or "≡");
  for _,row in ipairs(panel.rows) do row:Hide(); end; for _,head in ipairs(panel.headings) do head:Hide(); end
  panel.empty:Hide(); if config then menu:Show(); else menu:Hide(); end
@@ -101,7 +102,7 @@ local function Build()
   if key=="opacity" or key=="menuOpacity" or key=="scale" then
    setting.value=S.Label(menu,"",10,179,y+2,45); setting.value:SetJustifyH("CENTER");
    local function step(delta) ASRStatsDB[key]=math.max(key~="scale" and 0 or 0.5,math.min(key~="scale" and 1 or 1.5,ASRStatsDB[key]+delta)); A.Refresh(); end
-   setting.minus=S.Button(menu,"−",23,23,154,y,function() step(-0.05); end); setting.plus=S.Button(menu,"+",23,23,233,y,function() step(0.05); end);
+   setting.minus=S.Button(menu,"−",23,23,154,y,function() step(key=="scale" and -0.01 or -0.05); end); setting.plus=S.Button(menu,"+",23,23,233,y,function() step(key=="scale" and 0.01 or 0.05); end);
   else setting.button=S.Button(menu,"",102,23,154,y,function() if key~="language" then ASRStatsDB[key]=not ASRStatsDB[key]; if key=="enabled" and ASRSuite and ASRSuite.SetModuleEnabled then ASRSuite.SetModuleEnabled("stats",ASRStatsDB.enabled); end; end; A.Refresh(); end); end
   if key=="language" then ASRLocale.Bind(setting.button,function() return ASRStatsDB.language; end,function(code) if ASRSuite and ASRSuite.SetLanguage then ASRSuite.SetLanguage(code); else ASRStatsDB.language=ASRLocale.Normalize(code); end end,A.Refresh); end
   menu.settings[#menu.settings+1]=setting;

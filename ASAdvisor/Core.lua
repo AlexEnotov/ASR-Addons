@@ -143,7 +143,8 @@ function A.Init()
   o.trackerOpacity=math.min(1,math.max(0.1,tonumber(o.trackerOpacity) or 0.42));
   o.scale=math.min(1.3,math.max(0.55,tonumber(o.scale) or 0.85));
   o.trackerScale=math.min(1.3,math.max(0.5,tonumber(o.trackerScale) or 0.85));
-  o.trackerWidth=math.min(520,math.max(240,tonumber(o.trackerWidth) or 280));
+  if not o.standardTrackerWidth then o.trackerWidth=196; o.standardTrackerWidth=true; end
+  o.trackerWidth=math.min(520,math.max(196,tonumber(o.trackerWidth) or 196));
   o.trackerHeight=math.min(600,math.max(110,tonumber(o.trackerHeight) or 280));
   if o.plannerWidth then o.plannerWidth=math.min(1240,math.max(760,tonumber(o.plannerWidth) or 880)); end
   if o.plannerHeight then o.plannerHeight=math.min(1000,math.max(500,tonumber(o.plannerHeight) or 540)); end

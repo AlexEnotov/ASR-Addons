@@ -72,8 +72,9 @@ local function RegisterBuiltins()
   Check(page,"Закрепить все панели",function() return ASRSuiteDB.lockPanels; end,function(v) ASRSuiteDB.lockPanels=v; end,211);
   B(page,"Изменить интерфейс",468,29,8,245,function() A.ToggleEdit(); end);
   Check(page,"Магнитная стыковка панелей",function() return ASRSuiteDB.dockingEnabled~=false; end,function(v) ASRSuiteDB.dockingEnabled=v; end,282);
-  Note(page,"В режиме изменения интерфейса подведи панель к краю другой. Главная двигает всю цепочку; дочерняя отделяется вместе со своей цепочкой. Shift — без стыковки.",314):SetHeight(42);
-  B(page,"Разъединить панели",468,27,8,366,function() if A.ClearDocking then A.ClearDocking(); end end);
+  Step(page,"Зазор между панелями",function() return ASRSuiteDB.dockingGap or 4; end,function(v) ASRSuiteDB.dockingGap=v; if A.ApplyDocking then A.ApplyDocking(); end end,314,1,16,1);
+  Note(page,"В режиме изменения интерфейса подведи панель к краю другой. Главная двигает всю цепочку; дочерняя отделяется вместе со своей цепочкой. Shift — без стыковки.",350):SetHeight(42);
+  B(page,"Разъединить панели",468,27,8,402,function() if A.ClearDocking then A.ClearDocking(); end end);
  end);
  A.RegisterSettingsPage("endless","Endless",function(page)
   L(page,"Бесконечный режим",16,8,0,480);
@@ -114,7 +115,7 @@ local function RegisterBuiltins()
   Check(page,"Модуль включён",function() return A.IsModuleEnabled("stats"); end,function(v) A.SetModuleEnabled("stats",v); end,30);
   local function Have() return ASRStatsDB and ASRStats; end
   Note(page,"Настройки панели характеристик. Расположение меняется в общем режиме редактирования.",60);
-  Step(page,"Масштаб",function() return ASRStatsDB and ASRStatsDB.scale or 0.7; end,function(v) ASRStatsDB.scale=v; end,98,0.5,1.5,0.05,Percent,Have);
+  Step(page,"Масштаб",function() return ASRStatsDB and ASRStatsDB.scale or 0.7; end,function(v) ASRStatsDB.scale=v; end,98,0.5,1.5,0.01,Percent,Have);
   Check(page,"Скрывать нули",function() return ASRStatsDB and ASRStatsDB.hideZeros; end,function(v) ASRStatsDB.hideZeros=v; end,130,Have);
   Check(page,"Закрепить",function() return ASRStatsDB and ASRStatsDB.locked; end,function(v) ASRStatsDB.locked=v; end,160,Have);
   OverrideOpacity(page,"stats",190);
@@ -132,8 +133,8 @@ local function RegisterBuiltins()
   Check(page,"Показывать трекер",function() return Have() and not Opt().trackerHidden; end,function(v) Opt().trackerHidden=not v; end,98,Have);
   local mode=B(page,"",468,25,8,130,function() if Have() then Opt().trackerMode=Opt().trackerMode=="compact" and "detailed" or "compact"; Changed(); end end);
   records[#records+1]=function() mode.text:SetText(A.T(Opt().trackerMode=="detailed" and "Трекер: подробный" or "Трекер: компактный")); end
-  Step(page,"Масштаб редактора",function() return Opt().scale or 0.85; end,function(v) Opt().scale=v; end,164,0.55,1.3,0.05,Percent,Have);
-  Step(page,"Масштаб трекера",function() return Opt().trackerScale or 0.85; end,function(v) Opt().trackerScale=v; end,196,0.5,1.3,0.05,Percent,Have);
+  Step(page,"Масштаб редактора",function() return Opt().scale or 0.85; end,function(v) Opt().scale=v; end,164,0.55,1.3,0.01,Percent,Have);
+  Step(page,"Масштаб трекера",function() return Opt().trackerScale or 0.85; end,function(v) Opt().trackerScale=v; end,196,0.5,1.3,0.01,Percent,Have);
   OverrideOpacity(page,"builder",228,"menu");
   local function Own() return Have() and OwnOpacity("builder","menu"); end
   Step(page,"Фон редактора",function() return Opt().opacity or 0.84; end,function(v) Opt().opacity=v; end,258,0.15,1,0.05,Percent,Own);
@@ -217,7 +218,7 @@ function A.CreateSettings()
  window:SetScript("OnShow",function(self) self:SetFrameStrata("FULLSCREEN_DIALOG"); self:SetFrameLevel(400); if self.Raise then self:Raise(); end; S.SyncChildren(self); end);
  window:SetScript("OnDragStart",function(self) self:StartMoving(); end); window:SetScript("OnDragStop",function(self) self:StopMovingOrSizing(); end);
  window:SetScale(math.min(1,(UIParent:GetWidth()-24)/740,(UIParent:GetHeight()-24)/610)); S.Panel(window,ASRSuiteDB.opacity);
- L(window,"ASR / КОМПЛЕКС",17,24,24,420); L(window,"by AlexEnotov",9,25,47,250,S.muted);
+ local title=L(window,"ASR / КОМПЛЕКС",17,24,24,420); records[#records+1]=function() title:SetText((string.gsub(A.T("ASR / КОМПЛЕКС"),"^ASR","|cff8cd123ASR|r",1))); end; L(window,"by AlexEnotov",9,25,47,250,S.muted);
  A.controls={}; A.controls.edit=B(window,"Изменить интерфейс",230,26,456,24,function() A.ToggleEdit(); end);
  B(window,"×",24,22,692,26,function() window:Hide(); end);
  RegisterBuiltins();

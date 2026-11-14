@@ -1,8 +1,11 @@
 ASRLoot={VERSION="0.1.0",ready=false}; local A=ASRLoot;
 local translations={
- ["Добыча"]="Loot",["Только новые"]="New items only",["Вся добыча"]="All drops",["Новый"]="New",["Продано"]="Sold",["Неизвестная редкость"]="Unknown rarity",
+ ["Масштаб"]="Scale",["Добыча"]="Loot",["Только новые"]="New items only",["Вся добыча"]="All drops",["Новый"]="New",["Продано"]="Sold",["Неизвестная редкость"]="Unknown rarity",
  ["Новые: %d · Дубликаты: %d"]="New: %d · Duplicates: %d",["Золото за дубликаты: %d"]="Duplicate gold: %d",["Пока нет предметов"]="No items yet",["Прокрутка колёсиком"]="Scroll with mouse wheel",
  ["Показать трекер добычи"]="Show loot tracker",["Скрыть обычные уведомления о добыче"]="Hide native loot notifications",["Режим трекера"]="Tracker mode",
+ ["Модуль включён"]="Module enabled",["Открыть панель"]="Open panel",["Закрыть панель"]="Close panel",["Открывать в начале забега"]="Open at run start",["Открывать при выпадении предмета"]="Open when an item drops",
+ ["Обычный"]="Common",["Необычный"]="Uncommon",["Редкий"]="Rare",["Эпический"]="Epic",["Легендарный"]="Legendary",["Количество: %d"]="Count: %d",["Золото: %d"]="Gold: %d",
+ ["Выбери автоматическое открытие в начале забега или при выпадении вещи. Без обеих галочек панель открывается вручную."]="Choose automatic opening at run start or when an item drops. With both unchecked, open the panel manually.",
  ["Учитываются постоянные броня и оружие. Звёзды не отслеживаются."]="Tracks permanent armor and weapons. Stars are not tracked.",
  ["Сумма золота — только за проданные дубликаты в этом забеге."]="Gold counts sold duplicates in this run only.",
  ["Статистика включает данные до установки трекера в этом забеге."]="The total includes data from before the tracker was installed in this run.",
@@ -65,8 +68,9 @@ function A.EnsureRun()
  local id=tostring(z.run or "")..":"..tostring(z.zone or z.map or "")..":"..Class();
  local run=ASRLootDB.run;
  if type(run)~="table" or run.id~=id or (clock+5<(run.lastTime or 0)) then
-  run={id=id,entries={},newCount=0,duplicateCount=0,gold=0,observedGold=0,lastTime=clock}; ASRLootDB.run=run; A.offset=0; A.lastChat=nil;
+  run={id=id,entries={},newCount=0,duplicateCount=0,gold=0,observedGold=0,lastTime=clock,panelOpen=ASRLootDB.openOnStart~=false}; ASRLootDB.run=run; A.offset=0; A.lastChat=nil;
  end
+ if run.panelOpen==nil then run.panelOpen=ASRLootDB.openOnStart~=false; end
  run.lastTime=clock; return run;
 end
 local function Add(run,name,kind)
@@ -74,11 +78,15 @@ local function Add(run,name,kind)
  run.entries[#run.entries+1]=e; if #run.entries>500 then table.remove(run.entries,1); end; A.offset=0; return e;
 end
 local function PaintMetadata(e,item) if item then e.icon=item.icon or e.icon; if item.rarity~=nil then e.rarity=item.rarity; end end end
+local function OpenForDrop(kind)
+ if ASRLootDB.openOnDrop and (kind=="new" or ASRLootDB.mode=="all") then A.EnsureRun().panelOpen=true; end
+end
 function A.NewDrop(fields)
  if not A.ready or not fields or not fields.name then return; end
  local name=A.Clean(fields.name); if name=="" then return; end
  local run=A.EnsureRun(); local meta=A.CacheItem({name=name,icon=fields.icon,rarity=fields.rarity});
  local e=Add(run,name,"new"); PaintMetadata(e,meta); run.newCount=run.newCount+1;
+ OpenForDrop("new");
  if A.Refresh then A.Refresh(); end
 end
 function A.Duplicate(message,event)
@@ -89,6 +97,7 @@ function A.Duplicate(message,event)
  A.lastChat={message=clean,event=event,at=GetTime()};
  local e=Add(run,parsed.name,"duplicate"); e.gold=parsed.gold; PaintMetadata(e,A.Resolve(parsed.name));
  run.duplicateCount=run.duplicateCount+1; run.observedGold=run.observedGold+parsed.gold; run.gold=run.gold+parsed.gold;
+ OpenForDrop("duplicate");
  if A.Refresh then A.Refresh(); end
 end
 function A.Reconcile(fields)
@@ -112,11 +121,26 @@ end
 function A.SetLanguage(language) ASRLootDB.language=ASRLocale.Normalize(language); if A.Refresh then A.Refresh(); end end
 function A.SetMode(mode) ASRLootDB.mode=mode=="all" and "all" or "new"; A.offset=0; if A.Refresh then A.Refresh(); end end
 function A.SetEnabled(on) ASRLootDB.enabled=on and true or false; if A.Refresh then A.Refresh(); end end
+function A.Open()
+ ASRLootDB.enabled=true;
+ if A.InRun() then A.EnsureRun().panelOpen=true; A.inspect=false; else A.inspect=true; end
+ if A.Refresh then A.Refresh(); end
+end
+function A.Close()
+ A.inspect=false; if ASRLootDB.run then ASRLootDB.run.panelOpen=false; end
+ if A.Refresh then A.Refresh(); end
+end
+function A.SetAutoOpen(mode)
+ ASRLootDB.openOnStart=mode=="start"; ASRLootDB.openOnDrop=mode=="drop";
+end
 function A.Init()
  ASRLootDB=type(ASRLootDB)=="table" and ASRLootDB or {};
  local d=ASRLootDB; d.items=type(d.items)=="table" and d.items or {};
  d.language=ASRLocale.Normalize(d.language or ASRSuiteDB and ASRSuiteDB.language or "en");
  if d.enabled==nil then d.enabled=true; end; if d.replaceNative==nil then d.replaceNative=true; end
+ if d.openOnStart==nil then d.openOnStart=true; end; if d.openOnDrop==nil then d.openOnDrop=false; end
+ if d.openOnStart and d.openOnDrop then d.openOnDrop=false; end
+ if not A.Number(d.scale) then d.scale=ASRStatsDB and ASRStatsDB.scale or 0.85; end; d.scale=math.max(0.5,math.min(1.5,d.scale));
  d.mode=d.mode=="all" and "all" or "new"; A.ready=true;
 end
 local runtime=CreateFrame("Frame","ASRLootRuntime"); runtime:RegisterEvent("ADDON_LOADED"); runtime:RegisterEvent("CHAT_MSG_SYSTEM"); runtime:RegisterEvent("CHAT_MSG_LOOT");
@@ -142,6 +166,6 @@ SlashCmdList.ASRLOOT=function(msg)
  if not A.ready then return; end
  if msg=="all" or msg=="new" then A.SetMode(msg);
  elseif ASRLocale.languages[msg] then A.SetLanguage(msg);
- elseif msg=="hide" then A.SetEnabled(false);
- else A.SetEnabled(true); A.inspect=not A.inspect; A.Refresh(); end
+ elseif msg=="hide" then A.Close();
+ else if A.frame and A.frame:IsShown() then A.Close(); else A.Open(); end end
 end;

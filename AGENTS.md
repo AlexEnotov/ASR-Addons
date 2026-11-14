@@ -4,6 +4,13 @@ When creating or changing addon icons, read `docs/ICON-STYLE.md` and use the app
 
 ## Changelog and versions
 
+Tracker sizing uses a common 196-unit base width. Stats, Loot and the default
+Advisor modes occupy one unit; future wider panels may occupy multiple units,
+accounting for the visible docking gap when spanning adjacent panels. This is
+a shared sizing grid, not a requirement to make every addon equally wide.
+Use consistent border geometry and 1% scale controls. Preserve deliberate manual
+resizing where supported.
+
 Record substantial player-facing additions and fixes in `CHANGELOG.md` under
 `Unreleased`. Consolidate small layout, wording and iterative fixes into their
 parent feature instead of listing every development step. Git commits retain

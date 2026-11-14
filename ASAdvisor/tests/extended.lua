@@ -84,11 +84,11 @@ check(ASAdvisorDB.options.trackerMode=="detailed","tracker mode configurable");
 planner.settings.back.scripts.OnClick(planner.settings.back); A.ToggleUI();
 AZSCardsFrame:Hide(); AZS_RUN.ph="playing"; AZS_SPELLS={live.spells.auto_shot,live.spells.kill_shot,live.spells.steady_shot}; AZS_GEAR={g};
 ASAdvisorRuntime.scripts.OnUpdate(ASAdvisorRuntime,0.3);
-check(ASAdvisorTracker.rows[1]:IsShown() and ASAdvisorTracker:GetWidth()==280,"detailed tracker renders rows");
+check(ASAdvisorTracker.rows[1]:IsShown() and ASAdvisorTracker:GetWidth()==196,"detailed tracker uses standard width and renders rows");
 local hasItem=false; for _,r in ipairs(ASAdvisorTracker.rows) do if r:IsShown() and r.row and r.row.group=="amulet" then hasItem=true; end end
 check(hasItem,"detailed tracker includes jewelry");
 ASAdvisorTracker.mode.scripts.OnClick(ASAdvisorTracker.mode);
-check(ASAdvisorTracker.itemLabel:IsShown() and ASAdvisorTracker:GetWidth()==232,"compact tracker includes jewelry row");
+check(ASAdvisorTracker.itemLabel:IsShown() and ASAdvisorTracker:GetWidth()==196,"compact tracker includes jewelry row");
 check(ASAdvisorCardMark1.point[1]=="RIGHT" and ASAdvisorCardMark1.point[2]==AZSCard1.tag and ASAdvisorCardMark1.point[3]=="LEFT","card mark anchored before native NEW/rank tag");
 check(ASAdvisorRerollMark.target==AZSCardsReroll.text and ASAdvisorSkipMark.target==AZSCardsSkip.text,"action highlights follow native caption bounds");
 check(ASAdvisorCardMark1:GetParent()==ASAdvisorHints and ASAdvisorHints:GetParent()==UIParent and MockOnTop.ASAdvisorHints,"markers rendered on registered top-level overlay");

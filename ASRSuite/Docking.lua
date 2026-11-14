@@ -1,5 +1,5 @@
 local A=ASRSuite;
-local panels={}; local busy=false; local dragging; local elapsed=0; local SNAP=32; local GAP=2; local preview; local dragData;
+local panels={}; local busy=false; local dragging; local elapsed=0; local SNAP=32; local function Gap() return ASRSuiteDB and ASRSuiteDB.dockingGap or 4; end; local preview; local dragData;
 local function Links() return ASRSuiteDB and ASRSuiteDB.docking or {}; end
 local function Rect(frame)
  if not frame or not frame.GetLeft or not frame.GetTop then return; end
@@ -48,7 +48,7 @@ function A.ApplyDocking()
      local cv,rv=Visual(c),Visual(r); local ci,ri=c.insets,r.insets; local offset=link.offset or 0;
      if link.align=="start" then offset=0;
      elseif link.align=="end" then offset=(link.side=="top" or link.side=="bottom") and rv.width-cv.width or cv.height-rv.height; end
-     local gap=GAP; local point,relative,x,y;
+     local gap=Gap(); local point,relative,x,y;
      if link.side=="bottom" then point,relative,x,y="TOPLEFT","BOTTOMLEFT",offset+ri.left-ci.left,ri.bottom+ci.top-gap;
      elseif link.side=="top" then point,relative,x,y="BOTTOMLEFT","TOPLEFT",offset+ri.left-ci.left,gap-ri.top-ci.bottom;
      elseif link.side=="right" then point,relative,x,y="TOPLEFT","TOPRIGHT",gap-ri.right-ci.left,offset+ci.top-ri.top;
@@ -82,8 +82,8 @@ local function FindTarget(id,c)
      local horizontal=math.min(c.left+c.width,r.left+r.width)-math.max(c.left,r.left)>12;
      local vertical=math.min(c.top,r.top)-math.max(c.top-c.height,r.top-r.height)>12;
      local candidates={};
-     if horizontal then candidates[#candidates+1]={side="bottom",distance=math.abs(c.top-(r.top-r.height-GAP)),offset=c.left-r.left,ending=r.width-c.width}; candidates[#candidates+1]={side="top",distance=math.abs(c.top-c.height-r.top-GAP),offset=c.left-r.left,ending=r.width-c.width}; end
-     if vertical then candidates[#candidates+1]={side="right",distance=math.abs(c.left-r.left-r.width-GAP),offset=c.top-r.top,ending=c.height-r.height}; candidates[#candidates+1]={side="left",distance=math.abs(c.left+c.width-r.left+GAP),offset=c.top-r.top,ending=c.height-r.height}; end
+     if horizontal then candidates[#candidates+1]={side="bottom",distance=math.abs(c.top-(r.top-r.height-Gap())),offset=c.left-r.left,ending=r.width-c.width}; candidates[#candidates+1]={side="top",distance=math.abs(c.top-c.height-r.top-Gap()),offset=c.left-r.left,ending=r.width-c.width}; end
+     if vertical then candidates[#candidates+1]={side="right",distance=math.abs(c.left-r.left-r.width-Gap()),offset=c.top-r.top,ending=c.height-r.height}; candidates[#candidates+1]={side="left",distance=math.abs(c.left+c.width-r.left+Gap()),offset=c.top-r.top,ending=c.height-r.height}; end
      for _,candidate in ipairs(candidates) do
       if candidate.distance<=SNAP and (not best or candidate.distance<best.distance or candidate.distance==best.distance and parent<best.parent) then candidate.parent=parent; best=candidate; end
      end
@@ -102,10 +102,10 @@ local function Preview(best)
   A.dockPreview=preview;
  end
  preview:ClearAllPoints(); preview:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",r.left,r.top); preview:SetSize(r.width,r.height); preview.line:ClearAllPoints();
- if best.side=="bottom" then preview.line:SetSize(r.width,2); preview.line:SetPoint("BOTTOMLEFT",preview,"BOTTOMLEFT",0,-GAP);
- elseif best.side=="top" then preview.line:SetSize(r.width,2); preview.line:SetPoint("TOPLEFT",preview,"TOPLEFT",0,GAP);
- elseif best.side=="left" then preview.line:SetSize(2,r.height); preview.line:SetPoint("TOPLEFT",preview,"TOPLEFT",-GAP,0);
- else preview.line:SetSize(2,r.height); preview.line:SetPoint("TOPRIGHT",preview,"TOPRIGHT",GAP,0); end
+ if best.side=="bottom" then preview.line:SetSize(r.width,2); preview.line:SetPoint("BOTTOMLEFT",preview,"BOTTOMLEFT",0,-Gap());
+ elseif best.side=="top" then preview.line:SetSize(r.width,2); preview.line:SetPoint("TOPLEFT",preview,"TOPLEFT",0,Gap());
+ elseif best.side=="left" then preview.line:SetSize(2,r.height); preview.line:SetPoint("TOPLEFT",preview,"TOPLEFT",-Gap(),0);
+ else preview.line:SetSize(2,r.height); preview.line:SetPoint("TOPRIGHT",preview,"TOPRIGHT",Gap(),0); end
  preview.text:SetText(A.T("Отпусти — стыковка")); preview:Show();
  if AZS_SetOnTopOfScreens then AZS_SetOnTopOfScreens("ASRDockingPreview",true); end
  preview:SetFrameLevel(900);
@@ -123,10 +123,10 @@ local function PositionDrag()
  if best then
   local r=Visual(Rect(Ready(best.parent))); local cv=Visual(c); local ci=c.insets; local offset=best.offset;
   if math.abs(offset)<=SNAP then offset=0; elseif math.abs(offset-best.ending)<=SNAP then offset=best.ending; end
-  if best.side=="bottom" then left,top=r.left+offset-ci.left,r.top-r.height-GAP+ci.top;
-  elseif best.side=="top" then left,top=r.left+offset-ci.left,r.top+GAP+cv.height+ci.top;
-  elseif best.side=="right" then left,top=r.left+r.width+GAP-ci.left,r.top+offset+ci.top;
-  else left,top=r.left-GAP-cv.width-ci.left,r.top+offset+ci.top; end
+  if best.side=="bottom" then left,top=r.left+offset-ci.left,r.top-r.height-Gap()+ci.top;
+  elseif best.side=="top" then left,top=r.left+offset-ci.left,r.top+Gap()+cv.height+ci.top;
+  elseif best.side=="right" then left,top=r.left+r.width+Gap()-ci.left,r.top+offset+ci.top;
+  else left,top=r.left-Gap()-cv.width-ci.left,r.top+offset+ci.top; end
  end
  p.frame:ClearAllPoints(); p.frame:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",left/c.ratio,top/c.ratio); Preview(best); return best;
 end
@@ -173,6 +173,7 @@ function A.RegisterDockPanel(id,frame,save,available)
  panels[id]={frame=frame,save=save,available=available}; Bind(id,frame); A.ApplyDocking();
 end
 function A.InitDocking()
+ ASRSuiteDB.dockingGap=math.max(1,math.min(16,A.Number(ASRSuiteDB.dockingGap) or 4));
  if type(ASRSuiteDB.docking)~="table" then ASRSuiteDB.docking={}; end
  if type(ASRSuiteDB.dockingEnabled)~="boolean" then ASRSuiteDB.dockingEnabled=true; end
  for id,link in pairs(ASRSuiteDB.docking) do if type(id)~="string" or type(link)~="table" or type(link.parent)~="string" or link.parent==id or (link.offset~=nil and not A.Number(link.offset)) or string.sub(id,1,5)=="text:" or string.sub(link.parent,1,5)=="text:" then ASRSuiteDB.docking[id]=nil; end end

@@ -7,7 +7,7 @@ local function Refresh()
  if not panel then return; end
  for key,h in pairs(handles) do h.label:SetText(T(names[key][1],names[key][2])); end
  if A.testButton then A.testButton.text:SetText(T("Тест","Test")); A.doneButton.text:SetText(T("Готово","Done")); end
- panel.title:SetText(T("ASR / ТЕКСТ УРОНА","ASR / COMBAT TEXT")); panel.enabled.text:SetText(T("Модуль: ","Module: ")..(ASRCombatTextDB.enabled and T("Вкл.","On") or T("Выкл.","Off")));
+ panel.title:SetText((string.gsub(T("ASR / ТЕКСТ УРОНА","ASR / COMBAT TEXT"),"^ASR","|cff8cd123ASR|r",1))); panel.enabled.text:SetText(T("Модуль: ","Module: ")..(ASRCombatTextDB.enabled and T("Вкл.","On") or T("Выкл.","Off")));
  panel.mode.text:SetText(T("Расположение: ","Placement: ")..(ASRCombatTextDB.mode=="columns" and T("Колонки","Columns") or T("Над врагами","Above enemies")));
  kindButton.text:SetText(T("Тип: ","Type: ")..T(names[targets[index]][1],names[targets[index]][2]));
  custom.text:SetText(index==1 and T("Общие настройки","Shared settings") or (Editable() and "[x] " or "[ ] ")..T("Свои настройки","Custom settings"));

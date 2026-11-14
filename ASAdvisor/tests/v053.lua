@@ -9,10 +9,10 @@ ASAdvisorDB.active.HUNTER=nil; AZS_SPELLS={};
 for i=1,4 do AZS_SPELLS[i]={key=AZS_GEN.spells.HUNTER[i].key,rank=1,cdmax=1}; end
 AZSCardsFrame:Hide(); A.offer=false; AZS_RUN.ph="playing"; ASAdvisorDB.options.trackerMode="compact"; A.RefreshUI();
 local t=ASAdvisorTracker;
-check(t.brand.point[4]>=24 and -t.brand.point[5]>=23,"tracker branding clears the visible inner metal edge");
-check(t.builds.point[4]>=24 and -t.builds.point[5]>=23 and t.builds.point[4]+t.builds:GetWidth()<=t:GetWidth()-24,"build button is inside safe inner header bounds");
-check(-t.mode.point[5]>=23 and t.mode.point[4]+t.mode:GetWidth()<=t:GetWidth()-24,"mode button is inside safe inner header bounds");
-for _,icon in ipairs(t.icons) do if icon:IsShown() then check(-icon.point[5]>=58 and icon.point[4]>=24 and -icon.point[5]+icon:GetHeight()<=t:GetHeight()-24,"compact icon stays inside padded content"); end end
+check(t.brand.point[4]>=20 and -t.brand.point[5]>=23,"tracker branding clears the visible inner metal edge");
+check(t.builds.point[4]>=24 and -t.builds.point[5]>=23 and t.builds.point[4]+t.builds:GetWidth()<=t:GetWidth()-20,"build button is inside safe inner header bounds");
+check(-t.mode.point[5]>=23 and t.mode.point[4]+t.mode:GetWidth()<=t:GetWidth()-20,"mode button is inside safe inner header bounds");
+for _,icon in ipairs(t.icons) do if icon:IsShown() then check(-icon.point[5]>=58 and icon.point[4]>=20 and -icon.point[5]+icon:GetHeight()<=t:GetHeight()-24,"compact icon stays inside padded content"); end end
 local b=A.NewBuild("HUNTER"); b.name="Test shared build"; b.spells={{key="auto_shot",rank=0},{key="aimed_shot",rank=2,cd=0.9}}; b.items={"accuria","quick_strike","earthstrike","south_seas_kelp"}; b.description=string.rep("Длинное описание общего билда и порядка выбора. ",30);
 A.ToggleUI();
 check(p.brand.point[4]>=24 and -p.brand.point[5]>=28 and -p.credit.point[5]>=54,"main branding clears the same safe inner border");

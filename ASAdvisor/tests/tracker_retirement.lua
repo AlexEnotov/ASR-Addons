@@ -7,6 +7,8 @@ A.ObserveBanishCommand("AZSCMD","banish 1"); check(A.pendingBanish and not A.Run
 A.ConfirmBanish(); check(not A.RunBans().spells.aimed_shot,"unchanged charge count never confirms a rejected command");
 AZS_CARDS.bn=2; A.ConfirmBanish(); check(A.RunBans().spells.aimed_shot and not A.pendingBanish,"decreased count confirms actual banned spell");
 local record=A.RunBans();
+record.spells.aimed_shot=nil; A.recoveredRunBans={id="tracking-1",spells={aimed_shot=true}};
+check(A.RunBans().spells.aimed_shot and not A.recoveredRunBans,"verified recovery merges into the matching run journal");
 AZS_ZONE={run="reload-bootstrap"}; check(not A.RunBans().spells.aimed_shot,"transient zone has its own empty journal");
 AZS_ZONE={run="tracking-1",hub=0}; A.pendingBanish=nil;
 check(A.RunBans()==record and A.RunBans().spells.aimed_shot,"returning from reload bootstrap restores the original confirmed ban");

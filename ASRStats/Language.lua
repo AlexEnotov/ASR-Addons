@@ -48,7 +48,7 @@ function L.Bind(button,get,set,refresh)
      option:SetScript("OnClick",function() menu:Hide(); set(key); if refresh then refresh(); end end);
      option:EnableMouseWheel(true); option:SetScript("OnMouseWheel",function(self,delta) menu.offset=menu.offset-delta; Draw(); end);
     end
-    option:SetWidth(menu:GetWidth()); option.text:SetWidth(menu:GetWidth()-16); option:SetFrameStrata("FULLSCREEN_DIALOG"); option:SetFrameLevel(menu:GetFrameLevel()+2); option.text:SetText((get()==code and "• " or "")..L.languages[code]); option.text:SetTextColor(0.96,0.96,0.97,1);
+    option:SetWidth(menu:GetWidth()); option.text:SetWidth(menu:GetWidth()-16); option:SetFrameStrata("TOOLTIP"); option:SetFrameLevel(menu:GetFrameLevel()+2); option.text:SetText((get()==code and "• " or "")..L.languages[code]); option.text:SetTextColor(0.96,0.96,0.97,1);
     option:SetBackdropColor(get()==code and 0.22 or 0.1,get()==code and 0.25 or 0.11,get()==code and 0.29 or 0.13,1);
     if i>menu.offset and i<=menu.offset+visible then option:ClearAllPoints(); option:SetPoint("TOPLEFT",menu,"TOPLEFT",0,-(i-menu.offset-1)*26); option:Show(); else option:Hide(); end
    end
@@ -56,6 +56,6 @@ function L.Bind(button,get,set,refresh)
   menu:SetScript("OnMouseWheel",function(self,delta) self.offset=self.offset-delta; Draw(); end);
   local ratio=(button.GetEffectiveScale and button:GetEffectiveScale() or 1)/(UIParent.GetEffectiveScale and UIParent:GetEffectiveScale() or 1);
   menu:SetScale(ratio); menu:ClearAllPoints(); menu:SetPoint("TOPLEFT",button,"BOTTOMLEFT",0,-2); menu.mouseWasDown=IsMouseButtonDown and IsMouseButtonDown("LeftButton") or false; L.openMenu=menu; menu:Show();
-  if AZS_SetOnTopOfScreens then AZS_SetOnTopOfScreens("ASRLanguageMenu"..menu.serial,true); end; menu:SetFrameStrata("FULLSCREEN_DIALOG"); menu:SetFrameLevel(math.max(1000,button:GetFrameLevel()+20)); Draw();
+  if AZS_SetOnTopOfScreens then AZS_SetOnTopOfScreens("ASRLanguageMenu"..menu.serial,false); end; menu:SetFrameStrata("TOOLTIP"); menu:SetFrameLevel(math.max(1000,button:GetFrameLevel()+20)); Draw();
  end);
 end

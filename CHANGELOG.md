@@ -80,7 +80,8 @@ are summarized with the feature they improve rather than listed individually.
 
 - Simplify the shared language picker to full-width language tiles without an
   outer frame. Prevent the opening mouse press from dismissing the list, and
-  close other ASR language pickers when opening a new one.
+  close other ASR language pickers when opening a new one. Keep popup tiles on
+  the tooltip layer so fullscreen settings backgrounds cannot cover them.
 
 - Add complete settings export/import under General, including per-module
   preferences, panel positions/scales, docking links, Endless options and saved

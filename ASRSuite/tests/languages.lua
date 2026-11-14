@@ -6,6 +6,7 @@ check(A.T("Совместимость")=="Test compatibility" and A.T("Наст�
 local control=A.controls.language; A.settings:Show(); A.SelectSettingsPage("general"); control.scripts.OnClick(control);
 check(not control.localePopup.backdrop and control.localePopup:GetWidth()==control:GetWidth(),"picker contains only full-width language tiles without an outer frame");
 check(control.localePopup.options.ru.point[4]==0 and control.localePopup.options.ru.point[5]==0,"language tiles have no leftover outer padding");
+check(control.localePopup.strata=="TOOLTIP" and control.localePopup.options.en.strata=="TOOLTIP","picker tiles render above fullscreen settings backgrounds");
 check(control.localePopup.options["test-locale"]~=nil and ASRSuiteDB.language=="test-locale","opening a picker lists registered locales without changing the selection");
 control.localePopup.options.en.scripts.OnClick(control.localePopup.options.en); check(ASRSuiteDB.language=="en" and not control.localePopup:IsShown(),"choosing an item applies it and closes the list");
 for i=1,15 do ASRLocale.Register("test-language-"..i,"Test language "..i); end

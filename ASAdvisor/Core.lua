@@ -230,6 +230,14 @@ function A.RunBans()
   if type(saved)=="table" and type(saved.id)=="string" and not runs[saved.id] then
     runs[saved.id]=saved; order[#order+1]=saved.id;
   end
+  local recovery=A.recoveredRunBans;
+  if type(recovery)=="table" and type(recovery.id)=="string" and type(recovery.spells)=="table" then
+    local record=runs[recovery.id];
+    if not record then record={id=recovery.id,spells={}}; runs[recovery.id]=record; order[#order+1]=recovery.id; end
+    if type(record.spells)~="table" then record.spells={}; end
+    for key,confirmed in pairs(recovery.spells) do if type(key)=="string" and confirmed==true then record.spells[key]=true; end end
+    A.recoveredRunBans=nil;
+  end
   local id=AZS_ZONE and AZS_ZONE.run;
   if id and tostring(id)~="" then
     id=tostring(id);

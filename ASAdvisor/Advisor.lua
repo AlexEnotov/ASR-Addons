@@ -147,7 +147,7 @@ function A.ScoreItem(b,card,live,index)
     if row.group=="amulet" then
       for _,g in ipairs(live.gear or {}) do
         if g.slot=="amulet" then
-          local worn=A.ResolveItem(g);
+          local worn=A.ResolveItem(g,b.class);
           local wornPriority=worn and A.ItemPriority(b,worn.key,"amulet");
           if wornPriority and wornPriority<priority then r.reason=A.T("Амулет ниже надетого по приоритету"); return r; end
         end

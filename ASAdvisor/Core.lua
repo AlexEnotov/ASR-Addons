@@ -1,5 +1,5 @@
 -- Original implementation for Reborn's Lua 5.1 interface. No network or executable imports.
-ASAdvisor = { VERSION = "0.5.14", catalog = {}, byKey = {}, aliases = {}, ready = false };
+ASAdvisor = { VERSION = "0.5.15", catalog = {}, byKey = {}, aliases = {}, ready = false };
 local A = ASAdvisor;
 local function trim(s) return (string.gsub(s or "", "^%s*(.-)%s*$", "%1")); end
 A.Trim = trim;
@@ -66,6 +66,20 @@ function A.BuildCatalog()
       for _,name in ipairs({m.name,m.ru}) do
         A.itemNames[name]=A.itemNames[name] or {}; local found=false; for _,v in ipairs(A.itemNames[name]) do if v==r then found=true; end end; if not found then A.itemNames[name][#A.itemNames[name]+1]=r; end
         A.aliases[name]=r;
+      end
+      -- Live class amulets include the enhanced spell in their name, unlike
+      -- the base legend catalogue. Index both game and planner separators.
+      for _,token in ipairs(classes) do
+        local target=A.byKey[token..":"..m.spell];
+        for _,base in ipairs({m.name,m.ru,A.Local(m.name)}) do
+          for _,suffix in ipairs({target.english,target.name,ASAdvisorNamesRU and ASAdvisorNamesRU[target.english] or target.english}) do
+            for _,separator in ipairs({": "," · "}) do
+              local name=A.Plain(base..separator..suffix); local list=A.itemNames[name] or {}; A.itemNames[name]=list;
+              local found=false; for _,v in ipairs(list) do if v==r then found=true; end end;
+              if not found then list[#list+1]=r; end
+            end
+          end
+        end
       end
     end
   end

@@ -29,6 +29,7 @@ run(fs.readFileSync(path.join(__dirname,'v050.lua'),'utf8'),'v050');
 run(fs.readFileSync(path.join(__dirname,'v051.lua'),'utf8'),'v051');
 run(fs.readFileSync(path.join(__dirname,'v052.lua'),'utf8'),'v052');
 run(fs.readFileSync(path.join(__dirname,'item_priority.lua'),'utf8'),'item_priority');
+run(fs.readFileSync(path.join(__dirname,'class_amulets.lua'),'utf8'),'class_amulets');
 run(fs.readFileSync(path.join(__dirname,'stat_caps.lua'),'utf8'),'stat_caps');
 run(fs.readFileSync(path.join(__dirname,'v053.lua'),'utf8'),'v053');
 run(fs.readFileSync(path.join(__dirname,'duration.lua'),'utf8'),'duration');

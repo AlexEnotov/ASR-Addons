@@ -245,7 +245,7 @@ function A.WornForKey(b,key,live)
   if rule and rule.any then
     local assigned=A.AnyAssignments(b,live,rule.group); local g=assigned[key]; return g;
   end
-  for _,g in ipairs(live.gear or {}) do local r=A.ResolveItem(g); if r and r.key==key then return g; end end
+  for _,g in ipairs(live.gear or {}) do local r=A.ResolveItem(g,b.class); if r and r.key==key then return g; end end
 end
 local function accepts(rule,key)
   if not rule.options or #rule.options==0 then return true; end
@@ -263,7 +263,7 @@ function A.AnyAssignments(b,live,group)
     for _,key in ipairs(b.items) do local row=A.ItemInfo(b,key); if row and row.group==group then
       local p=b.itemRules and b.itemRules[key]; if p and p.any then local s=A.Copy(p); s.key=key; slots[#slots+1]=s; else explicit[key]=true; end
     end end
-    for _,g in ipairs(live.gear or {}) do local row=A.ResolveItem(g); if g.slot==group and not (row and explicit[row.key]) then candidates[#candidates+1]={key=row and row.key,value=g}; end end
+    for _,g in ipairs(live.gear or {}) do local row=A.ResolveItem(g,b.class); if g.slot==group and not (row and explicit[row.key]) then candidates[#candidates+1]={key=row and row.key,value=g}; end end
   end
   table.sort(candidates,function(x,y) return tostring(x.key)<tostring(y.key); end);
   local owner={}; local function assign(index,seen)
@@ -290,7 +290,7 @@ function A.MatchItem(b,row,live)
   if A.HasItem(b,row.key) then return row.key,A.ItemRule(b,row.key); end
   local assignments=A.AnyAssignments(b,live,row.group);
   for _,key in ipairs(b.items) do local p=b.itemRules and b.itemRules[key]; if p and p.any and p.group==row.group then
-    local g=assignments[key]; local owned=g and A.ResolveItem(g);
+    local g=assignments[key]; local owned=g and A.ResolveItem(g,b.class);
     if owned and owned.key==row.key then return key,p; end
   end end
   if row.group~="amulet" then
@@ -323,11 +323,11 @@ function A.TrackerEntries(b,live)
   for key in pairs(live.spells) do if not usedSpell[key] and A.byKey[token..":"..key] then spell(A.byKey[token..":"..key],key,false); end end
   for _,key in ipairs(b and b.items or {}) do
     local row=A.ItemInfo(b,key); local g=A.WornForKey(b,key,live);
-    if g then usedGear[g]=true; if row.any then row=A.ResolveItem(g) or {name=g.name,icon=g.icon,group=g.slot}; end end
+    if g then usedGear[g]=true; if row.any then row=A.ResolveItem(g,token) or {name=g.name,icon=g.icon,group=g.slot}; end end
     items[#items+1]={row=row,owned=g~=nil,detail=g and A.ShortItem(g) or "",planned=true};
   end
   for _,g in ipairs(live.gear) do if not usedGear[g] then
-    local row=A.ResolveItem(g) or {name=g.name,icon=g.icon,group=g.slot};
+    local row=A.ResolveItem(g,token) or {name=g.name,icon=g.icon,group=g.slot};
     items[#items+1]={row=row,owned=true,detail=A.ShortItem(g),planned=false};
   end end
   return spells,items;

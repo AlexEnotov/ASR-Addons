@@ -11,6 +11,8 @@ are summarized with the feature they improve rather than listed individually.
 - Track permanent armor and weapon acquisitions in two modes: new items only,
   or all drops including sold duplicates. Display icons, rarity, grouped repeat
   counts and the current run's total gold from duplicates.
+- Preserve loot during reload while run and zone snapshots arrive separately;
+  reset only after a changed server run ID is confirmed. Migrate old identities.
 - Save the current run across reloads and reconcile duplicate gold against the
   end summary, continuing correctly into Endless. Bound retained entries to 500
   while preserving totals. Ignore coins and unrelated rewards.

@@ -45,6 +45,13 @@ Advance(1); A.Duplicate("Шлем следопыта уже подобрано: 
 check(ASRLootDB.run.gold==120,"endless drops continue adding after a map-end reconciliation");
 A.Reconcile({dupgold=100}); check(ASRLootDB.run.gold==120,"repeated older end summaries cannot reduce or double-count gold");
 A.Reconcile({dupgold=120}); check(ASRLootDB.run.gold==120,"matching summary does not add the total twice");
+local retained=ASRLootDB.run; local zone,live=AZS_ZONE,AZS_RUN;
+retained.id=zone.run..":"..zone.zone..":"..zone.class; retained.serverId=nil;
+AZS_ZONE={}; AZS_RUN={ph="playing",t=0}; A.Init(); A.EnsureRun(); A.Refresh();
+check(ASRLootDB.run==retained and retained.duplicateCount==4 and retained.gold==120,"reload run snapshot before zone snapshot preserves existing loot");
+AZS_ZONE={run=zone.run}; A.EnsureRun(); check(ASRLootDB.run==retained,"partial zone snapshot preserves a migrated run identity");
+AZS_ZONE=zone; AZS_RUN=live; A.EnsureRun();
+check(ASRLootDB.run==retained and retained.serverId==zone.run,"complete snapshot adopts stable server identity without wiping loot");
 local old=ASRLootDB.run; A.Init(); check(ASRLootDB.run==old and ASRLootDB.mode=="all","reload initialization preserves run entries and selected mode");
 A.SetLanguage("ru"); check(A.frame.footer:GetText()=="Золото: 120","Russian interface follows the selected language");
 AZS_ZONE.run="r2"; AZS_RUN.t=0; A.EnsureRun(); check(ASRLootDB.run.gold==0 and #ASRLootDB.run.entries==0,"new run resets session counters");

@@ -65,13 +65,17 @@ end
 function A.InRun() local p=AZS_RUN and AZS_RUN.ph; return p=="playing" or p=="choosing" or p=="paused" or p=="ready" or p=="dead" or p=="victory"; end
 function A.EnsureRun()
  local r,z=AZS_RUN or {},AZS_ZONE or {}; local clock=A.Number(r.t) or 0;
- local id=tostring(z.run or "")..":"..tostring(z.zone or z.map or "")..":"..Class();
+ -- AZSRUN and AZSZONE can arrive separately after reload. Only a server run
+ -- identifier proves a new session; missing fields or a rewound clock do not.
+ local id=z.run and tostring(z.run)~="" and tostring(z.run) or nil;
  local run=ASRLootDB.run;
- if type(run)~="table" or run.id~=id or (clock+5<(run.lastTime or 0)) then
-  run={id=id,entries={},newCount=0,duplicateCount=0,gold=0,observedGold=0,lastTime=clock,panelOpen=ASRLootDB.openOnStart~=false}; ASRLootDB.run=run; A.offset=0; A.lastChat=nil;
+ local oldId=type(run)=="table" and (run.serverId or run.id) or nil;
+ local legacyMatch=id and type(run)=="table" and not run.serverId and type(run.id)=="string" and string.sub(run.id,1,#id+1)==id..":";
+ if type(run)~="table" or (id and oldId and oldId~=id and not legacyMatch) then
+  run={id=id,serverId=id,entries={},newCount=0,duplicateCount=0,gold=0,observedGold=0,lastTime=clock,panelOpen=ASRLootDB.openOnStart~=false}; ASRLootDB.run=run; A.offset=0; A.lastChat=nil;
  end
  if run.panelOpen==nil then run.panelOpen=ASRLootDB.openOnStart~=false; end
- run.lastTime=clock; return run;
+ if id then run.id=id; run.serverId=id; run.lastTime=clock; end; return run;
 end
 local function Add(run,name,kind)
  local e={name=name,key=A.Key(name),kind=kind,time=AZS_RUN and AZS_RUN.t or 0,wall=GetTime()};

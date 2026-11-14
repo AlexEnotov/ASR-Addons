@@ -14,7 +14,8 @@ are summarized with the feature they improve rather than listed individually.
 - Save the current run across reloads and reconcile duplicate gold against the
   end summary, continuing correctly into Endless. Bound retained entries to 500
   while preserving totals. Ignore coins and unrelated rewards.
-- Use a compact rarity-bordered icon grid with hover details. Open at run start
+- Use a compact rarity-bordered icon grid with hover details and a New/All
+  filter button in the tracker header. Open at run start
   by default, on a matching drop, or manually through Suite controls.
 - Add optional Suite settings, shared language and layout-editor integration;
   standalone controls remain available through `/asrloot`.

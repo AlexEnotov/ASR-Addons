@@ -35,6 +35,7 @@ function A.Refresh()
  panel:SetWidth(196); panel:SetScale(ASRLootDB.scale); panel:SetHeight(48+gridHeight+20+(ASRLootDB.mode=="all" and 18 or 0)); panel:Show();
  S.Panel(panel,ASRSuite and ASRSuiteDB and ASRSuiteDB.trackerOpacity or 0.9);
  panel.title:SetText("|cff8cd123ASR|r / "..A.T("Добыча"));
+ panel.mode.text:SetText(A.T(ASRLootDB.mode=="all" and "Все" or "Новые"));
  panel.empty:SetText(A.T("Пока нет предметов")); if count==0 then panel.empty:Show(); else panel.empty:Hide(); end
  A.offset=math.max(0,math.min(A.offset or 0,math.max(0,#rows-15)));
  for i,row in ipairs(panel.rows) do
@@ -60,9 +61,13 @@ function A.CreateUI()
  panel.asrDockInsets=IsAddOnLoaded and IsAddOnLoaded("AzerothSurvivorsUI") and {left=1.5,right=1.5,top=10,bottom=11} or nil; A.frame=panel; panel:SetSize(196,78); panel:SetScale(ASRLootDB.scale); panel:SetFrameStrata("HIGH"); panel:SetFrameLevel(10); panel:SetClampedToScreen(true);
  local p=ASRLootDB.position;
  if p then panel:SetPoint(p.point or "TOPLEFT",UIParent,p.relative or "TOPLEFT",tonumber(p.x) or 330,tonumber(p.y) or -80); else panel:SetPoint("TOPLEFT",UIParent,"TOPLEFT",330,-80); end
- panel.title=S.Label(panel,"",9,20,23,129); panel.close=S.Button(panel,"×",20,16,156,23,A.Close);
+ panel.title=S.Label(panel,"",9,20,23,80);
+ panel.mode=S.Button(panel,"",48,16,104,23,function() A.SetMode(ASRLootDB.mode=="all" and "new" or "all"); if ASRSuite and ASRSuite.ready then ASRSuite.DrawSettings(); end end);
+ panel.mode.text:SetFont(S.font,8,""); panel.mode.text:SetTextColor(140/255,209/255,35/255,1);
+ panel.mode:SetScript("OnEnter",function(self) GameTooltip:SetOwner(self,"ANCHOR_RIGHT"); GameTooltip:SetText(A.T("Переключить режим")); GameTooltip:AddLine(A.T(ASRLootDB.mode=="all" and "Только новые" or "Вся добыча")); GameTooltip:Show(); end);
+ panel.mode:SetScript("OnLeave",function() GameTooltip:Hide(); end); panel.close=S.Button(panel,"×",20,16,156,23,A.Close);
  panel.empty=S.Label(panel,"",9,20,48,156,S.muted); panel.rows={};
- panel.titleHit=CreateFrame("Frame",nil,panel); panel.titleHit:SetSize(132,20); panel.titleHit:SetPoint("TOPLEFT",panel,"TOPLEFT",20,-20); panel.titleHit:EnableMouse(true);
+ panel.titleHit=CreateFrame("Frame",nil,panel); panel.titleHit:SetSize(80,20); panel.titleHit:SetPoint("TOPLEFT",panel,"TOPLEFT",20,-20); panel.titleHit:EnableMouse(true);
  panel.titleHit:SetScript("OnEnter",function(self)
   local run=ASRLootDB.run or {}; GameTooltip:SetOwner(self,"ANCHOR_RIGHT"); GameTooltip:SetText("ASR Loot");
   GameTooltip:AddLine(A.T(ASRLootDB.mode=="all" and "Вся добыча" or "Только новые"));

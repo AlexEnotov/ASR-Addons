@@ -1,6 +1,6 @@
 ASRLoot={VERSION="0.1.0",ready=false}; local A=ASRLoot;
 local translations={
- ["Масштаб"]="Scale",["Добыча"]="Loot",["Только новые"]="New items only",["Вся добыча"]="All drops",["Новый"]="New",["Продано"]="Sold",["Неизвестная редкость"]="Unknown rarity",
+ ["Новые"]="New",["Все"]="All",["Переключить режим"]="Switch mode",["Масштаб"]="Scale",["Добыча"]="Loot",["Только новые"]="New items only",["Вся добыча"]="All drops",["Новый"]="New",["Продано"]="Sold",["Неизвестная редкость"]="Unknown rarity",
  ["Новые: %d · Дубликаты: %d"]="New: %d · Duplicates: %d",["Золото за дубликаты: %d"]="Duplicate gold: %d",["Пока нет предметов"]="No items yet",["Прокрутка колёсиком"]="Scroll with mouse wheel",
  ["Показать трекер добычи"]="Show loot tracker",["Скрыть обычные уведомления о добыче"]="Hide native loot notifications",["Режим трекера"]="Tracker mode",
  ["Модуль включён"]="Module enabled",["Открыть панель"]="Open panel",["Закрыть панель"]="Close panel",["Открывать в начале забега"]="Open at run start",["Открывать при выпадении предмета"]="Open when an item drops",

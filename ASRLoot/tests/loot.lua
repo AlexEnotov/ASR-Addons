@@ -10,6 +10,13 @@ A.SetAutoOpen("drop"); AZS_ZONE.run="visibility3"; A.EnsureRun(); A.Refresh(); c
 A.NewDrop({name="Visibility helm",rarity=3,icon="INV_Test"}); check(A.frame:IsShown(),"new drop opens the panel");
 A.Close(); A.Duplicate("Шлем следопыта уже подобрано: +20 золото.","CHAT_MSG_SYSTEM"); check(not A.frame:IsShown(),"filtered duplicate does not reopen new-only panel");
 A.SetAutoOpen("start"); AZS_ZONE.run="r1"; A.EnsureRun(); A.Refresh();
+check(A.frame.mode.text:GetText()=="New","header labels the new-only filter");
+local before=ASRLootDB.run; A.frame.mode.scripts.OnClick();
+check(ASRLootDB.mode=="all" and A.frame.mode.text:GetText()=="All" and ASRLootDB.run==before,"tracker button changes filter without clearing drops");
+A.frame.mode.scripts.OnClick(); check(ASRLootDB.mode=="new","tracker button switches back");
+A.SetLanguage("ru"); check(A.frame.mode.text:GetText()=="Новые","mode label follows Russian language");
+A.SetLanguage("en");
+check(A.frame.titleHit.point[4]+A.frame.titleHit:GetWidth()<=A.frame.mode.point[4] and A.frame.mode.point[4]+A.frame.mode:GetWidth()<A.frame.close.point[4],"header drag area and mode button do not overlap neighboring controls");
 local p=A.ParseDuplicate("Шлем следопыта уже подобрано: +20 золото.");
 check(p and p.name=="Шлем следопыта" and p.gold==20,"exact user screenshot is parsed");
 p=A.ParseDuplicate("|cffffffffTracker's Helm|r already collected: |cffffff00+1,200 gold.|r");

@@ -6,6 +6,7 @@ It tracks armor and weapons, not run jewelry or item stars. Suite is optional.
 - **New items only**: newly acquired equipment from native loot events.
 - **All drops**: also includes sold duplicates from the game's localized system
   messages, with a running duplicate-gold total for the current run.
+- The header shows **New** / **All**; click that button to change the filter.
 - A compact icon grid uses rarity borders; hover an icon for its name and rarity.
 - Opens at run start by default. Suite can select opening on a matching drop
   instead, or manual opening. Closing preserves background tracking.

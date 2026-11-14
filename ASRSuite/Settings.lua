@@ -110,7 +110,8 @@ local function RegisterBuiltins()
    Check(page,"Короткие числа",function() return A.EffectiveOptions(kind).short; end,function(v) A.CombatConfig().types[kind].values.short=v; end,333,function() return A.CombatConfig().types[kind].custom; end);
   end);
  end
- A.RegisterSettingsPage("stats","Stats",function(page)
+ A.RegisterSettingsPage("stats","Stats",function(root)
+  local page=CreateFrame("Frame",nil,root); page:SetSize(500,465); page:SetPoint("TOPLEFT",root,"TOPLEFT",0,0); root.statsOptions=page;
   L(page,"Stats",16,8,0,480);
   Check(page,"Модуль включён",function() return A.IsModuleEnabled("stats"); end,function(v) A.SetModuleEnabled("stats",v); end,30);
   local function Have() return ASRStatsDB and ASRStats; end
@@ -123,6 +124,33 @@ local function RegisterBuiltins()
   OverrideOpacity(page,"stats",254,"menu");
   Step(page,"Фон настроек",function() return ASRStatsDB and ASRStatsDB.menuOpacity or 0.95; end,function(v) ASRStatsDB.menuOpacity=v; end,284,0,1,0.05,Percent,function() return Have() and OwnOpacity("stats","menu"); end);
   B(page,"Изменить интерфейс",468,28,8,326,function() A.ToggleEdit(); end);
+  root.openStatsFields=B(page,"Показываемые параметры",468,28,8,362,function() page:Hide(); root.statsFields:Show(); A.DrawSettings(); end);
+  local chooser=CreateFrame("Frame",nil,root); chooser:SetSize(500,465); chooser:SetPoint("TOPLEFT",root,"TOPLEFT",0,0); root.statsFields=chooser; chooser:Hide();
+  L(chooser,"Показываемые параметры",16,8,0,340);
+  B(chooser,"Назад",92,25,384,0,function() chooser:Hide(); page:Show(); end);
+  Note(chooser,"Выбери характеристики для трекера. Пустые категории скрываются автоматически.",32);
+  local scroll=CreateFrame("ScrollFrame",nil,chooser); scroll:SetSize(448,344); scroll:SetPoint("TOPLEFT",chooser,"TOPLEFT",8,-76);
+  local list=CreateFrame("Frame",nil,scroll); list:SetWidth(448); scroll:SetScrollChild(list); chooser.rows={}; chooser.scroll=scroll;
+  local slider=CreateFrame("Slider",nil,chooser); slider:SetSize(14,344); slider:SetPoint("TOPLEFT",chooser,"TOPLEFT",478,-76); slider:SetOrientation("VERTICAL"); slider:SetValueStep(1);
+  slider:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8"}); slider:SetBackdropColor(0.12,0.13,0.15,1); slider:SetThumbTexture("Interface\\Buttons\\UI-ScrollBar-Knob"); slider:GetThumbTexture():SetSize(14,28);
+  local maximum=0; slider:SetScript("OnValueChanged",function(self,value) scroll:SetVerticalScroll(math.max(0,math.min(maximum,value or 0))); end);
+  local function Wheel(self,delta) slider:SetValue(math.max(0,math.min(maximum,scroll:GetVerticalScroll()-delta*48))); end
+  for _,f in ipairs({chooser,scroll,list,slider}) do f:EnableMouseWheel(true); f:SetScript("OnMouseWheel",Wheel); end
+  local function Text(def,i,j) return ASRLocale.Text("stats",ASRSuiteDB.language,def[i],def[j]); end
+  local y=0;
+  for _,group in ipairs(ASRStats and ASRStats.sections or {}) do
+   local heading=S.Label(list,"",11,0,y,440,group[3]); heading:SetHeight(18); records[#records+1]=function() heading:SetText(Text(group,1,2)); end; y=y+22;
+   for _,definition in ipairs(group[4]) do
+    local row=CreateFrame("CheckButton",nil,list,"UICheckButtonTemplate"); row:SetSize(24,24); row:SetPoint("TOPLEFT",list,"TOPLEFT",0,-y); row.label=S.Label(row,"",11,30,3,408); row:EnableMouseWheel(true); row:SetScript("OnMouseWheel",Wheel);
+    row:SetScript("OnClick",function() ASRStats.SetStatShown(definition,not ASRStats.IsStatShown(definition)); A.DrawSettings(); end);
+    records[#records+1]=function() row:SetChecked(ASRStats.IsStatShown(definition)); row.label:SetText(Text(definition,1,2)); end;
+    chooser.rows[ASRStats.StatKey(definition)]=row; y=y+24;
+   end
+   y=y+8;
+  end
+  list:SetHeight(y); maximum=math.max(0,y-344); slider:SetMinMaxValues(0,maximum); slider:SetValue(0);
+  chooser.all=B(chooser,"Включить все",226,26,8,433,function() ASRStats.SetAllStatsShown(true); A.DrawSettings(); end);
+  chooser.none=B(chooser,"Выключить все",226,26,250,433,function() ASRStats.SetAllStatsShown(false); A.DrawSettings(); end);
  end);
  A.RegisterSettingsPage("builder","Билдер",function(page)
   L(page,"Билдер",16,8,0,480);

@@ -53,4 +53,15 @@ scrolling.set(100000); check(scrolling.frame:GetVerticalScroll()==scrolling.maxi
 check(A.compatibilityGroups.combat.frame:GetHeight()<=60,"addon section is compact with details in tooltips");
 local overlay=CreateFrame("Frame",nil,A.settings); overlay.asrOverlay=true; ASRStyle.SyncChildren(A.settings);
 check(overlay.strata=="TOOLTIP" and overlay:GetFrameLevel()>=1000,"synchronizing window controls preserves tooltip overlays above nested scrolling rows"); overlay:Hide();
+
+
+local statsPage=A.pages.stats; A.SelectSettingsPage("stats"); statsPage.openStatsFields.scripts.OnClick();
+check(statsPage.statsFields:IsShown() and not statsPage.statsOptions:IsShown(),"stats picker replaces content without modifying navigation");
+local chooser=statsPage.statsFields; local selected=ASRStats.IsStatShown("crit"); chooser.rows.crit.scripts.OnClick();
+check(ASRStats.IsStatShown("crit")==not selected and chooser.rows.crit:GetChecked()==not selected,"stat checkbox updates persisted visibility immediately");
+chooser.none.scripts.OnClick(); check(not ASRStats.IsStatShown("crit") and not ASRStats.IsStatShown("pet"),"disable all reaches stats beyond the first screen");
+chooser.scroll.scripts.OnMouseWheel(chooser.scroll,-20); check(chooser.scroll:GetVerticalScroll()>0,"stat list scrolls to later categories");
+A.SetLanguage("en"); check(chooser.rows.crit.label:GetText()=="Crit","stat picker labels follow English language");
+chooser.all.scripts.OnClick(); check(ASRStats.IsStatShown("crit") and ASRStats.IsStatShown("pet"),"enable all restores every stat"); A.SetLanguage("ru");
+
 print("Passed "..count.." module and interface controls checks");

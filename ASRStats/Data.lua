@@ -39,6 +39,20 @@ A.sections={
  {"Ближний бой","Melee","auto",nil,"pct",0},
  {"Урон питомцев","Pet damage","pet",nil,"pct",0}}},
 };
+function A.StatKey(row) return type(row)=="table" and (row[3] or row[4]) or row; end
+function A.IsStatShown(row)
+ local hidden=ASRStatsDB and ASRStatsDB.hiddenStats;
+ return not hidden or hidden[A.StatKey(row)]~=true;
+end
+function A.SetStatShown(row,on)
+ ASRStatsDB.hiddenStats=ASRStatsDB.hiddenStats or {};
+ ASRStatsDB.hiddenStats[A.StatKey(row)]=not on or nil;
+ if A.Refresh then A.Refresh(); end
+end
+function A.SetAllStatsShown(on)
+ for _,group in ipairs(A.sections) do for _,row in ipairs(group[4]) do ASRStatsDB.hiddenStats[A.StatKey(row)]=not on or nil; end end
+ if A.Refresh then A.Refresh(); end
+end
 function A.Number(value)
  local n=tonumber(value); if n and n==n and math.abs(n)<1e12 then return n; end
 end

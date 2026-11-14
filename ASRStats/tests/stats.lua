@@ -48,4 +48,14 @@ check(shield:IsShown() and shield.value:GetText()=="328","shield reads current A
 check(shield.point[5]==hp.point[5]-11,"shield row is immediately under health");
 check(A.Format(bonus.definition,A.Value(bonus.definition,{shd=0.35}))=="+35%" and bonus.definition[1]=="Урон под щитом","conditional damage is named clearly and formatted as a bonus");
 AZS_RUN.sh=0; A.Refresh(); check(not shield:IsShown(),"zero shield follows hide-zero preference");
+ASRStatsDB.hideZeros=false; AZS_RUN={ph="playing",sh=10}; ASRStatsDB.hidden=false;
+A.Refresh(); local tracker=ASRStatsPanel; local beforeHeight=tracker:GetHeight();
+local damage; for _,row in ipairs(tracker.rows) do if A.StatKey(row.definition)=="dmg" then damage=row; end end;
+A.SetStatShown("dmg",false); check(not damage:IsShown() and tracker:GetHeight()<beforeHeight,"disabled stat removes its row and reserved vertical space");
+ASRStatsDB.hideZeros=true; A.Refresh(); check(not damage:IsShown(),"hide zeros does not reenable an explicitly disabled stat");
+A.SetAllStatsShown(false); check(not tracker.headings[1]:IsShown() and tracker.empty:GetText()=="Нет выбранных параметров","disabling every stat hides empty categories and explains empty tracker");
+A.SetStatShown(A.sections[3][4][3],true); check(A.IsStatShown("pick") and not A.IsStatShown("dmg"),"fallback-only pickup field has a stable independent saved key");
+local saved=ASRStatsDB.hiddenStats; ASRStatsPanel=nil; ASRStatsRuntime.scripts.OnEvent(ASRStatsRuntime,"ADDON_LOADED","ASRStats");
+check(ASRStatsDB.hiddenStats==saved and not A.IsStatShown("dmg"),"initialization preserves saved per-stat choices");
+A.SetAllStatsShown(true); check(next(ASRStatsDB.hiddenStats)==nil,"enable all restores current and future defaults");
 print("Passed "..count.." ASR Stats checks and Lua 5.1 syntax");

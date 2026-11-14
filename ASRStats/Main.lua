@@ -50,12 +50,13 @@ function A.Refresh()
   end
   menu.reset.text:SetText(L("Сбросить положение","Reset position")); menu.close.text:SetText(L("Готово","Done")); height=375;
  else
-  local primary=received and raw or AZS_STATS; local fallback=AZS_RUNSTATS; if not InRun() then primary=nil; fallback=nil; end; local y=45; local shown=0;
+  local primary=received and raw or AZS_STATS; local fallback=AZS_RUNSTATS; if not InRun() then primary=nil; fallback=nil; end; local y=45; local shown=0; local selected=0;
   for gi,group in ipairs(A.sections) do
    local start=y; local groupShown=0;
    for _,row in ipairs(panel.groupRows[gi]) do
+    local enabled=A.IsStatShown(row.definition); if enabled then selected=selected+1; end
     local v=A.Value(row.definition,primary,fallback,InRun() and AZS_RUN or nil);
-    if (v~=nil and (not ASRStatsDB.hideZeros or math.abs(v)>0.00001)) or (not ASRStatsDB.hideZeros and (primary or fallback)) then
+    if enabled and ((v~=nil and (not ASRStatsDB.hideZeros or math.abs(v)>0.00001)) or (not ASRStatsDB.hideZeros and (primary or fallback))) then
      if groupShown==0 then y=y+14; end
      row:ClearAllPoints(); row:SetPoint("TOPLEFT",panel,"TOPLEFT",20,-y);
      row.name:SetText(L(row.definition[1],row.definition[2])); row.value:SetText(A.Format(row.definition,v,ASRStatsDB.language~="ru")); row:Show();
@@ -64,7 +65,7 @@ function A.Refresh()
    end
    if groupShown>0 then local head=panel.headings[gi]; head:ClearAllPoints(); head:SetPoint("TOPLEFT",panel,"TOPLEFT",20,-start); head:SetText(L(group[1],group[2])); head:Show(); y=y+3; end
   end
-  if shown==0 then panel.empty:SetText(L("Ожидание характеристик от игры…","Waiting for current game stats…")); panel.empty:Show(); y=79; end
+  if shown==0 then panel.empty:SetText(selected==0 and L("Нет выбранных параметров","No stats selected") or L("Ожидание характеристик от игры…","Waiting for current game stats…")); panel.empty:Show(); y=79; end
   height=y+20;
  end
  panel:SetHeight(height); panel:SetScale(math.min(config and math.max(0.85,ASRStatsDB.scale) or ASRStatsDB.scale,(UIParent:GetHeight()-24)/height,(UIParent:GetWidth()-24)/panel:GetWidth()));
@@ -119,7 +120,7 @@ clock:SetScript("OnEvent",function(self,event,name)
   ASRStatsDB.language=ASRLocale.Normalize(ASRStatsDB.language);
   if not ASRStatsDB.compactLayout then if ASRStatsDB.scale==0.9 then ASRStatsDB.scale=0.7; end; ASRStatsDB.compactLayout=true; end
   ASRStatsDB.scale=math.max(0.5,math.min(1.5,A.Number(ASRStatsDB.scale) or 0.9)); ASRStatsDB.opacity=math.max(0,math.min(1,A.Number(ASRStatsDB.opacity) or 0.9)); ASRStatsDB.menuOpacity=math.max(0,math.min(1,A.Number(ASRStatsDB.menuOpacity) or 0.95));
-  ASRStatsDB.onlyRun=nil;
+  ASRStatsDB.onlyRun=nil; if type(ASRStatsDB.hiddenStats)~="table" then ASRStatsDB.hiddenStats={}; end;
   Build(); ready=true;
   AZS.On("AZS",function(msg) raw={}; for key,value in string.gmatch(msg or "","(%w+)=([^;]*)") do raw[key]=A.Number(value); end; received=true; A.Refresh(); end);
   for _,prefix in ipairs({"AZSSTATS","AZSRUN","AZSEND","AZSZONE"}) do AZS.On(prefix,function() A.Refresh(); end); end

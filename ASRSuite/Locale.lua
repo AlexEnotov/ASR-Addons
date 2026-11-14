@@ -1,5 +1,8 @@
 local A=ASRSuite;
 local EN={
+ ["Назад"]="Back",
+ ["Показываемые параметры"]="Visible stats",["Включить все"]="Enable all",["Выключить все"]="Disable all",
+ ["Выбери характеристики для трекера. Пустые категории скрываются автоматически."]="Choose which stats appear in the tracker. Empty categories are hidden automatically.",
  ["Отпусти — стыковка"]="Release to dock",
  ["Магнитная стыковка панелей"]="Magnetic panel docking",
  ["Разъединить панели"]="Undock panels",

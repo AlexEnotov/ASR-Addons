@@ -42,6 +42,12 @@ are summarized with the feature they improve rather than listed individually.
 - Improve tooltip readability with class and damage-school colors, distinct
   base/current headings, measured text wrapping and numeric units kept together.
 
+### ASR Stats
+
+- Choose individual tracker stats in Suite, grouped by category, with a scrollable
+  list and enable/disable-all controls. Preserve choices across runs and reloads;
+  collapse empty categories and apply hide-zero filtering independently.
+
 ### ASR Combat Text
 
 - Abbreviate billions and trillions instead of displaying large multiples of

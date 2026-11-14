@@ -1,4 +1,4 @@
-# ASR Combat Text 0.6.0 — by AlexEnotov
+# ASR Combat Text 0.6.1 — by AlexEnotov
 
 Самостоятельные плавающие числа урона для Azeroth Survivors Reborn. Не требует ASR Suite, Stats или билдера. Требует игровые AzerothSurvivors и AzerothSurvivorsAPI.
 

@@ -7,7 +7,7 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 $repoRoot = Split-Path $PSScriptRoot -Parent
 $output = if ([IO.Path]::IsPathRooted($OutputDirectory)) { $OutputDirectory } else { Join-Path $repoRoot $OutputDirectory }
 [IO.Directory]::CreateDirectory($output) | Out-Null
-$modules = [ordered]@{ ASAdvisor = 'ASRAdvisor'; ASRStats = 'ASRStats'; ASRCombatText = 'ASRCombatText'; ASRSuite = 'ASRSuite'; ASRLoot = 'ASRLoot' }
+$modules = [ordered]@{ ASAdvisor = 'ASRAdvisor'; ASRStats = 'ASRStats'; ASRCombatText = 'ASRCombatText'; ASRSuite = 'ASRSuite'; ASRLoot = 'ASRLoot'; ASREndless = 'ASREndless' }
 $hashes = @()
 foreach ($folder in $modules.Keys) {
     $source = Join-Path $repoRoot $folder

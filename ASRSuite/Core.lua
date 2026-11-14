@@ -1,4 +1,4 @@
-ASRSuite={VERSION="0.6.0",ready=false}; local A=ASRSuite;
+ASRSuite={VERSION="0.6.1",ready=false}; local A=ASRSuite;
 local defaults={enabled=true,mode="columns",fontSize=16,lifetime=1.6,rise=85,merge=0.35,spacing=0,icons=true,periodic=true,heals=true,taken=true,short=true,minimapAngle=220,opacity=0.95};
 A.lanes={"normal","critical","heal","taken"};
 A.positions={normal={x=-190,y=25},critical={x=190,y=25},heal={x=-100,y=-125},taken={x=100,y=-125}};
@@ -6,6 +6,12 @@ function A.Number(v) local n=tonumber(v); if n and n==n and math.abs(n)<1e12 the
 function A.InRun() local ph=AZS_RUN and AZS_RUN.ph; return ph=="playing" or ph=="ready" or ph=="choosing" or ph=="dead"; end
 function A.Init()
  if type(ASRSuiteDB)~="table" then ASRSuiteDB={}; end
+ -- Updating Suite without installing Endless must release the old embedded HUD.
+ if not ASREndless and ASRSuiteDB.endlessHud then
+  local owner=AZS_API_HUD and AZS_API_HUD.clock;
+  if ASRSuiteDB.endlessHud.previous and (owner==nil or owner=="ASRSuite") and AZS_SetHudShown then AZS_SetHudShown("clock",true); end
+  ASRSuiteDB.endlessHud=nil;
+ end
  A.hadLegacyCombat=ASRSuiteDB.fontSize~=nil or ASRSuiteDB.positions~=nil or ASRSuiteDB.types~=nil;
  for k,v in pairs(defaults) do if type(ASRSuiteDB[k])~=type(v) then ASRSuiteDB[k]=v; end end
  if A.CombatConfig().mode~="columns" and A.CombatConfig().mode~="enemies" then A.CombatConfig().mode="columns"; end
@@ -43,14 +49,13 @@ end
 local clock=CreateFrame("Frame","ASRSuiteRuntime"); clock:RegisterEvent("ADDON_LOADED"); clock:RegisterEvent("PLAYER_ENTERING_WORLD");
 clock:SetScript("OnEvent",function(self,event,name)
  if event=="ADDON_LOADED" and name=="ASRSuite" then
-  A.Init(); A.CreateCombat(); A.CreateSources(); A.CreateUI(); A.InitEndless(); A.InitDocking(); if A.HasCombat() then if not A.SelectDisplaySource("combat",ASRSuiteDB.sources.combat) then A.Enabled(false); end end
+  A.Init(); A.CreateCombat(); A.CreateSources(); A.CreateUI(); A.InitDocking(); if A.HasCombat() then if not A.SelectDisplaySource("combat",ASRSuiteDB.sources.combat) then A.Enabled(false); end end
   AZS.On("AZSEND",function() A.ClearCombat(); end); AZS.On("AZSZONE",function() A.ClearCombat(); end);
  elseif event=="PLAYER_ENTERING_WORLD" and A.ready then A.ApplyCombat(); end
 end);
 local elapsed=0;
 clock:SetScript("OnUpdate",function(self,dt)
  if not A.ready then return; end
- if A.UpdateEndless then A.UpdateEndless(dt); end
  if A.UpdateDocking then A.UpdateDocking(dt); end
  -- ASR Combat Text owns its own runtime, even without the suite.
  if A.editing then for _,frame in pairs(A.handles or {}) do if frame.moving and IsMouseButtonDown and not IsMouseButtonDown("LeftButton") then A.StopDrag(frame); end end end

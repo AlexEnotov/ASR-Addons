@@ -1,4 +1,4 @@
-# ASR Suite 0.6.0 — by AlexEnotov
+# ASR Suite 0.6.1 — by AlexEnotov
 
 Необязательный общий центр настроек ASR. Собственных боевых чисел больше не содержит: это отдельный ASR Combat Text.
 
@@ -42,3 +42,10 @@ RegisterSettingsPage(id,title,build,draw,parent) — страница модул
 Код включает настройки установленных модулей ASR, их масштабы, прозрачность, выбранные статы, положения панелей, магнитную стыковку, настройки Endless, библиотеку билдов и выбранные билды. Импорт заменяет настройки и билды из кода; перед переносом можно сохранить текущий экспорт. Для полного импорта должны быть установлены все включённые в код аддоны.
 
 Статистика текущего забега, добыча, фактические баны и данные восстановления штатного интерфейса не переносятся и сохраняются у получателя. Повреждённый или несовместимый код отклоняется до применения. Импорт не исполняет код Lua.
+
+## Standalone Endless (0.6.1)
+
+Endless now requires the separate ASREndless addon. Its settings still appear in
+Suite when installed. Install both updated packages to migrate old visibility,
+position and run progress automatically, or use the combined ZIP. Suite alone
+no longer includes the tracker.

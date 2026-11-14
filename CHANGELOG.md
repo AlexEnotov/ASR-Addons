@@ -8,6 +8,16 @@ are summarized with the feature they improve rather than listed individually.
 
 No pending changes.
 
+## v0.6.1 — 2026-11-15
+
+- Extract ASR Endless from Suite into an independently installable addon with
+  its own settings window, enable/disable commands, language and movement lock.
+- Keep optional Suite settings, shared layout editing and full settings transfer.
+  Migrate the embedded tracker visibility, position and run state once; support
+  old settings profile codes and restore the native HUD when Suite is used alone.
+- Ship six independent addon ZIPs plus an all-in-one ZIP. No changes to the
+  other modules' gameplay behavior.
+
 ## v0.6.0 — 2026-11-15
 
 ### ASR Loot — new standalone addon

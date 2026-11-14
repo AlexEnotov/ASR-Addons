@@ -1,4 +1,4 @@
-ASRCombatText={VERSION="0.6.0",ready=false}; local A=ASRCombatText;
+ASRCombatText={VERSION="0.6.1",ready=false}; local A=ASRCombatText;
 A.lanes={"normal","critical","heal","taken"}; A.typeKeys={"normal","critical","heal","taken","periodic"};
 A.positions={normal={x=-190,y=25},critical={x=190,y=25},heal={x=-100,y=-125},taken={x=100,y=-125}};
 local defaults={enabled=true,mode="columns",fontSize=16,lifetime=1.6,rise=85,merge=0.35,spacing=0,icons=true,periodic=true,heals=true,taken=true,short=true,combatOpacity=1,language="en",minimapAngle=250};

@@ -2,10 +2,10 @@
 ## Title: |cff8cd123ASR|r Suite
 ## Author: AlexEnotov
 ## X-License: GPL-3.0-only
-## Version: 0.6.0
-## Notes: Shared ASR settings, interface editor and Endless tracker. /asrhub
+## Version: 0.6.1
+## Notes: Shared ASR settings, interface editor. /asrhub
 ## Dependencies: AzerothSurvivors, AzerothSurvivorsAPI
-## OptionalDeps: AzerothSurvivorsUI, ASRStats, ASAdvisor, ASRCombatText, ASRLoot, SurvivorUI
+## OptionalDeps: AzerothSurvivorsUI, ASRStats, ASAdvisor, ASRCombatText, ASRLoot, ASREndless, SurvivorUI
 ## SavedVariables: ASRSuiteDB
 Language.lua
 Style.lua
@@ -15,8 +15,6 @@ Profiles.lua
 Integration.lua
 Docking.lua
 Locale.lua
-WorldNames.lua
-Endless.lua
 Transfer.lua
 Settings.lua
 UI.lua

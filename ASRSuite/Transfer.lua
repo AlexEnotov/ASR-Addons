@@ -1,7 +1,7 @@
 local A=ASRSuite;
 local LIMIT=2000000;
-local specs={suite="ASRSuiteDB",stats="ASRStatsDB",combat="ASRCombatTextDB",loot="ASRLootDB"};
-local excluded={suite={endlessState=true,endlessHud=true},combat={nativeDamage=true,previousSurvivorMode=true},loot={run=true,items=true,nativeLoot=true},stats={}};
+local specs={suite="ASRSuiteDB",stats="ASRStatsDB",combat="ASRCombatTextDB",loot="ASRLootDB",endless="ASREndlessDB"};
+local excluded={suite={endlessState=true,endlessHud=true},combat={nativeDamage=true,previousSurvivorMode=true},loot={run=true,items=true,nativeLoot=true},stats={},endless={endlessState=true,endlessHud=true,migratedSuite=true}};
 local function Copy(value,omit)
  if type(value)~="table" then return value; end
  local out={}; for k,v in pairs(value) do if not (omit and omit[k]) then out[k]=Copy(v); end end; return out;
@@ -126,6 +126,7 @@ function A.ImportSettings(text)
   end
  end
  for global,value in pairs(replacements) do _G[global]=value; end
+ if not data.endless and data.suite and data.suite.endlessEnabled~=nil and ASREndlessDB then for _,key in ipairs({"endlessEnabled","endlessPosition"}) do ASREndlessDB[key]=Copy(data.suite[key]); end end
  return true;
 end
 function A.CreateSettingsTransfer(parent,close)

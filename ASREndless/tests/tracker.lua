@@ -1,4 +1,4 @@
-local A=ASRSuite; local checks=0;
+local A=ASREndless; local checks=0;
 local function check(ok,name) assert(ok,name); checks=checks+1; end
 local schedule={}; for i,name in ipairs({"Хоггер","Матушка Клык","Рахк'Зор","Мистер Смайт","Эдвин Ван Клиф"}) do schedule[i]={index=i,name=name,at=i*180,state="dead",final=i==5 and 1 or 0}; end
 local zone={run="azs:r123",map=1,zname="Элвиннский лес"};
@@ -37,9 +37,9 @@ check(A.EndlessStep({t=20,endless=1},zone,{}, {})==nil,"missing schedule falls b
 
 local shown=true; local calls={}; AZS_API_HUD={};
 function AZS_IsHudShown(part) return shown; end
-function AZS_SetHudShown(part,on) check(part=="clock","only tracker/clock HUD is changed"); shown=on; AZS_API_HUD.clock=not on and "ASRSuite" or nil; calls[#calls+1]=on; end
+function AZS_SetHudShown(part,on) check(part=="clock","only tracker/clock HUD is changed"); shown=on; AZS_API_HUD.clock=not on and "ASREndless" or nil; calls[#calls+1]=on; end
 AZS_RUN={t=900,bk=11,nb=85,endless=1,ph="playing",kills=36068,lvl=59}; AZS_ZONE=zone; AZS_SCHEDULE=schedule; AZS_UNITS={};
-ASRSuiteDB.endlessEnabled=true; ASRSuiteDB.endlessState=nil; A.SetLanguage("en");
+ASREndlessDB.endlessEnabled=true; ASREndlessDB.endlessState=nil; A.SetLanguage("en");
 A.UpdateEndless(0,true);
 check(A.endlessFrame:IsShown() and not shown,"endless tracker atomically replaces native tracker");
 check(A.endlessFrame.rows[2].status:GetText()=="1:25" and A.endlessFrame.rows[2].status.justifyH=="RIGHT","next boss displays countdown in the right status column");
@@ -68,24 +68,24 @@ A.SetLanguage("en"); check(A.EndlessDifficulty({difficulty="Героически
 local oldNative,oldCatalog=AZS_L,AZS_GEN;
 AZS_L={Hogger="Hogger-fr"}; AZS_GEN={zones={{name="Elwynn Forest",bosses={{name="Hogger"}}}}};
 check(A.EndlessName("Hogger-fr")=="Hogger","native catalog resolves names received in another game language");
-ASRLocale.RegisterTranslations("world","test-locale",{Hogger="Test Hogger"}); A.SetLanguage("test-locale");
+ASRLocale.Register("test-locale","Test"); ASRLocale.RegisterTranslations("world","test-locale",{Hogger="Test Hogger"}); A.SetLanguage("test-locale");
 check(A.EndlessName("Hogger-fr")=="Test Hogger","world-name translations support additional registered languages");
 AZS_L,AZS_GEN=oldNative,oldCatalog; A.SetLanguage("ru");
-check(A.controls.endlessEnabled~=nil,"Endless section contains a visibility checkbox");
-A.controls.endlessEnabled.scripts.OnClick();
-check(not A.endlessFrame:IsShown() and shown and ASRSuiteDB.endlessEnabled==false,"settings checkbox restores native HUD immediately");
-A.controls.endlessEnabled.scripts.OnClick(); check(A.endlessFrame:IsShown() and not shown,"settings checkbox enables replacement again");
+check(A.settings.enabled~=nil,"Endless section contains a visibility checkbox");
+A.settings.enabled.scripts.OnClick();
+check(not A.endlessFrame:IsShown() and shown and ASREndlessDB.endlessEnabled==false,"settings checkbox restores native HUD immediately");
+A.settings.enabled.scripts.OnClick(); check(A.endlessFrame:IsShown() and not shown,"settings checkbox enables replacement again");
 AZS_RUN.ph="paused"; A.UpdateEndless(0,true); check(A.endlessFrame:IsShown(),"pause retains endless tracker");
 AZS_RUN.ph="dead"; A.UpdateEndless(0,true); check(A.endlessFrame:IsShown(),"death screen retains run summary until exit");
 AZS_RUN={ph="ready",endless=0}; A.UpdateEndless(0,true);
-check(not A.endlessFrame:IsShown() and shown and not ASRSuiteDB.endlessState,"leaving endless restores HUD and clears run state");
+check(not A.endlessFrame:IsShown() and shown and not ASREndlessDB.endlessState,"leaving endless restores HUD and clears run state");
 shown=false; AZS_API_HUD.clock="OtherAddon";
 AZS_RUN={t=900,bk=11,nb=85,endless=1,ph="playing"}; A.UpdateEndless(0,true);
-ASRSuiteDB.endlessEnabled=false; A.UpdateEndless(0,true);
+ASREndlessDB.endlessEnabled=false; A.UpdateEndless(0,true);
 check(not shown and AZS_API_HUD.clock=="OtherAddon","pre-existing hidden clock is not enabled by cleanup");
 -- Reload may leave API ownership in saved variables; a non-endless load must release it.
-ASRSuiteDB.endlessHud={previous=true}; AZS_API_HUD.clock="ASRSuite"; AZS_RUN={}; A.UpdateEndless(0,true);
-check(shown and ASRSuiteDB.endlessHud==nil,"reload outside endless releases persisted HUD suppression");
+ASREndlessDB.endlessHud={previous=true}; AZS_API_HUD.clock="ASREndless"; AZS_RUN={}; A.UpdateEndless(0,true);
+check(shown and ASREndlessDB.endlessHud==nil,"reload outside endless releases persisted HUD suppression");
 local displayTime=100; function AZS_GetRunTime() return displayTime; end
 local function clockModel() return {time=100,nextIn=10,nextAt=110,interval=10,progress=0}; end
 local last=11;
@@ -97,5 +97,5 @@ displayTime=105; local paused=A.EndlessDisplayClock(clockModel()); local pausedA
 check(paused.nextIn==pausedAgain.nextIn and paused.progress==0.5,"frozen game clock freezes the countdown and progress bar");
 check(A.EndlessDisplayClock({time=100}).nextIn==nil,"missing server countdown is never invented");
 AZS_GetRunTime=nil;
-ASRSuiteDB.endlessEnabled=true; A.SetLanguage("en");
+ASREndlessDB.endlessEnabled=true; A.SetLanguage("en");
 print("PASS: "..checks.." endless tracker checks");

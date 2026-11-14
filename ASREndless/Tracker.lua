@@ -1,5 +1,5 @@
 -- Endless HUD: the server's countdown is authoritative; AZS_SCHEDULE.at belongs to the map.
-local A,S=ASRSuite,ASRStyle;
+local A,S=ASREndless,ASRStyle;
 local GREEN={140/255,209/255,35/255,1};
 local function Num(v) local n=tonumber(v); if n and n==n and n>=0 and n<1e15 then return n; end end
 local function Count(v) return math.floor(Num(v) or 0); end
@@ -72,15 +72,15 @@ end
 
 local function HudOwner() return AZS_API_HUD and AZS_API_HUD.clock; end
 function A.EndlessRestoreHud()
- local d=ASRSuiteDB and ASRSuiteDB.endlessHud;
+ local d=ASREndlessDB and ASREndlessDB.endlessHud;
  if not d then return; end
- if d.previous and AZS_SetHudShown and (HudOwner()=="ASRSuite" or HudOwner()==nil) then AZS_SetHudShown("clock",true); end
- ASRSuiteDB.endlessHud=nil;
+ if d.previous and AZS_SetHudShown and ((HudOwner()=="ASREndless" or HudOwner()=="ASRSuite") or HudOwner()==nil) then AZS_SetHudShown("clock",true); end
+ ASREndlessDB.endlessHud=nil;
 end
 local function HideNative()
  if not AZS_SetHudShown or not AZS_IsHudShown then return false; end
- if not ASRSuiteDB.endlessHud then
-  ASRSuiteDB.endlessHud={previous=AZS_IsHudShown("clock") or HudOwner()=="ASRSuite"};
+ if not ASREndlessDB.endlessHud then
+  ASREndlessDB.endlessHud={previous=AZS_IsHudShown("clock") or (HudOwner()=="ASREndless" or HudOwner()=="ASRSuite")};
  end
  if AZS_IsHudShown("clock") then AZS_SetHudShown("clock",false); end
  return true;
@@ -159,7 +159,7 @@ function A.EndlessDifficulty(m)
 end
 local worldAliases,worldLanguage,worldNative,worldCatalog;
 function A.EndlessName(source)
- local language=ASRSuiteDB and ASRSuiteDB.language or "en"; local catalog=AZS_GEN and AZS_GEN.zones;
+ local language=ASREndlessDB and ASREndlessDB.language or "en"; local catalog=AZS_GEN and AZS_GEN.zones;
  if not worldAliases or worldLanguage~=language or worldNative~=AZS_L or worldCatalog~=catalog then
   worldAliases={}; worldLanguage=language; worldNative=AZS_L; worldCatalog=catalog;
   local function Add(english)
@@ -178,7 +178,7 @@ function A.EndlessName(source)
  return ASRLocale.Text("world",language,english,english);
 end
 function A.InitEndless()
- if ASRSuiteDB.endlessEnabled==nil then ASRSuiteDB.endlessEnabled=true; end
+ if ASREndlessDB.endlessEnabled==nil then ASREndlessDB.endlessEnabled=true; end
  if A.endlessFrame then return; end
  local f=CreateFrame("Frame","ASREndlessTracker",UIParent); A.endlessFrame=f; f:SetSize(270,244); f:SetFrameStrata("MEDIUM"); f:SetFrameLevel(20); f:Hide();
  f.head=CreateFrame("Frame",nil,f); f.head:SetPoint("TOPLEFT",f,"TOPLEFT",0,0); f.head:SetSize(270,68);
@@ -196,7 +196,7 @@ function A.InitEndless()
  f.bar:SetMinMaxValues(0,1); local bg=f.bar:CreateTexture(nil,"BACKGROUND"); bg:SetAllPoints(f.bar); bg:SetTexture(0.12,0.14,0.10,1);
  f:EnableMouse(true); f:SetMovable(true); f:SetClampedToScreen(true); f:RegisterForDrag("LeftButton");
  f:SetScript("OnDragStart",function(self) if A.CanMovePanel("endless") then self:StartMoving(); self.moving=true; end end);
- f.saveDrag=function(self) local p,_,rel,x,y=self:GetPoint(); ASRSuiteDB.endlessPosition={p,rel,x,y}; self.placed=true; end;
+ f.saveDrag=function(self) local p,_,rel,x,y=self:GetPoint(); ASREndlessDB.endlessPosition={p,rel,x,y}; self.placed=true; end;
  f:SetScript("OnDragStop",function(self) A.StopDrag(self); end);
  f:SetScript("OnEnter",function(self)
   GameTooltip:SetOwner(self,"ANCHOR_LEFT"); GameTooltip:SetText("ASR Endless");
@@ -207,8 +207,8 @@ function A.InitEndless()
 end
 local function Place(f)
  if f.moving then return; end
- if ASRSuiteDB.endlessPosition then
-  if not f.placed then local p=ASRSuiteDB.endlessPosition; f:ClearAllPoints(); f:SetPoint(p[1],UIParent,p[2],p[3],p[4]); f.placed=true; end
+ if ASREndlessDB.endlessPosition then
+  if not f.placed then local p=ASREndlessDB.endlessPosition; f:ClearAllPoints(); f:SetPoint(p[1],UIParent,p[2],p[3],p[4]); f.placed=true; end
  else
   f:ClearAllPoints();
   if AZSTrackerFrame then f:SetPoint("BOTTOMRIGHT",AZSTrackerFrame,"BOTTOMRIGHT",0,0);
@@ -258,12 +258,12 @@ function A.UpdateEndless(dt,force)
  local active=Enabled(r) and (phase=="playing" or phase=="choosing" or phase=="paused" or phase=="dead");
  if not active then
   f:Hide(); A.EndlessRestoreHud(); A.endlessModel=nil;
-  if phase and not Enabled(r) then ASRSuiteDB.endlessState=nil; end
+  if phase and not Enabled(r) then ASREndlessDB.endlessState=nil; end
   return;
  end
- local model,state=A.EndlessStep(r,AZS_ZONE,AZS_SCHEDULE,AZS_UNITS,ASRSuiteDB.endlessState);
+ local model,state=A.EndlessStep(r,AZS_ZONE,AZS_SCHEDULE,AZS_UNITS,ASREndlessDB.endlessState);
  if model then A.EndlessDisplayClock(model); end
- ASRSuiteDB.endlessState=state; A.endlessModel=model;
- if model and ASRSuiteDB.endlessEnabled~=false and HideNative() then A.DrawEndless(model);
+ ASREndlessDB.endlessState=state; A.endlessModel=model;
+ if model and ASREndlessDB.endlessEnabled~=false and HideNative() then A.DrawEndless(model);
  else f:Hide(); A.EndlessRestoreHud(); end
 end

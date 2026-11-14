@@ -1,0 +1,18 @@
+id = "asr-endless"
+name = "ASR Endless"
+author = "AlexEnotov"
+repo = "AlexEnotov/ASR-Addons"
+description = "Endless boss rounds, live status and next boss countdown."
+category = "Map"
+license = "GPL-3.0-only"
+folders = ["ASREndless"]
+requires = []
+
+[source]
+type = "release"
+asset = "ASREndless-v*.zip"
+
+[reborn]
+status = "untested"
+tested = ""
+notes = "Standalone extraction validated by automated scenarios; Suite integration is optional."

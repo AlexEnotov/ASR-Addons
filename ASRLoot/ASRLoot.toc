@@ -2,7 +2,7 @@
 ## Title: |cff8cd123ASR|r Loot
 ## Author: AlexEnotov
 ## X-License: GPL-3.0-only
-## Version: 0.6.0
+## Version: 0.6.1
 ## Notes: Boss equipment drops, new items and duplicate gold. /asrloot
 ## Dependencies: AzerothSurvivors
 ## OptionalDeps: AzerothSurvivorsAPI, AzerothSurvivorsUI

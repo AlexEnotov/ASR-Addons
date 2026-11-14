@@ -1,0 +1,16 @@
+## Interface: 30300
+## Title: |cff8cd123ASR|r Endless
+## Author: AlexEnotov
+## X-License: GPL-3.0-only
+## Version: 0.6.1
+## Notes: Repeating boss rounds and countdowns in endless mode. /asrendless
+## Dependencies: AzerothSurvivors, AzerothSurvivorsAPI
+## OptionalDeps: AzerothSurvivorsUI
+## SavedVariables: ASREndlessDB
+Language.lua
+Style.lua
+Core.lua
+Locale.lua
+WorldNames.lua
+Tracker.lua
+Settings.lua

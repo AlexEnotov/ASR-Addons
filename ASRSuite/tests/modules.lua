@@ -1,6 +1,6 @@
 local A=ASRSuite; local count=0; local function check(ok,label) assert(ok,label); count=count+1; end
 local nav=0; for id in pairs(A.navigation) do if id~="future" then nav=nav+1; end end
-check(nav==6 and A.navigation.endless and not A.navigation.heal and not A.navigation.critical,"sidebar contains modules and Endless, with damage types inside Combat text");
+check(nav==5 and not A.navigation.endless and not A.navigation.heal and not A.navigation.critical,"sidebar contains only installed modules, with damage types inside Combat text");
 check(A.pages.builder.unavailable,"missing builder shows installation placeholder instead of inert settings");
 ASRStatsDB.locked=false; ASRStatsPanel.settings.close.scripts.OnClick(ASRStatsPanel.settings.close); AZS_RUN.ph="playing";
 A.SetEditing(false); ASRSuiteDB.lockPanels=true;

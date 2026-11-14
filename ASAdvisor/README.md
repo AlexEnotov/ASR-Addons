@@ -2,7 +2,7 @@
 
 **Планировщик билдов и подсказки для Azeroth Survivors Reborn.**
 
-Автор: **AlexEnotov** · Версия: **0.5.21** · Интерфейс: **Русский / English**
+Автор: **AlexEnotov** · Версия: **0.6.1** · Интерфейс: **Русский / English**
 
 [Скачать последнюю версию](https://github.com/AlexEnotov/ASR-Advisor/releases/latest) · [Сообщить об ошибке](https://github.com/AlexEnotov/ASR-Advisor/issues)
 
@@ -26,7 +26,7 @@
 ## Установка
 
 1. Открой [Releases](https://github.com/AlexEnotov/ASR-Advisor/releases/latest).
-2. Скачай **ASRAdvisor-0.5.8.zip** из раздела **Assets**. Архивы GitHub `Source code` предназначены для исходников.
+2. Скачай **ASRAdvisor-v0.6.1.zip** из раздела **Assets**. Архивы GitHub `Source code` предназначены для исходников.
 3. Распакуй папку **ASAdvisor** в `Interface/AddOns` установленной игры.
 4. Проверь путь: `Interface/AddOns/ASAdvisor/ASAdvisor.toc`. Вложенной второй папки `ASAdvisor` быть не должно.
 5. Включи аддон в игре и введи **`/asr`**.

@@ -81,15 +81,16 @@ local function RegisterBuiltins()
   root.importSettings=B(page,"Импорт настроек",226,27,250,437,function() page:Hide(); root.transfer:Open("import"); end);
   records[#records+1]=function() root.transfer:Draw(); end
  end);
- A.RegisterSettingsPage("endless","Endless",function(page)
+ if ASREndless then A.RegisterSettingsPage("endless","Endless",function(page)
   L(page,"Бесконечный режим",16,8,0,480);
-  A.controls.endlessEnabled=Check(page,"Показывать трекер Endless",function() return ASRSuiteDB.endlessEnabled~=false; end,function(v) ASRSuiteDB.endlessEnabled=v; A.UpdateEndless(0,true); end,30);
+  A.controls.endlessEnabled=Check(page,"Показывать трекер Endless",function() return ASREndlessDB.endlessEnabled~=false; end,function(v) ASREndlessDB.endlessEnabled=v; ASREndless.UpdateEndless(0,true); end,30);
   Note(page,"Автоматически заменяет штатный трекер только в бесконечном режиме. Выключение возвращает штатный интерфейс.",64):SetHeight(40);
   Note(page,"Враги — за весь забег. Боссы — только в бесконечном режиме.",114):SetHeight(30);
   Note(page,"Боссы повторяются в порядке карты.",150):SetHeight(24);
   B(page,"Изменить интерфейс",468,29,8,190,function() A.ToggleEdit(); end);
-  B(page,"Сбросить положение Endless",468,29,8,227,function() ASRSuiteDB.endlessPosition=nil; if A.endlessFrame then A.endlessFrame.placed=nil; end; A.UpdateEndless(0,true); end);
+  B(page,"Сбросить положение Endless",468,29,8,227,function() ASREndlessDB.endlessPosition=nil; if ASREndless.endlessFrame then ASREndless.endlessFrame.placed=nil; end; ASREndless.UpdateEndless(0,true); end);
  end);
+ end
  A.RegisterSettingsPage("combat","Текст урона",function(page)
   L(page,"Общие настройки текста",16,8,0,480);
   A.controls.enabled=Check(page,"Текст урона",function() return A.IsModuleEnabled("combat"); end,function(v) A.SetModuleEnabled("combat",v); end,26);

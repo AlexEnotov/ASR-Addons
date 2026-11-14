@@ -1,0 +1,11 @@
+local A=ASREndless;
+SlashCmdList.ASRENDLESS("off"); assert(not ASREndlessDB.endlessEnabled);
+SlashCmdList.ASRENDLESS("on"); assert(ASREndlessDB.endlessEnabled);
+SlashCmdList.ASRENDLESS(""); assert(A.settings:IsShown());
+SlashCmdList.ASRENDLESS(""); assert(not A.settings:IsShown());
+SlashCmdList.ASRENDLESS("unlock"); assert(A.CanMovePanel());
+SlashCmdList.ASRENDLESS("lock"); assert(not A.CanMovePanel());
+ASREndlessDB.endlessPosition={"CENTER","CENTER",7,9}; SlashCmdList.ASRENDLESS("reset"); assert(not ASREndlessDB.endlessPosition);
+SlashCmdList.ASRENDLESS("ru"); assert(ASREndlessDB.language=="ru");
+local saved=ASREndlessDB; A.Init(); assert(ASREndlessDB==saved and ASREndlessDB.language=="ru");
+print("PASS: standalone Endless commands, preferences and reload initialization");

@@ -1,4 +1,4 @@
-# ASR Stats 0.6.0
+# ASR Stats 0.6.1
 
 Отдельная панель текущих характеристик для Azeroth Survivors Reborn.
 Автор: AlexEnotov.

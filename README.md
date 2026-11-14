@@ -7,10 +7,11 @@ Independent addons for **Azeroth Survivors Reborn**, with an optional shared set
 | ASR Advisor | `ASAdvisor` | `/asr` | Build planner, tracker and card recommendations |
 | ASR Stats | `ASRStats` | `/asrstats config` | Current character stats |
 | ASR Combat Text | `ASRCombatText` | `/asrtext` | Movable combat numbers with per-type settings |
-| ASR Suite | `ASRSuite` | `/asrhub` | Shared settings, compatibility controls, interface editor and automatic Endless tracker |
+| ASR Suite | `ASRSuite` | `/asrhub` | Shared settings, compatibility controls, interface editor |
+| ASR Endless | `ASREndless` | `/asrendless` | Endless boss rounds and countdowns |
 | ASR Loot | `ASRLoot` | `/asrloot` | Permanent equipment drops, new items and duplicate gold |
 
-Install only what you need. Advisor, Stats, Combat Text and Loot work without Suite. Suite discovers installed modules; it does not require all of them. All modules require the game's native AzerothSurvivors addon; some also use AzerothSurvivorsAPI as declared in their TOCs. These native game components are not bundled. The v0.6.0 release includes all five modules. Endless is included in Suite.
+Install only what you need. Advisor, Stats, Combat Text, Loot and Endless work without Suite. Suite discovers installed modules; it does not require all of them. All modules require the game's native AzerothSurvivors addon; some also use AzerothSurvivorsAPI as declared in their TOCs. These native game components are not bundled. The v0.6.1 release includes all six modules. Endless is a separate addon; Suite integration is optional.
 
 ## Installation
 
@@ -26,8 +27,9 @@ ASRStats/        character stats source and tests
 ASRCombatText/   standalone combat text source and tests
 ASRSuite/        optional shared settings source and tests
 ASRLoot/         standalone equipment drop tracker and tests
+ASREndless/      standalone endless boss tracker and tests
 tools/          repository checks and release packaging
-catalog/        store entry templates (four accepted; Loot submitted with v0.6.0)
+catalog/        store entry templates (one per standalone addon)
 docs/           release process and resource notes
 .github/        checks; no automatic publication
 ```
@@ -42,13 +44,13 @@ Node.js 22 and PowerShell 7:
 npm ci --ignore-scripts
 npm test
 npm run test:game -- "D:/path/to/game/Interface/AddOns/AzerothSurvivors"
-./tools/package.ps1 -Tag v0.6.0
+./tools/package.ps1 -Tag v0.6.1
 ```
 
 `npm test` checks Lua 5.1 syntax for all modules, TOC resources and Stats/Combat Text/Suite scenarios. The builder's full recommendation tests require a locally installed native game catalogue, supplied explicitly to `test:game`; CI does not redistribute it. Mocked UI tests do not replace in-game visual checks.
 
-Packaging writes five independently installable, deterministic ZIPs, an ASR-All bundle and `SHA256SUMS` to ignored `release/`. The tag is the shared distribution release version; all five module TOC/runtime versions are aligned to 0.6.0 for this release. The store displays the pinned release tag.
+Packaging writes six independently installable, deterministic ZIPs, an ASR-All bundle and `SHA256SUMS` to ignored `release/`. The tag is the shared distribution release version; all six module TOC/runtime versions are aligned to 0.6.1 for this release. The store displays the pinned release tag.
 
 See [the release process](docs/RELEASING.md). Original ASR implementation code is licensed under **GPL-3.0-only**. Copyright (C) 2026 AlexEnotov. See [LICENSE](LICENSE) for the full terms and [resource notes](docs/RESOURCES.md) for game data and third-party material, whose rights remain with their respective owners.
 
-Fresh installations default to English in all five addons. Saved language preferences are preserved on update.
+Fresh installations default to English in all six addons. Saved language preferences are preserved on update.

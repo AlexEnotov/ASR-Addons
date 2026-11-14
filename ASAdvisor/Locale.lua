@@ -1,5 +1,6 @@
 local A=ASAdvisor;
 local EN={
+ ["Длит."]="Dur.",["с"]="s",["м"]="yd",["Особый бонус"]="Special bonus",
  ["Забанены"]="Banished",
  ["Все улучшения, кроме уже достигнутых целей."]="All upgrades except goals already reached.",
  ["Только заданные параметры до достижения целей."]="Only configured stats until their goals are reached.",

@@ -41,6 +41,7 @@ run(fs.readFileSync(path.join(__dirname,'ban_plan.lua'),'utf8'),'ban_plan');
 run(fs.readFileSync(path.join(__dirname,'presentation.lua'),'utf8'),'presentation');
 run(fs.readFileSync(path.join(__dirname,'goal_modes.lua'),'utf8'),'goal modes');
 run(fs.readFileSync(path.join(__dirname,'tracker_retirement.lua'),'utf8'),'tracker retirement');
+run(fs.readFileSync(path.join(__dirname,'tracker_summary.lua'),'utf8'),'tracker summaries');
 run('ASRSuite={}; ASRSuiteDB={language="en",opacity=0.95};','settings transfer context');
 run(fs.readFileSync(path.resolve(__dirname,'../../ASRSuite/Transfer.lua'),'utf8'),'suite transfer codec');
 run(fs.readFileSync(path.join(__dirname,'settings_transfer.lua'),'utf8'),'builder settings transfer');

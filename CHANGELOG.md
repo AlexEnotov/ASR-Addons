@@ -27,6 +27,10 @@ are summarized with the feature they improve rather than listed individually.
 
 ### ASR Advisor
 
+- Keep tracker summaries compact with abbreviated duration/units and K/M/B/T
+  damage formatting. Show class-specific amulets as Special bonus, preserving
+  their full effects in hover descriptions and exact values for goal checks.
+
 - Hide lower-priority backup amulets after a preferred amulet is equipped.
   Move confirmed banned spells into a separate muted-red icon group without
   stats/ranks in both tracker modes. Persist observed bans across reloads, reset

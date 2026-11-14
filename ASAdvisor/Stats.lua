@@ -292,7 +292,22 @@ function A.ItemGoalText(metrics)
   end
   return #parts>0 and table.concat(parts," · ") or "?";
 end
-function A.ShortItem(gear)
+function A.TrackerNumber(value)
+  local n=tonumber(value); if not n or n~=n or math.abs(n)==math.huge then return "?"; end
+  local units={{1e3,"K"},{1e6,"M"},{1e9,"B"},{1e12,"T"}}; local tier=0;
+  for i,unit in ipairs(units) do if math.abs(n)>=unit[1] then tier=i; end end
+  if tier==0 then return fmt(n); end
+  local amount=n/units[tier][1];
+  if math.abs(amount)>=999.95 then
+    if tier==#units then return string.format("%.2e",n); end
+    tier=tier+1; amount=n/units[tier][1];
+  end
+  return (string.gsub(string.format("%.1f",amount),"%.0$",""))..units[tier][2];
+end
+function A.ShortItem(gear,row)
+  row=row or A.ResolveItem(gear);
+  local mechanics=row and ASAdvisorMechanics.items[row.key];
+  if row and row.legend or mechanics and mechanics.legend then return A.T("Особый бонус"); end
   local parts={}; for i,m in ipairs(A.ItemMetrics(gear)) do if i<=6 then
     parts[#parts+1]=m.value and (A.StatLabel(m.kind,A.T("Бонус").." "..i).." "..m.value..m.unit) or A.T("Особый эффект");
   end end
@@ -365,11 +380,11 @@ function A.TrackerEntries(b,live)
   local function spell(row,key,planned)
     local current=key and live.spells[key]; local stats=key and A.SpellStats(key,live) or {};
     local parts={}; if current then
-      if stats.cd then parts[#parts+1]=A.StatLabel("cooldown").." "..stats.cd.."s"; end
-      if stats.damage then parts[#parts+1]=A.StatLabel("damage").." "..stats.damage; end
+      if stats.cd then parts[#parts+1]=A.StatLabel("cooldown").." "..fmt(stats.cd)..A.T("с"); end
+      if stats.damage then parts[#parts+1]=A.StatLabel("damage").." "..A.TrackerNumber(stats.damage); end
       if stats.targets then parts[#parts+1]=A.T("Цели").." "..stats.targets; end
-      if stats.duration then parts[#parts+1]=A.T("Длительность").." "..stats.duration..A.T(" сек."); end
-      if stats.radius then parts[#parts+1]=A.StatLabel("area").." "..stats.radius..A.T(" м"); end
+      if stats.duration then parts[#parts+1]=A.T("Длит.").." "..fmt(stats.duration)..A.T("с"); end
+      if stats.radius then parts[#parts+1]=A.StatLabel("area").." "..fmt(stats.radius)..A.T("м"); end
       usedSpell[key]=true;
     end
     local banned=key and live.banned and live.banned[key] or false;
@@ -391,11 +406,11 @@ function A.TrackerEntries(b,live)
     local amuletPriority=row and row.group=="amulet" and A.ItemPriority(b,key,"amulet");
     local obsolete=not g and bestAmulet and amuletPriority and amuletPriority>bestAmulet;
     if g then usedGear[g]=true; if row.any then row=A.ResolveItem(g,token) or {name=g.name,icon=g.icon,group=g.slot}; end end
-    if not obsolete then items[#items+1]={row=row,owned=g~=nil,detail=g and A.ShortItem(g) or "",planned=true}; end;
+    if not obsolete then items[#items+1]={row=row,owned=g~=nil,detail=g and A.ShortItem(g,row) or "",planned=true}; end;
   end
   for _,g in ipairs(live.gear) do if not usedGear[g] then
     local row=A.ResolveItem(g,token) or {name=g.name,icon=g.icon,group=g.slot};
-    items[#items+1]={row=row,owned=true,detail=A.ShortItem(g),planned=false};
+    items[#items+1]={row=row,owned=true,detail=A.ShortItem(g,row),planned=false};
   end end
   return spells,items;
 end

@@ -1,5 +1,12 @@
 local A=ASAdvisor;
 local EN={
+  ["Таргетное"]="Targeted",["Массовое"]="AOE",["Снарядов"]="Projectiles",["Цепь"]="Chain",
+  ["Область на земле"]="Ground area",["Периодическое"]="Damage over time",["Конус"]="Cone",["Круговая область"]="Circular area",["Вокруг персонажа"]="Around the character",
+  ["Исцеление"]="Healing",["Щит"]="Shield",["Поглощение"]="Absorption",["Усиление"]="Buff",["Невосприимчивость"]="Immunity",["Ответный урон"]="Retaliation",["Питомцы"]="Pets",["Пассивное"]="Passive",["Тотем"]="Totem",["Снаряды"]="Projectiles",
+  ["Светлая магия"]="Holy",["Огонь"]="Fire",["Холод"]="Frost",["Природа"]="Nature",["Тьма"]="Shadow",["Тайная магия"]="Arcane",
+  ["Только соло"]="Solo only",["Поддержка союзников"]="Ally support",
+  ["Базовое описание пока недоступно."]="Base description is not available yet.",
+  ["Урон от светлой магии"]="Holy damage",["Урон огнём"]="Fire damage",["Урон холодом"]="Frost damage",["Урон силами природы"]="Nature damage",["Урон тёмной магией"]="Shadow damage",["Урон тайной магией"]="Arcane damage",["Физический урон"]="Physical damage",
   ["Баны"]="Bans",["Изгнать"]="Banish",["Авто"]="Auto",
   ["Умение отмечено для изгнания"]="Spell marked for banishing",
   ["В билде можно отметить не больше 3 изгнаний."]="A build can have at most 3 manual banishes.",

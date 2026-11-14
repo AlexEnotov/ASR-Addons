@@ -50,6 +50,7 @@ for(const match of source.matchAll(/\[\[spell\]\]\s*key\s*=\s*"([a-z0-9_]+)"/g))
  const body=tail.split(/\[\[[a-z_]+\]\]|(?:base|tbc|wotlk|cata)\/[a-zA-Z0-9_./-]+\.toml/)[0];
  const shape=body.match(/^shape\s*=\s*(.*)$/m)?.[1]||'';
  const data={shape:shape.match(/\{\s*([a-z_]+)\s*=/)?.[1]||''};
+ const school=body.match(/^school\s*=\s*"([a-z_]+)"/m)?.[1]; if(school)data.school=school;
  if(shape) data.shapeData=inline(shape);
  const rider=body.match(/^rider\s*=\s*(.*)$/m)?.[1]; if(rider)data.rider=inline(rider);
  for(const key of ['radius','targets']) {const value=shape.match(new RegExp('\\b'+key+'\\s*=\\s*([\\d.]+)'))?.[1];if(value)data[key]=Number(value);}

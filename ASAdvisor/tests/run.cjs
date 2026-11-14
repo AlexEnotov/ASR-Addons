@@ -20,7 +20,7 @@ function run(code,name){
 run(fs.readFileSync(path.join(__dirname,'mock.lua'),'utf8'),'mock');
 run(fs.readFileSync(path.join(game,'Generated/Content.lua'),'utf8'),'game catalog');
 run(fs.readFileSync(path.join(game,'Generated/Content_ruRU.lua'),'utf8'),'game Russian');
-for(const file of ['Language.lua','Mechanics.lua','Names.lua','Core.lua','Locale.lua','Stats.lua','Advisor.lua','UI.lua','Runtime.lua']) run(fs.readFileSync(path.join(root,file),'utf8'),file);
+for(const file of ['Language.lua','Mechanics.lua','Names.lua','Core.lua','Locale.lua','Presentation.lua','Stats.lua','Advisor.lua','UI.lua','Runtime.lua']) run(fs.readFileSync(path.join(root,file),'utf8'),file);
 run(fs.readFileSync(path.join(__dirname,'scenarios.lua'),'utf8'),'scenarios');
 run(fs.readFileSync(path.join(__dirname,'extended.lua'),'utf8'),'extended');
 run(fs.readFileSync(path.join(__dirname,'v040.lua'),'utf8'),'v040');
@@ -38,5 +38,6 @@ run(fs.readFileSync(path.join(__dirname,'suite_opacity.lua'),'utf8'),'suite_opac
 run(fs.readFileSync(path.join(__dirname,'tracker_mode.lua'),'utf8'),'tracker_mode');
 run(fs.readFileSync(path.join(__dirname,'module_control.lua'),'utf8'),'module_control');
 run(fs.readFileSync(path.join(__dirname,'ban_plan.lua'),'utf8'),'ban_plan');
+run(fs.readFileSync(path.join(__dirname,'presentation.lua'),'utf8'),'presentation');
 console.log('PASS: Lua 5.1 syntax, game catalog integration, recommendation scenarios, import validation and UI smoke.');
 

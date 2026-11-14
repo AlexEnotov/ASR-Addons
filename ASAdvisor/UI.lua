@@ -102,7 +102,7 @@ local function RestoreTipWheel(f)
  if f and f.wheelAnchor then f.wheelAnchor:SetScript("OnMouseWheel",f.wheelScript); f.wheelAnchor:EnableMouseWheel(f.wheelScript~=nil); f.wheelAnchor=nil; f.wheelScript=nil; end
 end
 -- Tooltips keep their own overlay layer above scrolling tracker rows.
-local function tip(root,anchor,title,body)
+local function tip(root,anchor,title,body,row)
   if not root.tip then
     root.tip=box(root,nil,300,104,nil,nil,1); root.tip.asrOverlay=true; root.tip:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8",edgeFile=BORDER,edgeSize=12,insets={left=3,right=3,top=3,bottom=3}}); root.tip:SetFrameLevel(root:GetFrameLevel()+100); root.tip:SetClampedToScreen(true);
     root.tip.title=label(root.tip,"",12,12,-10,276,mint); root.tip.body=label(root.tip,"",11,12,-34,276,text);
@@ -110,7 +110,8 @@ local function tip(root,anchor,title,body)
   end
   local f=root.tip; RestoreTipWheel(f); f:SetFrameStrata("TOOLTIP"); f:SetFrameLevel(math.max(1000,root:GetFrameLevel()+100)); f:SetAlpha(1); local raw=A.Plain(body or "");
   f:ClearAllPoints(); f:SetPoint("TOPLEFT",anchor,"BOTTOMLEFT",0,-5); f:SetBackdropColor(0.06,0.06,0.065,1);
-  f.title:SetText(title); local width=raw=="" and math.max(80,math.min(300,(f.title.GetStringWidth and f.title:GetStringWidth() or #title*5)+24)) or 300;
+  f.title:SetText(title); A.SetClassText(f.title,row,root==main and view.class or A.Class()); f.row=row;
+  local width=raw=="" and math.max(80,math.min(300,(f.title.GetStringWidth and f.title:GetStringWidth() or #title*5)+24)) or 330;
   f:SetWidth(width);
   if root==tracker then
     local ratio=root:GetEffectiveScale()/UIParent:GetEffectiveScale(); local right=root.GetRight and root:GetRight();
@@ -134,7 +135,7 @@ local function tip(root,anchor,title,body)
   f.maxScroll=math.max(0,#f.lines-f.visibleLines)*14; f.scrollOffset=0;
   f.UpdateBody=function(self)
     local first=math.floor(self.scrollOffset/14)+1; local out={};
-    for i=first,math.min(#self.lines,first+self.visibleLines-1) do out[#out+1]=self.lines[i]; end
+    for i=first,math.min(#self.lines,first+self.visibleLines-1) do out[#out+1]=A.ColorTooltipLine(self.lines[i],self.row); end
     self.body:SetText(table.concat(out,"\n")); self.body:SetHeight(math.max(1,#out*14));
     self:SetHeight(24+th+#out*14+(self.maxScroll>0 and 18 or 0));
   end
@@ -168,7 +169,7 @@ local function itemTip(root,cell,row)
   local p=b and (row.group=="spell" and A.FindPick(b,row.key) or b.itemRules and b.itemRules[row.key]);
   if p and p.note and p.note~="" then desc=(desc and desc.."\n" or "")..p.note; end
   if cell.outside then desc=A.T("Вне билда").."\n\n"..(desc or ""); end
-  tip(root,cell,row.name,desc or A.T("В забеге ещё не получено описание. Базовые числа не подставляются."));
+  tip(root,cell,row.name,desc or A.T("В забеге ещё не получено описание. Базовые числа не подставляются."),row);
 end
 local CLASS_COORDS={
   WARRIOR={0,0.25,0,0.25},MAGE={0.25,0.5,0,0.25},ROGUE={0.5,0.75,0,0.25},DRUID={0.75,1,0,0.25},
@@ -682,6 +683,7 @@ function A.Redraw()
     if quick.edit.boundBuild~=b then quick.edit:ClearFocus(); quick.edit.boundBuild=b; end
     main.bindingDescription=true; if not quick.edit:HasFocus() then quick.edit:SetText(b and b.description or ""); end; main.bindingDescription=false; quick.edit:Fit(); quick.edit.UpdatePlaceholder();
     main.inline.base:SetText(row and A.BaseFacts(row) or "");
+    A.SetClassText(main.inline.title,row,b and b.class); main.inline.base:SetTextColor(0.84,0.74,0.51,1); main.inline.current:SetTextColor(0.55,0.82,0.14,1);
     for _,control in ipairs({main.planLeft,main.planRight,main.inline.remove}) do if p then control:Show(); else control:Hide(); end end
     local fieldOrder={}; local worn,metrics;
     if p then
@@ -955,8 +957,8 @@ function A.RefreshUI()
       r.name:SetFont(FONT,9,""); r.name.asFontSize=9; r.detail:SetFont(FONT,8,""); r.detail.asFontSize=8; r.icon:SetSize(18,18);
       local chars={}; for char in string.gmatch(entry.row.name,".[\128-\191]*") do chars[#chars+1]=char; end
       local limit=math.max(10,math.floor(nameWidth/5.6)); local name=#chars>limit and table.concat(chars,"",1,limit-3).."..." or entry.row.name;
-      r.icon:SetTexture(A.Icon(entry.row.icon)); r.name:SetText(name); move(r.name,27,0); r.name:SetHeight(13);
-      r.detail:SetText(entry.detail); move(r.detail,27,14); local detailH=0;
+      r.icon:SetTexture(A.Icon(entry.row.icon)); r.name:SetText(name); A.SetClassText(r.name,entry.row,b and b.class); move(r.name,27,0); r.name:SetHeight(13);
+      r.detail:SetText(A.ColorTooltipLine(entry.detail,entry.row)); move(r.detail,27,14); local detailH=0;
       if entry.owned and entry.detail~="" then r.detail:Show(); detailH=measured(r.detail,10); else r.detail:Hide(); end
       local rowH=entry.owned and math.max(24,15+detailH) or 19; move(r,0,bodyHeight); r:SetHeight(rowH); r:SetAlpha(entry.owned and 1 or 0.45); r:Show(); bodyHeight=bodyHeight+rowH;
     end

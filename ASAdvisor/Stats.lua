@@ -56,7 +56,7 @@ function A.SpellAction(m)
   elseif m.shape=="cone" then action=say("Поражает противников перед персонажем по площади.","Hits enemies in an area in front of the character.");
   elseif m.shape=="chain" then action=say("Урон перескакивает между ближайшими противниками.","Damage jumps between nearby enemies.");
   elseif m.shape=="missiles" then action=say("Выпускает несколько снарядов.","Fires multiple projectiles.");
-  elseif m.shape=="heal" then action=say("Восстанавливает здоровье персонажа.","Restores the character's health.");
+  elseif m.shape=="heal" then action=s.share and say("Восстанавливает %s%% здоровья персонажа.","Restores %s%% of the character's health.",s.share) or say("Восстанавливает здоровье персонажа.","Restores the character's health.");
   elseif m.shape=="shield" then action=say("Создаёт щит, поглощающий входящий урон.","Creates a shield that absorbs incoming damage.");
   elseif m.shape=="haste" then action=say("Временно ускоряет перезарядку способностей на %s%%.","Temporarily speeds up ability cooldowns by %s%%.",s.pct or 0);
   elseif m.shape=="fury" then action=say("Временно усиливает наносимый урон на %s%%.","Temporarily increases damage dealt by %s%%.",s.pct or 0);
@@ -76,6 +76,10 @@ function A.SpellAction(m)
   if s.secs and s.secs>0 then lines[#lines+1]=say("Действует %s сек.","Lasts %s sec.",fmt(s.secs)); end
   if s.every then lines[#lines+1]=say("Срабатывает каждые %s сек.","Triggers every %s sec.",fmt(s.every)); end
   if s.count then lines[#lines+1]=say("Количество: %s.","Count: %s.",s.count); end
+  if s.jumps then lines[#lines+1]=say("Количество перескоков: %s.","Number of jumps: %s.",s.jumps); end
+  if s.length then lines[#lines+1]=say("Длина конуса: %s м.","Cone length: %s yd.",fmt(s.length)); end
+  if s.ticks then lines[#lines+1]=say("Число тиков за время действия: %s.","Ticks over the duration: %s.",s.ticks); end
+  if s.cap then lines[#lines+1]=say("Максимум наложений: %s.","Maximum stacks: %s.",s.cap); end
   local riders={slow={"Замедление","Slow"},root={"Обездвиживание","Root"},stun={"Оглушение","Stun"},weaken={"Ослабление","Weaken"},flee={"Страх","Fear"},mend={"Лечение","Healing"},drain={"Похищение здоровья","Health drain"},guard={"Защита","Protection"}};
   for key,p in pairs(m.rider or {}) do local title=riders[key]; if title then lines[#lines+1]=say(title[1],title[2])..(p.pct and " "..fmt(p.pct).."%" or "")..(p.secs and say(" на %s сек."," for %s sec.",fmt(p.secs)) or "").."."; end end
   return table.concat(lines,"\n");
@@ -105,7 +109,7 @@ function A.BaseItemText(row)
   return table.concat(parts,"\n");
 end
 function A.LegendDescription(m,classes)
-  local parts={A.T("Классовый амулет")}; local names={};
+  local parts={A.T("Базовые параметры · без улучшений"),A.T("Классовый амулет")}; local names={};
   for _,token in ipairs(classes or {}) do names[#names+1]=A.ClassName(token); end
   parts[#parts+1]=table.concat(names,", ");
   local spell; for _,token in ipairs(classes or {}) do spell=A.byKey[token..":"..m.spell]; if spell then break end end
@@ -124,7 +128,7 @@ function A.LegendDescription(m,classes)
       elseif type(v)=="table" then local details={}; for _,field in ipairs({"chance","share","secs","radius","count"}) do if type(v[field])=="number" then details[#details+1]=A.T(labels[field] or "Количество").." "..value(field,v[field]); end end; parts[#parts+1]=A.T(labels[key] or "Особый эффект")..(#details>0 and ": "..table.concat(details,", ") or ""); end
     end end
   end
-  parts[#parts+1]=A.T("Базовые параметры · без улучшений"); return table.concat(parts,"\n");
+  return table.concat(parts,"\n");
 end
 function A.BaseItemMetrics(row)
   local m=row and ASAdvisorMechanics.items[row.key]; local result={}; if not m then return result; end
@@ -143,16 +147,16 @@ function A.BaseItemMetrics(row)
 end
 function A.SpellDescription(row,baseOnly)
   local raw=not baseOnly and AZS_SPELLTIPS and AZS_SPELLTIPS[row.key];
-  if raw and A.Snapshot().spells[row.key] then return A.T("Текущие значения")..": "..raw; end
+  if raw and A.Snapshot().spells[row.key] then return A.T("Текущие значения").."\n"..raw; end
   local m=ASAdvisorMechanics.spells and ASAdvisorMechanics.spells[row.key];
-  if not m then return A.T("Точное описание появится при получении умения в забеге."); end
-  local parts={A.T("Базовые параметры · без улучшений"),A.SpellAction(m)};
-  if m.hit and m.hit>0 then parts[#parts+1]=A.T("Урон")..": "..fmt(m.hit); end
+  if not m then return A.T("Базовое описание пока недоступно."); end
+  local parts={A.SpellTags(row),"",A.T("Базовые параметры · без улучшений"),A.SpellAction(m)};
+  local damageNames={holy="Урон от светлой магии",fire="Урон огнём",frost="Урон холодом",nature="Урон силами природы",shadow="Урон тёмной магией",arcane="Урон тайной магией",physical="Физический урон"};
+  if m.hit and m.hit>0 then parts[#parts+1]=A.T(damageNames[m.school] or "Урон")..": "..fmt(m.hit); end
   if m.cooldown then parts[#parts+1]=A.T("перезарядка")..": "..fmt(m.cooldown)..A.T(" сек."); end
   if m.radius then parts[#parts+1]=A.T("Радиус")..": "..fmt(m.radius)..A.T(" м"); end
   if m.targets then parts[#parts+1]=A.T("число целей")..": "..m.targets; end
   local timed=m.shapeData and m.shapeData[m.shape]; if timed and timed.secs then parts[#parts+1]=A.T("Длительность")..": "..fmt(timed.secs)..A.T(" сек."); end
-  parts[#parts+1]=A.T("Точное описание с эффектами доступно у взятого умения.");
   return table.concat(parts,"\n");
 end
 function A.BaseFacts(row)
@@ -184,7 +188,7 @@ end
 function A.ItemDescription(row,live)
   for _,g in ipairs(live.gear or {}) do
     local actual=A.ResolveItem(g);
-    if actual and actual.key==row.key and g.text and g.text~="" then return A.T("Текущие значения")..": "..g.text,"current"; end
+    if actual and actual.key==row.key and g.text and g.text~="" then return A.T("Текущие значения").."\n"..g.text,"current"; end
   end
   return A.BaseItemText(row),"base";
 end

@@ -3,7 +3,7 @@
 ## Notes: Reborn build planner, Any alternatives and stat targets. /asr
 ## Author: AlexEnotov
 ## X-License: GPL-3.0-only
-## Version: 0.5.16
+## Version: 0.5.17
 ## Dependencies: AzerothSurvivors
 ## OptionalDeps: AzerothSurvivorsAPI
 ## SavedVariables: ASAdvisorDB
@@ -12,6 +12,7 @@ Mechanics.lua
 Names.lua
 Core.lua
 Locale.lua
+Presentation.lua
 Stats.lua
 Advisor.lua
 UI.lua

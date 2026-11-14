@@ -35,5 +35,16 @@ b.spells[1].rank=0;
 check(A.ScoreSpell(b,offer.cards[2],live,2).score>0,"zero rank means uncapped rather than completed");
 live.spells.exorcism=nil; offer.cards[1].new=1; action=A.NextAction(b,offer,live);
 check(action and action.index==1,"acquiring a missing planned spell retains its existing preference over upgrades");
+b={class="PALADIN",items={},itemRules={},spells={
+ {key="consecration",rank=0,cd=0,damage=0,radius=0,duration=0},
+ {key="exorcism",rank=0},{key="hammer_of_wrath",rank=0},{key="holy_wrath",rank=0},
+ {key="divine_storm",rank=0,cd=3,damage=0,radius=0},
+}};
+live={inRun=true,gear={},spells={consecration={rank=5,cdmax=5.5},holy_wrath={rank=1},divine_storm={rank=6,cdmax=3.1}}};
+offer={kind="spell",cards={{key="consecration",lines="a18",rarity=1},{key="holy_wrath",lines="a18",rarity=1},{key="divine_storm",lines="a25",rarity=2}}};
+action=A.NextAction(b,offer,live);
+check(action and action.index==1,"exact screenshot: uncapped Consecration beats Divine Storm area card with cooldown 3.1 versus goal 3");
+offer.cards[1],offer.cards[3]=offer.cards[3],offer.cards[1]; action=A.NextAction(b,offer,live);
+check(action and action.index==3,"exact screenshot choice follows build priority rather than screen position");
 UnitClass=oldClass; AZS_SPELLTIPS=oldTips;
 print("Passed "..count.." spell priority and zero-goal checks");

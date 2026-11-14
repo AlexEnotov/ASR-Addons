@@ -79,7 +79,7 @@ EN["Круг %d · Боссы: %d"]="Round %d · Bosses: %d";
 EN["Показывать трекер Endless"]="Show Endless tracker";
 EN["Автоматически заменяет штатный трекер только в бесконечном режиме. Выключение возвращает штатный интерфейс."]="Automatically replaces the native tracker in endless mode. Disable to restore the native interface.";
 EN["Враги — за весь забег. Боссы — только в бесконечном режиме."]="Enemies count the entire run. Bosses count endless mode only.";
-EN["Таймер приходит из игры. Следующий босс определяется по очереди карты."]="The countdown comes from the game. The next boss follows the map's boss order.";
+EN["Боссы повторяются в порядке карты."]="Bosses repeat in the map's order.";
 EN["Сбросить положение Endless"]="Reset Endless position";
 EN["Круг %d"]="Round %d"; EN["Уровень %d"]="Level %d";
 EN["Враги: %d  ·  Боссы: %d"]="Enemies: %d  ·  Bosses: %d";

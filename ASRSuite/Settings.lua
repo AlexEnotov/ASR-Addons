@@ -80,7 +80,7 @@ local function RegisterBuiltins()
   A.controls.endlessEnabled=Check(page,"Показывать трекер Endless",function() return ASRSuiteDB.endlessEnabled~=false; end,function(v) ASRSuiteDB.endlessEnabled=v; A.UpdateEndless(0,true); end,40);
   Note(page,"Автоматически заменяет штатный трекер только в бесконечном режиме. Выключение возвращает штатный интерфейс.",82):SetHeight(54);
   Note(page,"Враги — за весь забег. Боссы — только в бесконечном режиме.",146);
-  Note(page,"Таймер приходит из игры. Следующий босс определяется по очереди карты.",196);
+  Note(page,"Боссы повторяются в порядке карты.",196);
   B(page,"Изменить интерфейс",468,29,8,260,function() A.ToggleEdit(); end);
   B(page,"Сбросить положение Endless",468,29,8,304,function() ASRSuiteDB.endlessPosition=nil; if A.endlessFrame then A.endlessFrame.placed=nil; end; A.UpdateEndless(0,true); end);
  end);

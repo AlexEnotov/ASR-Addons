@@ -200,7 +200,7 @@ function A.InitEndless()
  f:SetScript("OnDragStop",function(self) A.StopDrag(self); end);
  f:SetScript("OnEnter",function(self)
   GameTooltip:SetOwner(self,"ANCHOR_LEFT"); GameTooltip:SetText("ASR Endless");
-  GameTooltip:AddLine(A.T("Таймер приходит из игры. Следующий босс определяется по очереди карты."),0.8,0.82,0.85,true);
+  GameTooltip:AddLine(A.T("Боссы повторяются в порядке карты."),0.8,0.82,0.85,true);
   GameTooltip:AddLine(A.T("Враги — за весь забег. Боссы — только в бесконечном режиме."),0.8,0.82,0.85,true);
   GameTooltip:Show();
  end); f:SetScript("OnLeave",function() GameTooltip:Hide(); end);

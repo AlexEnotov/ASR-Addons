@@ -1,0 +1,19 @@
+# Local draft for the next release; not submitted and no public asset exists yet.
+id = "asr-loot"
+name = "ASR Loot"
+author = "AlexEnotov"
+repo = "AlexEnotov/ASR-Addons"
+description = "Permanent boss equipment drops, new acquisitions and duplicate gold."
+category = "Combat"
+license = "GPL-3.0-only"
+folders = ["ASRLoot"]
+requires = []
+
+[source]
+type = "release"
+asset = "ASRLoot-v*.zip"
+
+[reborn]
+status = "untested"
+tested = ""
+notes = ""

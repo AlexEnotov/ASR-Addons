@@ -7,7 +7,7 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 $repoRoot = Split-Path $PSScriptRoot -Parent
 $output = if ([IO.Path]::IsPathRooted($OutputDirectory)) { $OutputDirectory } else { Join-Path $repoRoot $OutputDirectory }
 [IO.Directory]::CreateDirectory($output) | Out-Null
-$modules = [ordered]@{ ASAdvisor = 'ASRAdvisor'; ASRStats = 'ASRStats'; ASRCombatText = 'ASRCombatText'; ASRSuite = 'ASRSuite' }
+$modules = [ordered]@{ ASAdvisor = 'ASRAdvisor'; ASRStats = 'ASRStats'; ASRCombatText = 'ASRCombatText'; ASRSuite = 'ASRSuite'; ASRLoot = 'ASRLoot' }
 $hashes = @()
 foreach ($folder in $modules.Keys) {
     $source = Join-Path $repoRoot $folder
@@ -49,4 +49,4 @@ foreach ($folder in $modules.Keys) {
     $hashes += "$((Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash.ToLowerInvariant())  $name"
 }
 [IO.File]::WriteAllLines((Join-Path $output 'SHA256SUMS'), $hashes, (New-Object Text.UTF8Encoding($false)))
-Write-Output "Built four independent addons for $Tag in $output"
+Write-Output "Built $($modules.Count) independent addons for $Tag in $output"

@@ -18,7 +18,7 @@ never be mistaken for successive values of the common release version.
 
 ## Distribution model
 
-Use one GitHub repository and one release containing four assets:
+Use one GitHub repository and one release containing one asset per standalone addon:
 
 | Store ID | Asset pattern | Folder |
 | --- | --- | --- |
@@ -26,8 +26,14 @@ Use one GitHub repository and one release containing four assets:
 | `asr-stats` | `ASRStats-v*.zip` | `ASRStats` |
 | `asr-combat-text` | `ASRCombatText-v*.zip` | `ASRCombatText` |
 | `asr-suite` | `ASRSuite-v*.zip` | `ASRSuite` |
+| `asr-loot` (unreleased draft) | `ASRLoot-v*.zip` | `ASRLoot` |
 
 Each ID has its own catalogue entry. `requires = []` is deliberate: Suite is optional and the native game addons are not entries to install from this catalogue. Do not add Suite as a mandatory dependency of a standalone module.
+
+The published v0.5.14 release contains the original four addons. ASR Loot is a new,
+locally tested standalone addon with a draft entry only; its first publication and
+catalog submission require the usual release review. Local package previews do
+not create a public version or release.
 
 ## Before the first submission
 

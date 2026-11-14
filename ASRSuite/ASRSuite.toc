@@ -5,7 +5,7 @@
 ## Version: 0.5.5
 ## Notes: Shared ASR settings, interface editor and Endless tracker. /asrhub
 ## Dependencies: AzerothSurvivors, AzerothSurvivorsAPI
-## OptionalDeps: AzerothSurvivorsUI, ASRStats, ASAdvisor, ASRCombatText, SurvivorUI
+## OptionalDeps: AzerothSurvivorsUI, ASRStats, ASAdvisor, ASRCombatText, ASRLoot, SurvivorUI
 ## SavedVariables: ASRSuiteDB
 Language.lua
 Style.lua

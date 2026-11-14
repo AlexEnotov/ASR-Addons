@@ -6,6 +6,20 @@ are summarized with the feature they improve rather than listed individually.
 
 ## Unreleased
 
+### ASR Loot — new standalone addon
+
+- Track permanent armor and weapon acquisitions in two modes: new items only,
+  or all drops including sold duplicates. Display icons, rarity, grouped repeat
+  counts and the current run's total gold from duplicates.
+- Save the current run across reloads and reconcile duplicate gold against the
+  end summary, continuing correctly into Endless. Bound retained entries to 500
+  while preserving totals. Ignore coins and unrelated rewards.
+- Add optional Suite settings, shared language and layout-editor integration;
+  standalone controls remain available through `/asrloot`.
+- Use native item metadata and verified equipment hints. Unrecognized duplicate
+  metadata uses a question-mark/unknown-rarity fallback. Live drop testing is
+  still required; this addon has not been published.
+
 ### ASR Advisor
 
 - Recognize qualified class-specific amulet names, including Inferno amulets,

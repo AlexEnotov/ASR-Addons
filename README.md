@@ -8,8 +8,9 @@ Independent addons for **Azeroth Survivors Reborn**, with an optional shared set
 | ASR Stats | `ASRStats` | `/asrstats config` | Current character stats |
 | ASR Combat Text | `ASRCombatText` | `/asrtext` | Movable combat numbers with per-type settings |
 | ASR Suite | `ASRSuite` | `/asrhub` | Shared settings, compatibility controls, interface editor and automatic Endless tracker |
+| ASR Loot (unreleased) | `ASRLoot` | `/asrloot` | Permanent equipment drops, new items and duplicate gold |
 
-Install only what you need. Advisor, Stats and Combat Text work without Suite. Suite discovers installed modules; it does not require all three. All modules require the game's native AzerothSurvivors addon; some also use AzerothSurvivorsAPI as declared in their TOCs. These native game components are not bundled.
+Install only what you need. Advisor, Stats, Combat Text and Loot work without Suite. Suite discovers installed modules; it does not require all of them. All modules require the game's native AzerothSurvivors addon; some also use AzerothSurvivorsAPI as declared in their TOCs. These native game components are not bundled. Loot is currently in local testing and is not included in the published v0.5.14 assets.
 
 ## Installation
 
@@ -24,6 +25,7 @@ ASAdvisor/       builder source, tests, metadata tools and original glyphs
 ASRStats/        character stats source and tests
 ASRCombatText/   standalone combat text source and tests
 ASRSuite/        optional shared settings source and tests
+ASRLoot/         standalone equipment drop tracker and tests (unreleased)
 tools/          repository checks and release packaging
 catalog/        proposed store entries, not yet submitted
 docs/           release process and resource notes

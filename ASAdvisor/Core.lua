@@ -210,7 +210,7 @@ end
 function A.BanishPlan(b)
   local selected,count={},0;
   for _,p in ipairs(b and b.spells or {}) do if p.banish==true and count<3 then selected[p.key]="manual"; count=count+1; end end
-  for i=#(b and b.spells or {}),1,-1 do local p=b.spells[i]; if count<3 and not selected[p.key] then selected[p.key]="auto"; count=count+1; end end
+  for i=#(b and b.spells or {}),1,-1 do local p=b.spells[i]; if count<3 and not selected[p.key] and (tonumber(p.rank) or 0)>0 then selected[p.key]="auto"; count=count+1; end end
   return selected,count;
 end
 function A.SetBanish(b,key,on)

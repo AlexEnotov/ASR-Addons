@@ -80,6 +80,7 @@ function A.ScoreSpell(b,card,live,index)
     r.score=(p.any and 600 or 1200)-priority*20+(tonumber(card.rarity) or 0); r.reason=p.any and "Any" or A.T("Нужное умение").." · "..A.T("приоритет").." "..priority; r.kind="planned"; return r;
   end
   local stats=A.SpellStats(card.key,live);
+  if p.banish and A.BanishReady(p,stats,"manual") then r.reason=A.T("Умение отмечено для изгнания"); r.kind="banish"; return r; end
   local status=A.GoalStatus(p,stats);
   local goal=tonumber(p.rank) or 0;
   local selective=goal>0;
@@ -184,6 +185,9 @@ function A.Recommend(b,offer,live)
 end
 function A.BanishReady(p,stats,selected)
   if not p or not selected or not stats.rank or stats.rank<=0 then return false; end
+  -- Rank-zero picks always retain unconfigured improvements. Automatic bans
+  -- must not discard those; an explicit manual ban remains a deliberate stop.
+  if selected=="auto" and (tonumber(p.rank) or 0)<=0 then return false; end
   local hasStats=false;
   for _,state in pairs(A.GoalStatus(p,stats)) do hasStats=true; if state~="met" then return false; end end
   if hasStats then return true; end

@@ -24,6 +24,18 @@ p.rank=1; p.cd=1; live.spells.consecration=nil;
 check(score("").score>0,"selective spell is acquired before testing its upgrade goals");
 live.spells.consecration={rank=1,cdmax=2}; check(score("d20").score==0 and score("c10").score>0,"rank one with CD goal selects only CD after acquiring spell");
 p.rank=0; p.radius=10; AZS_SPELLTIPS.consecration="Unknown"; check(score("a18").kind=="unknown" and score("a18d20").score>0,"unknown radius does not fabricate completion or block independent uncapped damage");
+p.rank=0; p.cd=3; p.radius=0; live.spells.consecration={rank=4,cdmax=2.7};
+p.banish=true; check(score("a12").kind=="banish","manual ready-to-ban spell cannot also receive an upgrade recommendation");
+live.spells.consecration.cdmax=4; check(score("a12").score>0,"manual ban does not stop useful upgrades before its conditions are reached");
+p.banish=nil;
+-- Exact screenshot: all three lowest-priority slots are auto; only Storm remains unlimited.
+local stormBuild={class="PALADIN",spells={{key="consecration",rank=0},{key="hammer_of_justice",rank=1},{key="judgement",rank=1},{key="holy_wrath",rank=1},{key="divine_storm",rank=0,cd=3},{key="hammer_of_wrath",rank=1}},items={},itemRules={}};
+local stormLive={inRun=true,spells={holy_wrath={rank=1},divine_storm={rank=4,cdmax=2.7},hammer_of_wrath={rank=1}},gear={}};
+local stormOffer={kind="spell",bn=1,cards={{key="holy_wrath",lines="c10"},{key="divine_storm",lines="a12"},{key="hammer_of_wrath",lines="c7"}}};
+local stormPlan=A.BanishPlan(stormBuild); check(not stormPlan.divine_storm and stormPlan.judgement,"automatic outline skips Storm and fills remaining slot from lower eligible priority");
+AZSCardsFrame:Show(); local bans=A.BanishCandidates(stormBuild,stormOffer,stormLive); local action=A.NextAction(stormBuild,stormOffer,stormLive);
+check(action.kind=="card" and action.index==2 and not bans[2],"screenshot Storm area upgrade is recommended without an automatic ban mark");
+check(bans[1] and bans[3],"finished rank-one spells remain eligible for their independent automatic bans");
 UnitClass=oldClass; AZS_SPELLTIPS=oldTips;
 local ring=A.aliasItem("dragonslayer");
 if not ring then for _,r in ipairs(A.catalog) do local m=A.BaseItemMetrics(r); if r.group=="ring" and m[1] and m[1].kind=="crit" then ring=r; break; end end end

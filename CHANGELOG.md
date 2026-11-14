@@ -34,6 +34,8 @@ are summarized with the feature they improve rather than listed individually.
   and retires completed goals independently; positive rank with stat goals
   accepts only improvements toward those goals. Mixed cards remain useful when
   any allowed improvement remains. Rank-only goals still stop at that rank.
+  Automatic bans preserve rank-zero spells with unlimited improvements; explicit
+  manual bans stop upgrade recommendations once their conditions are satisfied.
 
 - Recognize qualified class-specific amulet names, including Inferno amulets,
   when matching equipped items to a build. Existing amulet priority rules now

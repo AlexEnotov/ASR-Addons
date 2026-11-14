@@ -1,5 +1,5 @@
 -- Original implementation for Reborn's Lua 5.1 interface. No network or executable imports.
-ASAdvisor = { VERSION = "0.5.15", catalog = {}, byKey = {}, aliases = {}, ready = false };
+ASAdvisor = { VERSION = "0.5.16", catalog = {}, byKey = {}, aliases = {}, ready = false };
 local A = ASAdvisor;
 local function trim(s) return (string.gsub(s or "", "^%s*(.-)%s*$", "%1")); end
 A.Trim = trim;
@@ -203,6 +203,20 @@ function A.ItemPriority(b,key,group)
     if row and row.group==group then n=n+1; if k==key then return n; end end
   end
 end
+function A.BanishCount(b)
+  local n=0; for _,p in ipairs(b and b.spells or {}) do if p.banish==true then n=n+1; end end; return n;
+end
+function A.BanishPlan(b)
+  local selected,count={},0;
+  for _,p in ipairs(b and b.spells or {}) do if p.banish==true and count<3 then selected[p.key]="manual"; count=count+1; end end
+  for i=#(b and b.spells or {}),1,-1 do local p=b.spells[i]; if count<3 and not selected[p.key] then selected[p.key]="auto"; count=count+1; end end
+  return selected,count;
+end
+function A.SetBanish(b,key,on)
+  local p=A.FindPick(b,key); if not p then return false; end
+  if on and not p.banish and A.BanishCount(b)>=3 then return false,"В билде можно отметить не больше 3 изгнаний."; end
+  p.banish=on and true or nil; A.dirty=true; return true;
+end
 function A.aliasItem(key)
   for _,g in ipairs({"ring","trinket","amulet","unknown"}) do local r=A.byKey[g..":"..key]; if r then return r; end end
 end
@@ -262,7 +276,7 @@ function A.NormalizeLegacy(code)
 end
 function A.Export(b)
   local picks={};
-  for _,p in ipairs(b.spells) do picks[#picks+1]=table.concat({p.key,p.rank or 0,p.cd or 0,p.damage or 0,p.targets or 0,p.any and 1 or 0,table.concat(p.options or {},"."),enc(p.note or ""),p.radius or 0,p.duration or 0},"~"); end
+  for _,p in ipairs(b.spells) do local fields={p.key,p.rank or 0,p.cd or 0,p.damage or 0,p.targets or 0,p.any and 1 or 0,table.concat(p.options or {},"."),enc(p.note or ""),p.radius or 0,p.duration or 0}; if p.banish then fields[11]=1; end; picks[#picks+1]=table.concat(fields,"~"); end
   local rules={};
   for _,key in ipairs(b.items) do local p=b.itemRules and b.itemRules[key]; if p then
     rules[#rules+1]=table.concat({key,p.group or (A.ItemInfo(b,key) or {}).group or "",p.value or 0,p.value2 or 0,p.any and 1 or 0,table.concat(p.options or {},"."),enc(p.note or ""),p.value3 or 0,p.value4 or 0,p.value5 or 0,p.value6 or 0},"~");
@@ -305,7 +319,7 @@ function A.Decode(code)
     for _,entry in ipairs(split(f[4],",")) do
       local v=split(entry,"~"); local key=v[1];
       local any=modern and v[6]=="1";
-      if (modern and #v~=8 and #v~=9 and #v~=10 or not modern and #v~=5) or (any and not string.match(key,"^@s%d+$")) or (not any and not A.byKey[b.class..":"..key]) or seen[key] or #b.spells>=6 then return nil,"Неизвестное или повторное умение."; end
+      if (modern and #v~=8 and #v~=9 and #v~=10 and #v~=11 or not modern and #v~=5) or (any and not string.match(key,"^@s%d+$")) or (not any and not A.byKey[b.class..":"..key]) or seen[key] or #b.spells>=6 then return nil,"Неизвестное или повторное умение."; end
       seen[key]=true; local nums={};
       for j=2,5 do
         local n=tonumber(v[j]);
@@ -319,7 +333,8 @@ function A.Decode(code)
       if not radius or radius~=radius or radius<0 or radius>1e9 then return nil,"Некорректная цель характеристики."; end
       local duration=0; if v[10] then duration=tonumber(v[10]); end;
       if not duration or duration~=duration or duration<0 or duration>1e9 then return nil,"Некорректная цель характеристики."; end
-      b.spells[#b.spells+1]={key=key,duration=duration,rank=nums[2],cd=nums[3],damage=nums[4],targets=nums[5],radius=radius,any=any or nil,options=opts,note=note};
+      if v[11] and v[11]~="0" and v[11]~="1" then return nil,"Некорректное правило изгнания."; end
+      b.spells[#b.spells+1]={key=key,duration=duration,rank=nums[2],cd=nums[3],damage=nums[4],targets=nums[5],radius=radius,any=any or nil,options=opts,note=note,banish=v[11]=="1" or nil};
     end
   end
   if modern and f[7]~="" then for _,entry in ipairs(split(f[7],",")) do
@@ -342,6 +357,7 @@ function A.Decode(code)
     b.items[#b.items+1]=key;
   end end
   for key,p in pairs(b.itemRules) do if not A.HasItem(b,key) or (not p.any and (not A.aliasItem(key) or A.aliasItem(key).group~=p.group)) then return nil,"Неизвестный или повторный предмет."; end end
+  if A.BanishCount(b)>3 then return nil,"В билде можно отметить не больше 3 изгнаний."; end
   return b;
 end
 function A.Import(code)

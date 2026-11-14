@@ -197,22 +197,32 @@ function A.Recommend(b,offer,live)
   table.sort(list,function(x,y) if x.score~=y.score then return x.score>y.score; end; return x.index<y.index; end);
   return list;
 end
--- Only explicit, fully verified goals permit retiring an already owned spell.
-function A.BanishCandidate(b,offer,live)
-  if offer.kind~="spell" or (tonumber(offer.bn) or 0)<=0 then return; end
-  local best,lowest;
+function A.BanishReady(p,stats,selected)
+  if not p or not selected or not stats.rank or stats.rank<=0 then return false; end
+  local hasStats=false;
+  for _,state in pairs(A.GoalStatus(p,stats)) do hasStats=true; if state~="met" then return false; end end
+  if hasStats then return true; end
+  return (tonumber(p.rank) or 0)<=0 or stats.rank>=tonumber(p.rank);
+end
+-- Independent hints: manual choices reserve slots; remaining slots follow
+-- the reverse build order. Never ban an unowned or unfinished spell.
+function A.BanishCandidates(b,offer,live)
+  local result={};
+  if not b or not live or not live.inRun or b.class~=A.Class() or not offer or offer.kind~="spell" or (tonumber(offer.bn) or 0)<=0 then return result; end
+  local plan=A.BanishPlan(b);
   for i,card in ipairs(offer.cards or {}) do
     local current=live.spells[card.key];
     local p,priority=A.MatchSpell(b,card.key,live);
     local button=_G["AZSCard"..i.."Banish"];
     if p and current and (tonumber(current.rank) or 0)>0 and tonumber(card.new)~=1 and button and button:IsShown() and not button.off then
-      local status=A.GoalStatus(p,A.SpellStats(card.key,live));
-      local hasStats,complete=false,true;
-      for _,value in pairs(status) do hasStats=true; if value~="met" then complete=false; end end
-      if not hasStats then complete=(tonumber(p.rank) or 0)>0 and tonumber(current.rank)>=tonumber(p.rank); end
-      if complete and (not lowest or priority>lowest) then best=i; lowest=priority; end
+      if A.BanishReady(p,A.SpellStats(card.key,live),plan[p.key]) then result[i]=priority; end
     end
   end
+  return result;
+end
+function A.BanishCandidate(b,offer,live)
+  local best,lowest;
+  for i,priority in pairs(A.BanishCandidates(b,offer,live)) do if not lowest or priority>lowest then best=i; lowest=priority; end end
   return best;
 end
 function A.NextAction(b,offer,live)
@@ -227,7 +237,7 @@ function A.NextAction(b,offer,live)
     return {kind="card",index=list[1].index,indices=indices,anyIndices=anyIndices,reason=list[1].reason},list;
   end
   local banish=A.BanishCandidate(b,offer,live);
-  if banish then return {kind="banish",index=banish,reason=A.T("Цели умения выполнены — можно изгнать")},list; end
+  if banish then return {kind="banish",index=banish,reason=A.T("Умение отмечено для изгнания")},list; end
   local reroll=_G.AZSCardsReroll;
   local cost=tonumber(offer.rc); local gold=tonumber(AZS_RUN and AZS_RUN.gold) or 0;
   local canPay=(tonumber(offer.rr) or 0)>0 or (cost~=nil and cost>=0 and gold>=cost);

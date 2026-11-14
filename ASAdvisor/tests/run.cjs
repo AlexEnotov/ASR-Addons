@@ -37,5 +37,6 @@ run(fs.readFileSync(path.join(__dirname,'duration.lua'),'utf8'),'duration');
 run(fs.readFileSync(path.join(__dirname,'suite_opacity.lua'),'utf8'),'suite_opacity');
 run(fs.readFileSync(path.join(__dirname,'tracker_mode.lua'),'utf8'),'tracker_mode');
 run(fs.readFileSync(path.join(__dirname,'module_control.lua'),'utf8'),'module_control');
+run(fs.readFileSync(path.join(__dirname,'ban_plan.lua'),'utf8'),'ban_plan');
 console.log('PASS: Lua 5.1 syntax, game catalog integration, recommendation scenarios, import validation and UI smoke.');
 

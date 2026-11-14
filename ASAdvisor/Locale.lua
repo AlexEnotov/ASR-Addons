@@ -1,5 +1,10 @@
 local A=ASAdvisor;
 local EN={
+  ["Баны"]="Bans",["Изгнать"]="Banish",["Авто"]="Auto",
+  ["Умение отмечено для изгнания"]="Spell marked for banishing",
+  ["В билде можно отметить не больше 3 изгнаний."]="A build can have at most 3 manual banishes.",
+  ["Некорректное правило изгнания."]="Invalid banish rule.",
+  ["До 3 изгнаний. Остальные — с конца приоритетов. Только после получения и выполнения целей."]="Up to 3 banishes. Remaining choices follow reverse priority order. Only after acquiring the spell and meeting its goals.",
   ["Вне билда"]="Outside build",
  ["Модуль"]="Module",
   ["Билды"]="Builds",["Умения"]="Spells",["Кольца"]="Rings",["Аксессуары"]="Trinkets",["Амулеты"]="Amulets",

@@ -222,6 +222,8 @@ local function buildCell(p,x,y)
   local f=button(p,"",34,34,x,y,function(self) if self.row then selectPick(self.row); end end);
   f.icon=texture(f,nil,30,2,-2); f.number=label(f,"",9,2,-2,13);
   f.anyLabel=label(f,"Any",9,2,-22,30,mint); f.anyLabel:Hide();
+  f.banBorder=CreateFrame("Frame",nil,f); f.banBorder:SetPoint("TOPLEFT",f,"TOPLEFT",0,0); f.banBorder:SetSize(34,34);
+  f.banBorder:SetFrameLevel(f:GetFrameLevel()+4); f.banBorder:SetBackdrop({edgeFile=BORDER,edgeSize=8}); f.banBorder:SetBackdropBorderColor(1,0.25,0.2,0.75); f.banBorder:Hide();
   f.remove=button(f,"×",20,20,29,3,function(self)
     local cell=self:GetParent(); local b=edited(); if b and cell.row then
       saveInline(); for _,e in pairs(main.inline.fields) do e:ClearFocus(); end
@@ -239,6 +241,8 @@ local function fillPlanCell(cell,row,n)
   if not row then cell:Hide(); return; end
   cell.icon:SetTexture(A.Icon(row.icon)); cell.number:SetText(tostring(n));
   if row.any then cell.anyLabel:Show(); else cell.anyLabel:Hide(); end
+  local plan=row.group=="spell" and A.BanishPlan(edited());
+  if plan and plan[row.key] then cell.banBorder:SetBackdropBorderColor(1,0.25,0.2,plan[row.key]=="manual" and 0.85 or 0.45); cell.banBorder:Show(); else cell.banBorder:Hide(); end
   cell:SetBackdropBorderColor(unpack(view.selected==row.key and view.group==row.group and mint or {0.14,0.24,0.28,0.7})); cell:Show();
 end
 local function showMode(mode)
@@ -350,6 +354,15 @@ local function createMain()
   main.inline=box(w,nil,652,100,4,-365); main.inline.fields={}; main.inline.captions={};
   main.inline.title=label(main.inline,"",11,9,-8,420,mint); main.inline.title:SetHeight(16);
   main.inline.remove=button(main.inline,"",58,22,580,-5,function() local row=selectedRow(); if row then saveInline(); A.RemovePick(edited(),row.key,row.group); view.selected=nil; refresh(); end end);
+  main.inline.banish=CreateFrame("CheckButton",nil,main.inline,"UICheckButtonTemplate"); main.inline.banish:SetSize(24,24);
+  main.inline.banish.caption=label(main.inline.banish,"",10,27,-4,220);
+  main.inline.banish:SetScript("OnClick",function(self)
+    if saveInline()==false then refresh(); return; end
+    local row,p=selectedRow(); if not p or row.group~="spell" then return; end
+    local value=self:GetChecked(); local ok,err=A.SetBanish(edited(),p.key,value==true or value==1);
+    status(err or ""); refresh();
+  end);
+  hint(main.inline.banish,"До 3 изгнаний. Остальные — с конца приоритетов. Только после получения и выполнения целей.");
   for i,f in ipairs({{"rank","Ранг"},{"cd","КД ≤, сек."},{"damage","Урон ≥"},{"targets","Целей ≥"},{"radius","Радиус ≥, м"},{"duration","Длительность ≥, сек."},{"value","Бонус 1 ≥"},{"value2","Бонус 2 ≥"},{"value3","Бонус 3 ≥"},{"value4","Бонус 4 ≥"},{"value5","Бонус 5 ≥"},{"value6","Бонус 6 ≥"}}) do
     main.inline.captions[f[1]]=label(main.inline,"",9,9+(i-1)*100,-7,96,muted);
     local e=edit(main.inline,88,23,9+(i-1)*100,-23); main.inline.fields[f[1]]=e;
@@ -548,7 +561,7 @@ function A.Redraw()
   local plan=nav+25; local spellY=plan+20; local itemLabel=spellY+40; local itemY=itemLabel+17; local inlineY=itemY+44;
   local amuletColumns=math.max(1,math.floor((workWidth-172)/40)); local amulets=0; for _,key in ipairs(b and b.items or {}) do local row=A.ItemInfo(b,key); if row and row.group=="amulet" then amulets=amulets+1; end end
   inlineY=inlineY+math.max(0,math.ceil(amulets/amuletColumns)-1)*40;
-  local height=view.mode=="preview" and math.max(340,ASAdvisorDB.options.previewHeight or 520) or math.max(view.mode=="editor" and (inlineY+320+110) or 540,ASAdvisorDB.options.plannerHeight or 0);
+  local height=view.mode=="preview" and math.max(340,ASAdvisorDB.options.previewHeight or 520) or math.max(view.mode=="editor" and (inlineY+352+110) or 540,ASAdvisorDB.options.plannerHeight or 0);
   main:SetHeight(height); main.side:SetHeight(height-112); main.work:SetSize(workWidth,height-100); move(main.status,280,66); main.status:SetWidth(width-310); main.status:SetHeight(14); A.ApplyLayout();
   move(main.close,width-56,28); move(main.settingsButton,width-178,28); move(main.descriptionButton,width-306,28); move(main.previewButton,width-420,28);
   main.name:SetWidth(workWidth-290); move(main.classLabel,workWidth-274,9); main.previewButton.text:SetText(A.T("Превью"));
@@ -647,7 +660,8 @@ function A.Redraw()
     end
     main.planLeft.text:SetText(A.T("Раньше")); main.planRight.text:SetText(A.T("Позже")); main.inline.remove.text:SetText(A.T("Убрать")); main.inline.remove.text:SetTextColor(1,0.6,0.55);
     move(main.planHint,340,spellY+4); move(main.inline,4,inlineY);
-    main.planHeading:SetText(A.T("Ваш план").." · "..#(b and b.spells or {}).." / 6"); main.planHint:Hide();
+    local _,banTotal=A.BanishPlan(b); local banManual=A.BanishCount(b);
+    main.planHeading:SetText(A.T("Ваш план").." · "..#(b and b.spells or {}).." / 6 · "..A.T("Баны")..": "..banTotal.."/3"..(banTotal>banManual and " ("..A.T("Авто")..": "..(banTotal-banManual)..")" or "")); main.planHint:Hide();
     if view.editAny then main.planHint:SetText(A.T("Any: отмечай варианты в каталоге. Пустой список — любой.")); end
     for i,cell in ipairs(main.spellCells) do local p=b and b.spells[i]; move(cell,4+(i-1)*40,spellY); fillPlanCell(cell,p and A.Info(b,p.key,"spell"),i); end
     for _,g in ipairs({"ring","trinket","amulet"}) do
@@ -688,10 +702,15 @@ function A.Redraw()
         for i=1,math.min(6,count) do fieldOrder[#fieldOrder+1]=A.ItemGoalFields[i]; end
       end
     end
+    local banSpace=p and row.group=="spell" and 28 or 0;
+    if banSpace>0 then
+      move(main.inline.banish,7,62); main.inline.banish:SetChecked(p.banish==true); main.inline.banish.caption:SetWidth(inspectorWidth-48);
+      local plan=A.BanishPlan(b); main.inline.banish.caption:SetText(A.T("Изгнать")..(plan[p.key]=="auto" and " · "..A.T("Авто") or "").." ("..A.BanishCount(b).."/3)"); main.inline.banish:Show();
+    else main.inline.banish:Hide(); end
     for i,key in ipairs(fieldOrder) do main.inline.active[key]=true; local step=(inspectorWidth-18)/2; local column=(i-1)%2; local line=math.floor((i-1)/2);
-      move(main.inline.fields[key],9+column*step,81+line*44); main.inline.fields[key]:SetWidth(step-9); move(main.inline.captions[key],9+column*step,64+line*44); main.inline.captions[key]:SetWidth(step-8); main.inline.captions[key]:SetHeight(16);
+      move(main.inline.fields[key],9+column*step,81+banSpace+line*44); main.inline.fields[key]:SetWidth(step-9); move(main.inline.captions[key],9+column*step,64+banSpace+line*44); main.inline.captions[key]:SetWidth(step-8); main.inline.captions[key]:SetHeight(16);
     end
-    local factsY=116+math.max(0,math.ceil(#fieldOrder/2)-1)*44; move(main.inline.base,9,factsY); main.inline.base:SetHeight(28); move(main.inline.current,9,factsY+34); main.inline.current:SetHeight(48); move(main.inline.help,9,factsY+88); main.inline.help:SetHeight(28); move(main.inline.any,9,factsY+68); main.inline.any:SetWidth(inspectorWidth-18);
+    local factsY=116+banSpace+math.max(0,math.ceil(#fieldOrder/2)-1)*44; move(main.inline.base,9,factsY); main.inline.base:SetHeight(28); move(main.inline.current,9,factsY+34); main.inline.current:SetHeight(48); move(main.inline.help,9,factsY+88); main.inline.help:SetHeight(28); move(main.inline.any,9,factsY+68); main.inline.any:SetWidth(inspectorWidth-18);
     main.bindingInline=true;
     for key,e in pairs(main.inline.fields) do
       if main.inline.active[key] then e:Show(); main.inline.captions[key]:Show(); if e.boundPick~=p or not e:HasFocus() then e:SetText(tostring(p[key] or 0)); e.pending=false; end; e.boundPick=p;
@@ -886,8 +905,9 @@ function A.RefreshUI()
   for _,kind in ipairs({"reroll","skip"}) do local mark=actionMark(kind); if mark then
     if not editorOpen and action and action.kind==kind then mark:SetAlpha(0.88+0.12*math.sin(GetTime()*4)); mark:Show(); else mark:Hide(); end
   end end
+  local bans=visible and A.BanishCandidates(b,AZS_CARDS,live) or {};
   for i=1,4 do local mark=actionMark("banish",i); if mark then
-    if not editorOpen and action and action.kind=="banish" and action.index==i then mark:SetAlpha(0.88+0.12*math.sin(GetTime()*4)); mark:Show(); else mark:Hide(); end
+    if not editorOpen and bans[i] then mark:SetAlpha(0.88+0.12*math.sin(GetTime()*4)); mark:Show(); else mark:Hide(); end
   end end
   tracker:SetBackdropColor(0.04,0.04,0.045,panelOpacity(ASAdvisorDB.options.trackerOpacity));
   tracker.builds.text:SetText(b and b.name or A.T("Выбрать билд")); tracker.builds.text:SetJustifyH("LEFT"); tracker.builds.text:SetHeight(14);

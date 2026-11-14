@@ -1,6 +1,8 @@
 unpack=table.unpack;
 table.getn=function(t) return #t; end;
 local Frame={}; Frame.__index=Frame;
+function Frame:SetChecked(value) self.checked=value; end
+function Frame:GetChecked() return self.checked; end
 local allowed={"SetFont","SetJustifyH","SetJustifyV","SetTextColor","SetBackdrop","SetBackdropColor","SetBackdropBorderColor","SetMovable","SetClampedToScreen","EnableMouse","RegisterForDrag","StartMoving","StopMovingOrSizing","SetAutoFocus","SetTextInsets","SetMaxLetters","SetMultiLine","SetVertexColor","SetTexCoord","SetTexture","HighlightText","SetScrollChild","EnableMouseWheel"};
 allowed[#allowed+1]="SetGradientAlpha";
 for _,name in ipairs({"SetResizable","SetMinResize","SetMaxResize","StartSizing"}) do allowed[#allowed+1]=name; end

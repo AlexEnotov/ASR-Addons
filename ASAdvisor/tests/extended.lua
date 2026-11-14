@@ -161,7 +161,8 @@ check(A.NextAction(retireBuild,retireHand,retireLive).kind=="card","useful upgra
 retireBuild.spells[2].rank=1; retireBuild.spells[2].cd=8;
 check(A.BanishCandidate(retireBuild,retireHand,retireLive)==1,"unfinished cooldown target cannot be banished");
 retireBuild.spells[1].rank=0;
-check(A.BanishCandidate(retireBuild,retireHand,retireLive)==nil,"uncapped rank is not a completed goal");
+check(A.BanishCandidate(retireBuild,retireHand,retireLive)==1,"an owned uncapped spell selected by the ban plan is ready to banish");
+retireBuild.spells[1].rank=2;
 retireBuild.spells[2].damage=100; retireLive.spells.rapid_fire.cdmax=8;
 check(A.BanishCandidate(retireBuild,retireHand,retireLive)==nil,"unknown damage target cannot be treated as completed");
 retireBuild.spells[1].rank=1;

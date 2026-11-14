@@ -784,6 +784,12 @@ local function pinTracker(pos)
   tracker:ClearAllPoints(); tracker:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",pos.left/ratio,pos.top/ratio);
   ASAdvisorDB.options.trackerAnchor=pos;
 end
+local function rankBadge(icon)
+  local badge=CreateFrame("Frame",nil,icon); badge:SetSize(14,12); badge:SetPoint("BOTTOMRIGHT",icon,"BOTTOMRIGHT",1,-1); badge:EnableMouse(false);
+  badge:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8"}); badge:SetBackdropColor(0,0,0,0.86);
+  local rank=label(badge,"",9,0,0,14,{1,1,1,1}); rank:ClearAllPoints(); rank:SetPoint("CENTER",badge,"CENTER",0,0); rank:SetHeight(12); rank:SetJustifyH("CENTER"); rank:SetJustifyV("MIDDLE"); rank:SetFont(FONT,9,"OUTLINE");
+  badge:Hide(); icon.rankBadge=badge; icon.rank=rank;
+end
 local function createTracker()
   tracker=box(UIParent,"ASAdvisorTracker",220,64,nil,nil,0.42); tracker:SetBackdrop(windowBackdrop()); tracker:SetBackdropBorderColor(0.75,0.75,0.77,1); tracker:SetFrameStrata("HIGH"); movable(tracker,"trackerPos");
   if not ASAdvisorDB.options.trackerPos then tracker:ClearAllPoints(); tracker:SetPoint("TOPLEFT",UIParent,"TOPLEFT",18,-150); end
@@ -793,7 +799,7 @@ local function createTracker()
   tracker.icons={};
   for i=1,6 do
     local f=CreateFrame("Frame",nil,tracker); f:SetSize(23,23); f:SetPoint("TOPLEFT",tracker,"TOPLEFT",8+(i-1)*34,-30); f:EnableMouse(true);
-    f.icon=texture(f,nil,23,0,0); f.rank=label(f,"",8,11,-14,18);
+    f.icon=texture(f,nil,23,0,0); rankBadge(f);
     f:SetScript("OnEnter",function(self) if self.row then itemTip(tracker,self,self.row); end end); f:SetScript("OnLeave",function() hideTip(tracker); end); tracker.icons[i]=f;
   end
   tracker.empty=label(tracker,"",10,8,-32,173,muted);
@@ -806,7 +812,7 @@ local function createTracker()
     r.name=label(r,"",10,31,-2,235); r.rank=label(r,"",9,240,0,38,muted); r.rank:SetJustifyH("RIGHT"); r.rank:SetHeight(13); r.detail=label(r,"",9,31,-18,235,muted);
     r:SetScript("OnEnter",function(self) if self.row then itemTip(tracker,self,self.row); end end); r:SetScript("OnLeave",function() hideTip(tracker); end); tracker.rows[i]=r;
     if i>6 then
-      local f=CreateFrame("Frame",nil,tracker); f:SetSize(23,23); f:EnableMouse(true); f.icon=texture(f,nil,23,0,0); f.rank=label(f,"",8,11,-14,18);
+      local f=CreateFrame("Frame",nil,tracker); f:SetSize(23,23); f:EnableMouse(true); f.icon=texture(f,nil,23,0,0); rankBadge(f);
       f:SetScript("OnEnter",function(self) if self.row then itemTip(tracker,self,self.row); end end); f:SetScript("OnLeave",function() hideTip(tracker); end); tracker.icons[i]=f;
     end
   end
@@ -972,7 +978,8 @@ function A.RefreshUI()
       move(f,20+(index%6)*26,y); f.outside=b and not entry.planned;
       if not f.warning then f.warning=label(f,"!",9,16,0,8,{1,0.68,0.28,1}); end
       if f.outside then f.warning:Show(); else f.warning:Hide(); end
-      f.row=entry.row; f.icon:SetTexture(A.Icon(entry.row.icon)); f:SetAlpha(entry.owned and 1 or 0.25); f.rank:SetText(entry.rank and tostring(entry.rank) or ""); f:Show();
+      f.row=entry.row; f.icon:SetTexture(A.Icon(entry.row.icon)); f:SetAlpha(entry.owned and 1 or 0.25); f.rank:SetText(entry.rank and tostring(entry.rank) or "");
+      if entry.rank and entry.rank>0 then local badgeWidth=math.max(14,f.rank:GetStringWidth()+4); f.rankBadge:SetWidth(badgeWidth); f.rank:SetWidth(badgeWidth); f.rankBadge:Show(); else f.rankBadge:Hide(); end; f:Show();
     end end
   end
   if #entries==0 then tracker.empty:SetText(A.T("Открой /asa и выбери билд")); tracker.empty:Show(); end

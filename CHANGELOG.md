@@ -39,6 +39,8 @@ are summarized with the feature they improve rather than listed individually.
 - Present base spell mechanics as readable descriptions before acquisition,
   alongside current descriptions when available. Include targeting range and
   descriptive ability-role tags without repeating target/projectile counts.
+- Keep compact tracker spell ranks readable with outlined white digits on a
+  dark corner badge that expands for multi-digit ranks.
 - Improve tooltip readability with class and damage-school colors, distinct
   base/current headings, measured text wrapping and numeric units kept together.
 

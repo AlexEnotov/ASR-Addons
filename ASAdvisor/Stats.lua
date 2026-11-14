@@ -47,6 +47,12 @@ local baseLabels={damage="Урон",cooldown="Сокращение КД",luck="�
 local flatBase={regen=true,kill_heal=true,targets=true,lives=true};
 local function fmt(v) return (string.gsub(string.gsub(string.format("%.2f",v),"0+$",""),"%.$","")); end
 local function say(ru,en,...) return string.format(ASAdvisorDB.options.language=="en" and en or ru,...); end
+function A.SpellEffects(m)
+  local lines={};
+  local riders={slow={"Замедление","Slow"},root={"Обездвиживание","Root"},stun={"Оглушение","Stun"},weaken={"Ослабление","Weaken"},flee={"Страх","Fear"},mend={"Лечение","Healing"},drain={"Похищение здоровья","Health drain"},guard={"Защита","Protection"}};
+  for key,p in pairs(m.rider or {}) do local title=riders[key]; if title then lines[#lines+1]=say(title[1],title[2])..(p.pct and " "..fmt(p.pct).."%" or "")..(p.secs and say(" на %s сек."," for %s sec.",fmt(p.secs)) or "").."."; end end
+  return table.concat(lines," ");
+end
 function A.SpellAction(m)
   local s=m.shapeData and m.shapeData[m.shape] or {}; local action;
   if m.shape=="strike" or m.shape=="execute" then action=say("Поражает до %s противников.","Strikes up to %s enemies.",s.targets or 1);
@@ -80,9 +86,41 @@ function A.SpellAction(m)
   if s.length then lines[#lines+1]=say("Длина конуса: %s м.","Cone length: %s yd.",fmt(s.length)); end
   if s.ticks then lines[#lines+1]=say("Число тиков за время действия: %s.","Ticks over the duration: %s.",s.ticks); end
   if s.cap then lines[#lines+1]=say("Максимум наложений: %s.","Maximum stacks: %s.",s.cap); end
-  local riders={slow={"Замедление","Slow"},root={"Обездвиживание","Root"},stun={"Оглушение","Stun"},weaken={"Ослабление","Weaken"},flee={"Страх","Fear"},mend={"Лечение","Healing"},drain={"Похищение здоровья","Health drain"},guard={"Защита","Protection"}};
-  for key,p in pairs(m.rider or {}) do local title=riders[key]; if title then lines[#lines+1]=say(title[1],title[2])..(p.pct and " "..fmt(p.pct).."%" or "")..(p.secs and say(" на %s сек."," for %s sec.",fmt(p.secs)) or "").."."; end end
+  local effects=A.SpellEffects(m); if effects~="" then lines[#lines+1]=effects; end
   return table.concat(lines,"\n");
+end
+function A.BaseSpellProse(m)
+  local s=m.shapeData and m.shapeData[m.shape] or {}; local lines={};
+  local schoolRU={holy="урона от светлой магии",fire="урона огнём",frost="урона холодом",nature="урона силами природы",shadow="урона тёмной магией",arcane="урона тайной магией",physical="физического урона"};
+  local schoolEN={holy="holy damage",fire="fire damage",frost="frost damage",nature="nature damage",shadow="shadow damage",arcane="arcane damage",physical="physical damage"};
+  local damage=say("%s ед. %s","%s %s",fmt(m.hit or 0),ASAdvisorDB.options.language=="en" and (schoolEN[m.school] or "damage") or (schoolRU[m.school] or "урона"));
+  local range=(m.range or 0)>0 and say(" в радиусе %s м"," within %s yd",fmt(m.range)) or "";
+  local specific=true;
+  if m.shape=="strike" or m.shape=="execute" then
+    if (s.targets or 1)==1 then lines[#lines+1]=say("Поражает противника%s, нанося %s.","Strikes an enemy%s for %s.",range,damage);
+    else lines[#lines+1]=say("Поражает до %s противников%s, нанося каждому %s.","Strikes up to %s enemies%s for %s each.",s.targets,range,damage); end
+  elseif m.shape=="ground" then
+    lines[#lines+1]=say("Создаёт область периодического урона радиусом %s м на %s сек.","Creates a periodic damage area with a %s yd radius for %s sec.",fmt(s.radius or m.radius or 0),fmt(s.secs or 0));
+    lines[#lines+1]=say("Каждый противник в области получает %s каждые %s сек.","Each enemy in the area takes %s every %s sec.",damage,fmt(s.every or 1));
+    if (m.range or 0)>0 then lines[#lines+1]=say("Область размещается на расстоянии до %s м.","The area can be placed up to %s yd away.",fmt(m.range)); end
+  elseif m.shape=="nova" then
+    lines[#lines+1]=say("Наносит %s всем противникам в круговой области радиусом %s м.","Deals %s to all enemies in a circular area with a %s yd radius.",damage,fmt(s.radius or m.radius or 0));
+  elseif m.shape=="cone" then
+    lines[#lines+1]=say("Поражает противников в конусе длиной %s м перед персонажем, нанося %s.","Hits enemies in a %s yd cone in front of the character for %s.",fmt(s.length or m.range or 0),damage);
+  elseif m.shape=="missiles" then
+    lines[#lines+1]=say("Выпускает снаряды по противникам%s. Количество снарядов: %s. Каждый наносит %s.","Fires projectiles at enemies%s. Number of projectiles: %s. Each deals %s.",range,s.count or 1,damage);
+  elseif m.shape=="chain" then
+    lines[#lines+1]=say("Поражает противника%s и перескакивает между соседними целями, нанося %s при попадании.","Hits an enemy%s and jumps between nearby targets, dealing %s on impact.",range,damage);
+    if s.jumps then lines[#lines+1]=say("Количество перескоков: %s; радиус перескока: %s м.","Number of jumps: %s; jump radius: %s yd.",s.jumps,fmt(s.radius or m.radius or 0)); end
+  else
+    specific=false; lines[#lines+1]=(string.gsub(A.SpellAction(m),"\n"," "));
+    if m.hit and m.hit>0 then lines[#lines+1]=say("Базовый урон эффекта — %s.","Base effect damage is %s.",damage); end
+    if (m.range or 0)>0 then lines[#lines+1]=say("Дальность действия — %s м.","Effective range is %s yd.",fmt(m.range)); end
+    if m.radius and m.radius>0 then lines[#lines+1]=say("Радиус действия — %s м.","Effect radius is %s yd.",fmt(m.radius)); end
+  end
+  if specific then local effects=A.SpellEffects(m); if effects~="" then lines[#lines+1]=effects; end end
+  if m.cooldown then lines[#lines+1]=say("Срабатывает каждые %s сек.","Triggers every %s sec.",fmt(m.cooldown)); end
+  return table.concat(lines," ");
 end
 function A.BaseItemText(row)
   local m=ASAdvisorMechanics.items[row.key]; if not m then return A.T("Базовые данные предмета недоступны."); end
@@ -150,14 +188,7 @@ function A.SpellDescription(row,baseOnly)
   if raw and A.Snapshot().spells[row.key] then return A.T("Текущие значения").."\n"..raw; end
   local m=ASAdvisorMechanics.spells and ASAdvisorMechanics.spells[row.key];
   if not m then return A.T("Базовое описание пока недоступно."); end
-  local parts={A.SpellTags(row),"",A.T("Базовые параметры · без улучшений"),A.SpellAction(m)};
-  local damageNames={holy="Урон от светлой магии",fire="Урон огнём",frost="Урон холодом",nature="Урон силами природы",shadow="Урон тёмной магией",arcane="Урон тайной магией",physical="Физический урон"};
-  if m.hit and m.hit>0 then parts[#parts+1]=A.T(damageNames[m.school] or "Урон")..": "..fmt(m.hit); end
-  if m.cooldown then parts[#parts+1]=A.T("перезарядка")..": "..fmt(m.cooldown)..A.T(" сек."); end
-  if m.radius then parts[#parts+1]=A.T("Радиус")..": "..fmt(m.radius)..A.T(" м");
-  elseif m.range and m.range>0 then parts[#parts+1]=A.T("Дальность")..": "..fmt(m.range)..A.T(" м"); end
-  if m.targets then parts[#parts+1]=A.T("число целей")..": "..m.targets; end
-  local timed=m.shapeData and m.shapeData[m.shape]; if timed and timed.secs then parts[#parts+1]=A.T("Длительность")..": "..fmt(timed.secs)..A.T(" сек."); end
+  local parts={A.SpellTags(row),"",A.T("Базовые параметры · без улучшений"),A.BaseSpellProse(m)};
   return table.concat(parts,"\n");
 end
 function A.BaseFacts(row)

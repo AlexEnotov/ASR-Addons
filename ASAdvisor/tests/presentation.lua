@@ -9,12 +9,12 @@ check(string.find(A.SpellTags(A.byKey["MAGE:cone_of_cold"]),"Конус",1,true)
 check(string.find(A.SpellTags(A.byKey["PALADIN:holy_light"]),"Исцеление",1,true),"healing is identified without guessing from its icon");
 check(string.find(A.SpellTags(A.byKey["PALADIN:sacred_shield"]),"Щит",1,true),"shield role comes from spell shape");
 local description=A.SpellDescription(exorcism,true);
-check(string.find(description,"Поражает до 1",1,true) and string.find(description,"Урон от светлой магии: 135",1,true),"base action and school-specific values are available before acquiring the spell");
+check(string.find(description,"Поражает противника в радиусе 25 м",1,true) and string.find(description,"135 ед. урона от светлой магии",1,true) and string.find(description,"каждые 3.5 сек.",1,true),"base description is a complete sentence with targeting, range, school damage and cooldown before acquisition");
 check(not string.find(description,"Точное описание с эффектами",1,true),"base description does not claim that description is unavailable");
 local hammer=A.byKey["PALADIN:hammer_of_the_righteous"];
-check(string.find(A.SpellDescription(hammer,true),"Дальность: 6 м",1,true) and string.find(A.BaseFacts(hammer),"Дальность 6 м",1,true),"Hammer of the Righteous includes its six-unit target range in full and compact base descriptions");
+check(string.find(A.SpellDescription(hammer,true),"до 3 противников в радиусе 6 м",1,true) and string.find(A.BaseFacts(hammer),"Дальность 6 м",1,true),"Hammer of the Righteous includes its six-unit target range in full and compact base descriptions");
 local ground=A.SpellDescription(A.byKey["HUNTER:frost_trap"],true);
-check(string.find(ground,"Радиус: 10 м",1,true) and not string.find(ground,"Дальность: 6 м",1,true),"ground effect radius remains distinct from its placement range");
+check(string.find(ground,"радиусом 10 м",1,true) and string.find(ground,"на расстоянии до 6 м",1,true),"ground effect radius remains distinct from its placement range");
 local line="Урон от светлой магии: 135 · Урон горением: 50"; local painted=A.ColorTooltipLine(line,exorcism);
 check(A.Plain(painted)==line and string.find(painted,"|cffffe58a",1,true) and string.find(painted,"|cffff9360",1,true),"school and burning colors preserve all displayed text");
 check(string.find(A.ColorTooltipLine("Текущие значения",cons),"|cff8cd123",1,true) and string.find(A.ColorTooltipLine("Базовые параметры · без улучшений",cons),"|cffd5bc83",1,true),"base and current sections have distinct heading colors");
@@ -33,6 +33,6 @@ for _,part in ipairs(ui.tip.lines) do check(not string.find(part,"|cff",1,true),
 cell.scripts.OnLeave(cell); A.ToggleUI();
 A.SetLanguage("en");
 check(string.find(A.SpellTags(A.byKey["PALADIN:consecration"]),"AOE",1,true),"English tags use AOE");
-check(string.find(A.SpellDescription(A.byKey["PALADIN:exorcism"],true),"Holy damage: 135",1,true),"English base description uses the spell school");
+check(string.find(A.SpellDescription(A.byKey["PALADIN:exorcism"],true),"135 holy damage",1,true),"English base description uses the spell school");
 A.SetLanguage(oldLanguage);
 print("Passed "..n.." tooltip colors, spell roles and base description checks");

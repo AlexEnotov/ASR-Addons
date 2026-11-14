@@ -2,7 +2,7 @@
 
 **Планировщик билдов и подсказки для Azeroth Survivors Reborn.**
 
-Автор: **AlexEnotov** · Версия: **0.5.19** · Интерфейс: **Русский / English**
+Автор: **AlexEnotov** · Версия: **0.5.20** · Интерфейс: **Русский / English**
 
 [Скачать последнюю версию](https://github.com/AlexEnotov/ASR-Advisor/releases/latest) · [Сообщить об ошибке](https://github.com/AlexEnotov/ASR-Advisor/issues)
 

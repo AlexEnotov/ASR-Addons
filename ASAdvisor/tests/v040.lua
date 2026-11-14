@@ -47,7 +47,7 @@ local c=A.Copy(b); c.spells[3].radius=15.5; c.itemRules.south_seas_kelp.value3=7
 local decoded,err=A.Decode(A.Export(c));
 check(decoded and decoded.spells[3].radius==15.5 and decoded.itemRules.south_seas_kelp.value3==7 and decoded.itemRules.south_seas_kelp.value6==9,err or "radius and six jewelry goals survive export/import");
 local rule=A.ItemRule(c,"south_seas_kelp"); rule.value=0; rule.value2=0; rule.value3=30; rule.value6=0;
-local itemLive={inRun=true,spells={},gear={{slot="amulet",name="Pristine Enchanted South Seas Kelp",text="+30% luck · +25% gold · +30% damage"}}};
+local itemLive={inRun=true,spells={},stats={damage=30},gear={{slot="amulet",name="Pristine Enchanted South Seas Kelp",text="+30% luck · +25% gold · +30% damage"}}};
 check(A.ScoreItem(c,{name="Pristine Enchanted South Seas Kelp",mode="grow"},itemLive,1).score==0,"third jewelry goal participates in completion checks");
 local before=#b.spells; click(p.spellCells[2].remove);
 check(#b.spells==before-1,"plan removal takes one click");

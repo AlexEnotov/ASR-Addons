@@ -27,6 +27,14 @@ are summarized with the feature they improve rather than listed individually.
 
 ### ASR Advisor
 
+- Use total character stats for jewelry build goals and current values in the
+  editor, rather than the bonus printed on an individual item. Missing totals
+  remain unknown. Preserve per-item goals, priority and global-cap rules.
+- Separate spell goal modes: rank zero keeps unconfigured improvements unlimited
+  and retires completed goals independently; positive rank with stat goals
+  accepts only improvements toward those goals. Mixed cards remain useful when
+  any allowed improvement remains. Rank-only goals still stop at that rank.
+
 - Recognize qualified class-specific amulet names, including Inferno amulets,
   when matching equipped items to a build. Existing amulet priority rules now
   apply to these items correctly.

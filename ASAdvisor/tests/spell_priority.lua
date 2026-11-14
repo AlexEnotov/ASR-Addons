@@ -28,7 +28,7 @@ b.spells[1],b.spells[2]=b.spells[2],b.spells[1]; action=A.NextAction(b,offer,liv
 check(action and action.index==1,"moving another spell earlier changes the recommendation");
 b.spells[1],b.spells[2]=b.spells[2],b.spells[1];
 b.spells[1].cd=5; action=A.NextAction(b,offer,live);
-check(action and action.index==1,"completed explicit goals still retire the higher-priority spell");
+check(action and action.index==1,"rank-zero spell rejects CD-only card after its CD goal is completed");
 b.spells[1].cd=0; b.spells[1].rank=3;
 check(A.ScoreSpell(b,offer.cards[2],live,2).score==0,"completed explicit rank still stops upgrades when there are no stat goals");
 b.spells[1].rank=0;

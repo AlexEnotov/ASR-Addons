@@ -23,7 +23,7 @@ check(decoded.spells[2].any and #decoded.spells[2].options==2 and decoded.spells
 check(decoded.itemRules[anyRing].any and decoded.itemRules[anyRing].options[1]=="quick_strike","custom Any item roundtrip");
 local corrupt=string.sub(code,1,-2)..(string.sub(code,-1)=="0" and "1" or "0");
 check(not A.Decode(corrupt),"modern corrupted checksum rejected");
-local live={inRun=true,spells={auto_shot={key="auto_shot",rank=5,cdmax=1}},gear={{slot="ring",name="Кольцо Аккурии",icon="INV_Jewelry_Ring_15",text="+20% damage"}}};
+local live={inRun=true,stats={damage=20},spells={auto_shot={key="auto_shot",rank=5,cdmax=1}},gear={{slot="ring",name="Кольцо Аккурии",icon="INV_Jewelry_Ring_15",text="+20% damage"}}};
 local good={key="kill_shot",new=1,rank=1,rarity=1,lines="d18"};
 check(A.ScoreSpell(b,good,live,1).score>0,"Any accepts one configured option after fixed picks acquired");
 check(A.ScoreSpell(b,{key="black_arrow",new=1},live,1).score==0,"custom Any rejects unlisted spell");
@@ -41,14 +41,14 @@ check(A.ScoreSpell(all,{key="legendary_dash",new=1},{inRun=true,spells={auto_sho
 check(A.ScoreItem(b,{name="Quick Strike Ring",mode="new"},live,1).score>0,"Any ring accepts configured alternative");
 check(A.ScoreItem(b,{name="Тяжёлое кольцо из черного железа",mode="new"},live,1).score==0,"Any ring rejects unlisted item");
 check(A.ScoreItem(b,{name="Кольцо Аккурии",mode="grow"},live,1).score>0,"unmet jewelry target recommends upgrade");
-live.gear[1].text="+30% damage";
+live.gear[1].text="+30% damage"; live.stats.damage=30;
 check(A.ScoreItem(b,{name="Кольцо Аккурии",mode="grow"},live,1).score==0,"jewelry target reached stops upgrading");
-live.gear[1].text="Unclear multiple effects 3 and 4";
+live.gear[1].text="Unclear multiple effects 3 and 4"; live.stats={};
 check(A.ScoreItem(b,{name="Кольцо Аккурии",mode="grow"},live,1).kind=="unknown","ambiguous jewelry stat not fabricated");
 local g={slot="amulet",name="Pristine Enchanted South Seas Kelp",text="+30% luck · +25% gold"};
 local metrics=A.ItemMetrics(g); check(metrics[1].value==30 and metrics[2].value==25,"two item bonuses parsed independently");
 check(string.find(A.ShortItem(g),"30%%") and string.find(A.ShortItem(g),"25%%"),"compact abbreviations include both percentages");
-live.gear={g}; b.items={"south_seas_kelp"}; b.itemRules.south_seas_kelp={value=30,value2=30,group="amulet"};
+live.gear={g}; live.stats={luck=30,gold=25}; b.items={"south_seas_kelp"}; b.itemRules.south_seas_kelp={value=30,value2=30,group="amulet"};
 check(A.ScoreItem(b,{name=g.name,mode="empower"},live,1).score>0,"second unmet bonus remains useful");
 b.itemRules.south_seas_kelp.value2=25; check(A.ScoreItem(b,{name=g.name,mode="empower"},live,1).score==0,"both item targets reached");
 local spells,jewelry=A.TrackerEntries(b,live);

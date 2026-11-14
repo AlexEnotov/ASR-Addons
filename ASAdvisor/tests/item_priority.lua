@@ -1,7 +1,7 @@
 local A=ASAdvisor; local count=0;
 local function check(ok,name) assert(ok,name); count=count+1; end
 local b={class="HUNTER",spells={},items={"accuria","chosen","hoj","south_seas_kelp","enlightenment"},itemRules={}};
-local live={inRun=true,spells={},gear={
+local live={inRun=true,spells={},stats={echo=26.8},gear={
   {slot="ring",name="Кольцо Аккурии",text="+191% к урону"},
   {slot="trinket",name="Рука Правосудия",text="Шанс двойного заклинания 26.8%"},
   {slot="amulet",name="Нетронутая зачарованная ламинария Южных морей",text="+115.7% к удаче · +40% к золоту"},

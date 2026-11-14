@@ -15,6 +15,8 @@ A.GameStatCaps={cooldown=80};
 function A.RunStats()
   local raw=AZS_RUNSTATS or {}; local out={};
   for _,stat in ipairs(A.CapStats) do local value=tonumber(raw[stat[3]]); if value and value==value and math.abs(value)<1e12 then out[stat[1]]=value; end end
+  local hp=tonumber(AZS_RUN and AZS_RUN.hpm); if hp and hp==hp and hp>=0 and hp<1e12 then out.max_health=hp; end
+  local lives=tonumber(raw.lives); if lives and lives==lives and lives>=0 and lives<1e12 then out.lives=lives; end
   return out;
 end
 function A.StatCap(key)
@@ -270,6 +272,25 @@ function A.ItemMetrics(gear)
     if segment~="" then result[#result+1]={value=v,unit=unit or "",kind=kind(segment),text=segment}; end
   end
   return result;
+end
+-- Goal slots keep their existing order; values come only from character totals.
+function A.ItemGoalMetrics(row,live,worn)
+  if row and row.any and worn then row=A.ResolveItem(worn) or row; end
+  local base=A.BaseItemMetrics(row); local observed=worn and A.ItemMetrics(worn) or {}; local out={};
+  for i=1,math.max(#base,#observed) do
+    local metric=observed[i] or base[i] or {};
+    local key=aliases[metric.kind] or metric.kind or (base[i] and (aliases[base[i].kind] or base[i].kind));
+    local value=key and live.stats and tonumber(live.stats[key]);
+    if value and (value~=value or math.abs(value)>=1e12) then value=nil; end
+    out[i]={kind=key,value=value,unit=(key=="max_health" or flatBase[key]) and "" or "%"};
+  end
+  return out;
+end
+function A.ItemGoalText(metrics)
+  local parts={}; for i,m in ipairs(metrics or {}) do
+    parts[#parts+1]=A.StatLabel(m.kind,A.T("Бонус").." "..i).." "..(m.value~=nil and fmt(m.value)..m.unit or "?");
+  end
+  return #parts>0 and table.concat(parts," · ") or "?";
 end
 function A.ShortItem(gear)
   local parts={}; for i,m in ipairs(A.ItemMetrics(gear)) do if i<=6 then

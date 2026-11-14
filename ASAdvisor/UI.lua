@@ -687,10 +687,8 @@ function A.Redraw()
         if p.any or not m or m.targets or (p.targets or 0)>0 then fieldOrder[#fieldOrder+1]="targets"; end
         if p.any or m and m.radius or (p.radius or 0)>0 then fieldOrder[#fieldOrder+1]="radius"; end
       else
-        worn=b.class==A.Class() and A.WornForKey(b,row.key,A.Snapshot()); local baseMetrics=A.BaseItemMetrics(row); metrics=worn and A.ItemMetrics(worn) or baseMetrics;
-        if worn then for i,m in ipairs(baseMetrics) do
-          if not metrics[i] then metrics[i]={kind=m.kind,unit=m.unit}; elseif not metrics[i].kind then metrics[i].kind=m.kind; end
-        end end
+        local snapshot=b.class==A.Class() and A.Snapshot() or {stats={},gear={},spells={}};
+        worn=A.WornForKey(b,row.key,snapshot); metrics=A.ItemGoalMetrics(row,snapshot,worn);
         local count=math.max(1,#metrics); if p.any then count=math.max(2,count); end
         for i,key in ipairs(A.ItemGoalFields) do if (p[key] or 0)>0 then count=math.max(count,i); end end
         for i=1,math.min(6,count) do fieldOrder[#fieldOrder+1]=A.ItemGoalFields[i]; end
@@ -720,14 +718,15 @@ function A.Redraw()
       if main.inline.active.duration then values[#values+1]=A.T("Длительность").." "..tostring(stats.duration or "?")..A.T(" сек."); end
       if main.inline.active.radius then values[#values+1]=A.T("Радиус").." "..tostring(stats.radius or "?")..A.T(" м"); end
       main.inline.current:SetText(A.T("Текущие значения")..": "..table.concat(values," · "));
-      main.inline.help:SetText(A.T("0 — без порога. При целях по статам ранг не влияет на выбор.")); main.inline.help:Show(); main.inline.current:Show(); main.inline.itemHelp:Hide();
+      local statGoals=false; for _,k in ipairs({"cd","damage","targets","radius","duration"}) do if (tonumber(p[k]) or 0)>0 then statGoals=true; end end
+      main.inline.help:SetText(A.T((tonumber(p.rank) or 0)==0 and "Все улучшения, кроме уже достигнутых целей." or statGoals and "Только заданные параметры до достижения целей." or "Любые улучшения до заданного ранга.")); main.inline.help:Show(); main.inline.current:Show(); main.inline.itemHelp:Hide();
     elseif p then
       for i,key in ipairs(fieldOrder) do
         local m=metrics[i]; local behavior=ASAdvisorMechanics.items[row.key] and ASAdvisorMechanics.items[row.key].behavior;
         main.inline.captions[key]:SetText(A.StatLabel(m and m.kind or i==1 and behavior,A.T("Бонус").." "..i).." ≥"..(m and m.unit or ""));
       end
-      main.inline.current:SetText(worn and A.T("Текущие значения")..": "..A.ShortItem(worn) or A.T("Текущих значений ещё нет: предмет не надет."));
-      main.inline.help:SetText(A.T("Бонусы сравниваются по модулю. Например, сокращение КД 30% — цель 30.")); main.inline.help:Show(); main.inline.current:Show(); main.inline.itemHelp:Hide();
+      main.inline.current:SetText(A.T("Характеристики персонажа")..": "..A.ItemGoalText(metrics));
+      main.inline.help:SetText(A.T("Цели — суммарные статы персонажа, а не бонус предмета.")); main.inline.help:Show(); main.inline.current:Show(); main.inline.itemHelp:Hide();
     else
       main.inline.help:Hide(); main.inline.current:Hide(); main.inline.itemHelp:Show();
       main.inline.itemHelp:SetText(row and A.T("Амулеты слева направо: от самого желанного к запасным.").."\n"..A.T("Лучший амулет заменяет худший. Обратную замену не советуем.") or A.T("Выбери умения из каталога"));

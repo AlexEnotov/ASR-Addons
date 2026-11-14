@@ -81,41 +81,26 @@ function A.ScoreSpell(b,card,live,index)
   end
   local stats=A.SpellStats(card.key,live);
   local status=A.GoalStatus(p,stats);
-  -- Explicit stat goals define completion of the whole pick. Unspecified boosts
-  -- may help while a goal remains open, but cannot revive a completed pick.
-  local hasStatGoals,complete=false,true;
-  for _,value in pairs(status) do hasStatGoals=true; if value~="met" then complete=false; end end
-  if hasStatGoals and complete then
-    r.reason=A.T("Карточка не улучшает недостигнутую цель"); r.kind="met"; return r;
-  end
-  local boosts=A.Boosts(card);
-  local needed,unknown,any=false,false,false;
-  local labels={cd="перезарядка",damage="урон",targets="число целей",radius="Радиус",duration="Длительность"};
-  local reasons={};
-  for _,field in ipairs({"cd","damage","targets","radius","duration"}) do
-    if status[field] then
-      any=true;
-      if boosts[field] and status[field]=="needed" then needed=true; reasons[#reasons+1]=field=="cd" and A.T("нужно сократить перезарядку") or A.T(labels[field]).." "..A.T("ниже цели");
-      elseif boosts[field] and status[field]=="unknown" then unknown=true; end
+  local goal=tonumber(p.rank) or 0;
+  local selective=goal>0;
+  local hasStatGoals=next(status)~=nil;
+  if not hasStatGoals then
+    if selective and stats.rank and stats.rank>=goal then r.reason=A.T("Целевой ранг уже достигнут"); r.kind="met"; return r; end
+  else
+    local boosts=A.Boosts(card); local needed,unknown=false,false; local reasons={};
+    local labels={cd="перезарядка",damage="урон",targets="число целей",radius="Радиус",duration="Длительность"};
+    for field in pairs(boosts) do
+      local state=status[field];
+      if state=="needed" or (not selective and state==nil) then
+        needed=true; reasons[#reasons+1]=A.T(labels[field] or field).." · "..A.T(state and "ниже цели" or "без ограничения");
+      elseif state=="unknown" then unknown=true; end
     end
-  end
-  -- Zero is uncapped, not disabled. Positive caps still stop their own improvement type.
-  for field in pairs(boosts) do
-    if status[field]==nil then
-      needed=true;
-      reasons[#reasons+1]=A.T(labels[field] or field).." · "..A.T("без ограничения");
-    end
-  end
-  if any then
     if needed then
-      r.score=(p.any and 450 or 900)-priority*20+(tonumber(card.rarity) or 0); r.reason=table.concat(reasons,", ");
-      r.kind="planned";
+      r.score=(p.any and 450 or 900)-priority*20+(tonumber(card.rarity) or 0); r.reason=table.concat(reasons,", "); r.kind="planned";
     elseif unknown then r.reason=A.T("Нельзя проверить цель: нет точного значения"); r.kind="unknown";
     else r.reason=A.T("Карточка не улучшает недостигнутую цель"); r.kind="met"; end
     return r;
   end
-  local goal=tonumber(p.rank) or 0;
-  if goal>0 and stats.rank and stats.rank>=goal then r.reason=A.T("Целевой ранг уже достигнут"); r.kind="met"; return r; end
   -- Thresholds control completion, not preference: uncapped upgrades use
   -- the same priority scale as upgrades with an unfinished stat goal.
   r.score=(p.any and 450 or 900)-priority*20+(tonumber(card.rarity) or 0); r.reason=A.T("Улучшение умения из билда"); r.kind="planned";
@@ -158,7 +143,7 @@ function A.ScoreItem(b,card,live,index)
     local worn=A.WornForKey(b,key,live);
     local hasGoal=false; for _,field in ipairs(A.ItemGoalFields) do if (rule[field] or 0)>0 then hasGoal=true; end end
     if worn and hasGoal then
-      local metrics=A.ItemMetrics(worn); local unmet,unknown=false,false;
+      local metrics=A.ItemGoalMetrics(row,live,worn); local unmet,unknown=false,false;
       for i,field in ipairs(A.ItemGoalFields) do if (rule[field] or 0)>0 then
         local v=metrics[i] and metrics[i].value;
         if v==nil then unknown=true; elseif v<rule[field] then unmet=true; end

@@ -1,5 +1,10 @@
 local A=ASAdvisor;
 local EN={
+ ["Все улучшения, кроме уже достигнутых целей."]="All upgrades except goals already reached.",
+ ["Только заданные параметры до достижения целей."]="Only configured stats until their goals are reached.",
+ ["Любые улучшения до заданного ранга."]="Any upgrades until the target rank.",
+ ["Цели — суммарные статы персонажа, а не бонус предмета."]="Goals use total character stats, not the item's bonus.",
+ ["Характеристики персонажа"]="Character stats",
   ["Дальность"]="Range",
   ["Таргетное"]="Targeted",["Массовое"]="AOE",["Снарядов"]="Projectiles",["Цепь"]="Chain",
   ["Область на земле"]="Ground area",["Периодическое"]="Damage over time",["Конус"]="Cone",["Круговая область"]="Circular area",["Вокруг персонажа"]="Around the character",

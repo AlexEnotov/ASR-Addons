@@ -116,7 +116,9 @@ function A.ScoreSpell(b,card,live,index)
   end
   local goal=tonumber(p.rank) or 0;
   if goal>0 and stats.rank and stats.rank>=goal then r.reason=A.T("Целевой ранг уже достигнут"); r.kind="met"; return r; end
-  r.score=(p.any and 350 or 700)-priority*20+(tonumber(card.rarity) or 0); r.reason=A.T("Улучшение умения из билда"); r.kind="planned";
+  -- Thresholds control completion, not preference: uncapped upgrades use
+  -- the same priority scale as upgrades with an unfinished stat goal.
+  r.score=(p.any and 450 or 900)-priority*20+(tonumber(card.rarity) or 0); r.reason=A.T("Улучшение умения из билда"); r.kind="planned";
   return r;
 end
 -- Compare only explicit totals for simple multiplicative damage/echo bonuses.

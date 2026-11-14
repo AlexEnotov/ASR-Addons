@@ -1,5 +1,7 @@
 # Source and resource notes
 
+- `assets/branding/icons/asr-*.png`: original ASR icon artwork generated and edited with the built-in image generation tool and approved by the project owner. These design masters are outside runtime addon folders and are not included by the release packager. See `docs/ICON-STYLE.md` for the approved appearance and reusable prompt.
+
 - `ASAdvisor/media/arrow-*.tga`: generated UI glyphs; generator is `ASAdvisor/tools/build-arrow.cjs`.
 - `ASRCombatText/media/minimap.tga` and `ASRSuite/media/minimap.tga`: small circular fallback textures created for these addons. No SurvivorUI texture files are bundled.
 - Game icons, fonts and border textures are referenced by existing installation paths at runtime. They are not copied into release ZIPs and remain the property of their respective owners.

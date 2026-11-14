@@ -33,7 +33,7 @@ function A.ParseDuplicate(message)
 end
 local slots={
  {0,{"helm","helmet","шлем","головной убор"}},{1,{"shoulder","pauldron","spaulder","наплеч"}},{2,{"chest","robe","breastplate","нагр","кираса","одеяние"}},
- {3,{"belt","waist","пояс","кушак"}},{4,{"legging","pants","trousers","понож","штаны","брюки"}},{5,{"boot","sabatons","сапог","ботин"}},
+ {3,{"belt","waist","пояс","кушак","ремень","girdle"}},{4,{"legging","pants","trousers","понож","штаны","брюки"}},{5,{"boot","sabatons","сапог","ботин","сабатон","набедренники"}},
  {6,{"bracer","wrist","наручи","браслет"}},{7,{"gauntlet","glove","перчат","рукавиц"}},
 };
 local function Class()
@@ -49,16 +49,37 @@ function A.CacheItem(item)
 end
 function A.Resolve(name)
  local key=A.Key(name); local cached=ASRLootDB.items[key]; if cached and cached.icon and cached.rarity~=nil then return cached; end
- local class=Class(); local spec=ASRLootMetadata.sets[class]; local rarity,slot,icon;
- if spec then
-  for index,names in ipairs(spec.names) do for _,alias in ipairs(names) do if string.find(key,A.Key(alias),1,true) then rarity=index-1; break end end; if rarity~=nil then break end end
-  for _,info in ipairs(slots) do for _,alias in ipairs(info[2]) do if string.find(key,alias,1,true) then slot=info[1]; break end end; if slot then break end end
+ local class=Class(); local spec=ASRLootMetadata.sets[class]; local rarity,slot,icon; local armor=spec and spec.armor;
+ local function Has(aliases,exact)
+  for _,alias in ipairs(aliases or {}) do local part=A.Key(alias); if part~="" and (exact and key==part or not exact and string.find(key,part,1,true)) then return #part; end end
+ end
+ local weapon,ambiguous;
+ for _,candidate in ipairs(ASRLootMetadata.weapons or {}) do if Has(candidate.names,true) then
+  if candidate.class==class then weapon=candidate; ambiguous=false; break end
+  if weapon and (weapon.icon~=candidate.icon or weapon.rarity~=candidate.rarity) then ambiguous=true; else weapon=candidate; end
+ end end
+ if weapon and not ambiguous then rarity=weapon.rarity; icon=weapon.icon; end
+ if rarity==nil then
+  local longest=0; local foundClass;
+  for token,definition in pairs(ASRLootMetadata.sets) do for index,names in ipairs(definition.names) do local length=Has(names);
+   if length and (length>longest or length==longest and token==class) then longest=length; rarity=index-1; armor=definition.armor; foundClass=token; end
+  end end
+  for _,info in ipairs(slots) do if Has(info[2]) then slot=info[1]; break end end
+  if slot==nil then for index,nouns in ipairs(ASRLootMetadata.slotNames or {}) do if Has(nouns) then slot=index-1; break end end end
   if slot~=nil and rarity~=nil then
    for _,look in ipairs(AZS_GEN and AZS_GEN.setLooks or {}) do
-    if look.class==class and look.rarity==rarity then for _,piece in ipairs(look.pieces or {}) do if piece[1]==slot then icon="INV_"..piece[4]; break end end end
+    if look.class==(foundClass or class) and look.rarity==rarity then for _,piece in ipairs(look.pieces or {}) do if piece[1]==slot then icon="INV_"..piece[4]; break end end end
    end
-   if not icon and rarity==0 then icon="INV_"..ASRLootMetadata.commonIcons[spec.armor][slot+1]; end
+   if not icon and rarity==0 and armor then icon="INV_"..ASRLootMetadata.commonIcons[armor][slot+1]; end
   end
+  if rarity==nil then for index,tier in ipairs(AZS_GEN and AZS_GEN.gearTiers or {}) do
+   local aliases=ASRLootMetadata.tierNames or {};
+   if Has(aliases[tier.weapon] or {tier.weapon},true) then
+    rarity=index+5; local icons=tier.weapon_icons and tier.weapon_icons[class]; if icons and #icons==1 then icon="INV_"..icons[1]; end; break
+   elseif Has(aliases[tier.name] or {tier.name}) then
+    rarity=index+5; local icons=tier.armor_icons and tier.armor_icons[armor]; if slot~=nil and icons and icons[slot+1] then icon="INV_"..icons[slot+1]; end; break
+   end
+  end end
  end
  return {name=name,icon=cached and cached.icon or icon,rarity=cached and cached.rarity or rarity};
 end
@@ -111,9 +132,10 @@ function A.Reconcile(fields)
  if A.Refresh then A.Refresh(); end
 end
 function A.Rows()
- local run=ASRLootDB.run; local rows,by={},{};
+ local run=ASRLootDB.run; local rows,by,resolved={},{},{};
  for i=#(run and run.entries or {}),1,-1 do
   local e=run.entries[i];
+  if not e.icon or e.rarity==nil then local hint=resolved[e.key]; if not hint then hint=A.Resolve(e.name); resolved[e.key]=hint; end; PaintMetadata(e,hint); end
   if ASRLootDB.mode=="all" or e.kind=="new" then
    local key=e.key..":"..e.kind..":"..tostring(e.rarity); local row=by[key];
    if not row then row={name=e.name,icon=e.icon,rarity=e.rarity,kind=e.kind,count=0,gold=0}; by[key]=row; rows[#rows+1]=row; end

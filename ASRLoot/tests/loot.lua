@@ -22,6 +22,15 @@ check(p and p.name=="Шлем следопыта" and p.gold==20,"exact user scr
 p=A.ParseDuplicate("|cffffffffTracker's Helm|r already collected: |cffffff00+1,200 gold.|r");
 check(p and p.name=="Tracker's Helm" and p.gold==1200,"colored English duplicate with a formatted amount is parsed");
 for _,text in ipairs({"Получено золото: +20 золото.","Хоггер yells: Грр... свежее мясо!","Шлем следопыта роняет +20 золото.","Шлем следопыта уже подобрано: -20 золото.","Tracker's Helm already collected: +nan gold.","Вы получили +500 золото за достижение."}) do check(not A.ParseDuplicate(text),"unrelated rewards and invalid amounts are ignored"); end
+local class=AZS_ZONE.class; AZS_ZONE.class="paladin";
+local belt=A.Resolve("Ремень оруженосца"); check(belt.rarity==0 and belt.icon=="INV_Belt_35","screenshot common plate belt resolves its real slot and icon");
+local originalGen=AZS_GEN; AZS_GEN={gearTiers={{name="Exotic",weapon="Exotic weapon",weapon_icons={paladin={"mace_111"}}},{name="Mythic",weapon="Mythic weapon",weapon_icons={paladin={"mace_118"}},armor_icons={plate={"helmet_151"}}}}};
+local mythic=A.Resolve("Мифическое оружие"); check(mythic.rarity==7 and mythic.icon=="INV_mace_118","localized generic high-tier weapon uses current game tier metadata");
+local plate=A.Resolve("Шлем мифа"); check(plate.rarity==7 and plate.icon=="INV_helmet_151","high-tier armor resolves its localized tier and slot"); AZS_GEN=originalGen;
+local maul=A.Resolve("Деревянная кувалда"); check(maul.rarity==0 and maul.icon=="INV_Hammer_15","common duplicate weapon has verified rarity and weapon icon");
+AZS_ZONE.class=class; local bow=A.Resolve("Короткий лук"); check(bow.rarity==0 and bow.icon=="INV_Weapon_Bow_05","hunter common weapon resolves without ever being newly acquired");
+for _,weapon in ipairs(ASRLootMetadata.weapons) do AZS_ZONE.class=weapon.class; local item=A.Resolve(weapon.names[1]); check(item.rarity==weapon.rarity and item.icon==weapon.icon,"verified weapon table resolves each class and tier"); end
+AZS_ZONE.class=class;
 local meta=A.Resolve("Шлем следопыта"); check(meta.rarity==0 and meta.icon=="INV_Helmet_18","first-time common hunter duplicate resolves rarity and icon from verified metadata");
 AZS_GEN={setLooks={{class="hunter",rarity=4,pieces={{0,35601,1,"Helmet_15"}}}}};
 meta=A.Resolve("Шлем Склепного охотника"); check(meta.rarity==4 and meta.icon=="INV_Helmet_15","class set icon comes from the live game catalog");
@@ -64,4 +73,7 @@ function AZS_SetHudShown(part,on) check(part=="loot","only native loot notificat
 A.SetEnabled(true); check(not shown,"enabled tracker hides native duplicate acquisition notifications");
 A.SetEnabled(false); check(shown and not A.frame:IsShown(),"disabling restores native notifications");
 shown=false; AZS_API_HUD.loot="OtherAddon"; A.SetEnabled(true); A.SetEnabled(false); check(not shown,"prior third-party HUD choice is preserved");
+local saved=ASRLootDB.run; ASRLootDB.run={entries={{name="Деревянная кувалда",key=A.Key("Деревянная кувалда"),kind="duplicate",gold=20}},gold=20}; AZS_ZONE.class="paladin";
+local repaired=A.Rows(); check(repaired[1].icon=="INV_Hammer_15" and repaired[1].rarity==0,"saved unknown entries gain newly available metadata without losing drops");
+AZS_ZONE.class=class; ASRLootDB.run=saved;
 print("PASS: "..checks.." standalone loot checks");

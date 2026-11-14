@@ -8,6 +8,11 @@ are summarized with the feature they improve rather than listed individually.
 
 ### ASR Loot — new standalone addon
 
+- Resolve duplicate base weapons from verified embedded class/tier tables,
+  including localized names, and recognize all extracted armor-slot nouns
+  such as plate belts. Use native metadata for additional gear tiers and
+  refresh existing unknown journal entries as metadata becomes available.
+
 - Track permanent armor and weapon acquisitions in two modes: new items only,
   or all drops including sold duplicates. Display icons, rarity, grouped repeat
   counts and the current run's total gold from duplicates.

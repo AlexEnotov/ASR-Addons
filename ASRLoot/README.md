@@ -31,7 +31,10 @@ No boss source is guessed from timing.
 
 Authoritative item icons/rarities are cached from native loot and worn-equipment
 messages. Verified class-set name hints and the native `AZS_GEN.setLooks` table
-resolve additional armor duplicates, including an already-owned common hunter
+resolve additional armor duplicates and base weapons using verified class/tier tables.
+Armor-slot and item-name aliases include the game's extracted translations;
+higher tiers use the live game catalog. Already saved unknown entries are
+refreshed when metadata becomes available, including an already-owned common hunter
 helmet on the first observation. Unrecognized items retain their name and gold
 but show a question-mark icon and unknown rarity rather than an invented value.
 Item names remain as supplied by the game. The UI supports English and Russian;

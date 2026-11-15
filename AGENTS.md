@@ -23,3 +23,12 @@ The common GitHub release tag is the player-facing distribution version; older
 internal module counters are separate and must not be presented as successive
 suite-wide releases. Review version consistency during release preparation.
 Do not publish, tag, or replace existing release assets merely to record work.
+
+## Catalogue pull requests
+
+Submit each new addon to `Syiana/azs-addons` in its own pull request containing
+one new `addons/<id>.toml` file. Do not combine different addons in one PR.
+Run the official offline pin and check commands; include `index.json` only if
+they change it. Handle changes to an existing addon's folder metadata in a
+separate PR, updating only the affected pin. Leave routine version updates for
+unchanged entries to the catalogue's daily pin workflow.

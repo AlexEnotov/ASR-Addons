@@ -46,7 +46,7 @@ store entries always point at their individual module ZIPs.
 5. Run `./tools/package.ps1 -Tag <tag>`. Inspect `release/` and hashes. Repeating a build with unchanged input produces identical bytes. Only attach that tag's eight module ZIPs, the optional ASR-All ZIP and optional checksum file; never attach a second ZIP matching the same module pattern.
 6. Commit the prepared source and packaging files, push to the author's repository, then create a Git tag pointing at the exact source used to build the ZIPs. Upload assets to a **draft** release first and review it.
 7. Publish a normal release only when ready. Drafts and prereleases are ignored by the index bot. Do not replace bytes in an already pinned asset; use a new tag for any correction.
-8. When explicitly authorized, submit only new or intentionally changed TOML entries to `Syiana/azs-addons`. Do not upload addon source to that repository. Reborn compatibility remains `untested` until an actual game version has been recorded from testing.
+8. When explicitly authorized, submit each new addon in its own PR to `Syiana/azs-addons`, with one new `addons/<id>.toml`. Run `pin.py pin --offline` and `pin.py check`; include the generated index only if changed. Handle an existing addon's folder change in a separate PR with only its affected pin updated. Leave routine release updates for unchanged entries to the daily pin bot. Do not upload addon source to that repository. Reborn compatibility remains `untested` until an actual game version has been recorded from testing.
 
 The existing release `v0.5.8` and its `ASRAdvisor-0.5.8.zip` asset predate this naming convention. Leave those published bytes intact; new assets include `-v` as in the patterns above.
 

@@ -246,7 +246,7 @@ function A.DrawEndless(m)
  end
  for i=#m.bossRows+1,#f.rows do f.rows[i]:Hide(); end
  if f.charge then f.charge(m.progress,math.floor(m.progress*100).."%",not f:IsShown()); else f.bar:SetValue(m.progress); end
- f:Show();
+ f:Show(); if A.editing then A.SetEditMode(true); end
 end
 local tick=0;
 function A.UpdateEndless(dt,force)

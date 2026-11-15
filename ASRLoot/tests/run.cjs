@@ -3,7 +3,7 @@ function dep(name){try{return require(name);}catch(e){if(e.code!=='MODULE_NOT_FO
 const {lua,lauxlib,lualib,to_luastring,to_jsstring}=dep('fengari'),parse=dep('luaparse');
 const L=lauxlib.luaL_newstate();lualib.luaL_openlibs(L);
 function run(code,name){if(lauxlib.luaL_loadbuffer(L,to_luastring(code),null,to_luastring(name))!==lua.LUA_OK||lua.lua_pcall(L,0,0,0)!==lua.LUA_OK)throw Error(name+': '+to_jsstring(lua.lua_tostring(L,-1)));}
-run(fs.readFileSync(path.resolve(__dirname,'../../ASAdvisor/tests/mock.lua'),'utf8'),'UI mock');
+run(fs.readFileSync(path.resolve(__dirname,'../../ASRAdvisor/tests/mock.lua'),'utf8'),'UI mock');
 run(fs.readFileSync(path.resolve(__dirname,'../../ASRSuite/tests/environment.lua'),'utf8'),'environment');
 run('function AZS_Fields(msg) local out={} for k,v in string.gmatch(msg,"(%w+)=([^;]*)") do out[k]=v end return out end','wire parser');
 for(const file of ['Language.lua','Style.lua','Metadata.lua','Core.lua','UI.lua']){const code=fs.readFileSync(path.resolve(__dirname,'..',file),'utf8');parse.parse(code,{luaVersion:'5.1'});run(code,file);}

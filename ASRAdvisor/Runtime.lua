@@ -25,7 +25,7 @@ local function register()
   end
 end
 clock:SetScript("OnEvent",function(self,event,name)
-  if event=="ADDON_LOADED" and name=="ASAdvisor" then
+  if event=="ADDON_LOADED" and name=="ASRAdvisor" then
     A.Init(); register();
     if hooksecurefunc and SendAddonMessage then hooksecurefunc("SendAddonMessage",A.ObserveBanishCommand); end
     if AZS_SetOnTopOfScreens then

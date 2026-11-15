@@ -1,19 +1,7 @@
 ## Interface: 30300
-## Title: |cff8cd123ASR|r Advisor
-## Notes: Reborn build planner, Any alternatives and stat targets. /asr
+## Title: |cff8cd123ASR|r Advisor — Legacy Settings
+## Notes: Preserves existing ASAdvisorDB builds and preferences during the folder rename. No interface or runtime code.
 ## Author: AlexEnotov
 ## X-License: GPL-3.0-only
-## Version: 0.6.1
-## Dependencies: AzerothSurvivors
-## OptionalDeps: AzerothSurvivorsAPI
+## Version: 0.6.2
 ## SavedVariables: ASAdvisorDB
-Language.lua
-Mechanics.lua
-Names.lua
-Core.lua
-Locale.lua
-Presentation.lua
-Stats.lua
-Advisor.lua
-UI.lua
-Runtime.lua

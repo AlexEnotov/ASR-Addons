@@ -5,7 +5,7 @@
   "description": "Independent ASR addons with an optional shared settings suite",
   "scripts": {
     "test": "node tools/check.cjs",
-    "test:game": "node ASAdvisor/tests/run.cjs",
+    "test:game": "node ASRAdvisor/tests/run.cjs",
     "package": "pwsh -NoProfile -File tools/package.ps1"
   },
   "devDependencies": {

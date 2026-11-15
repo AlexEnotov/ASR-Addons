@@ -1,0 +1,18 @@
+local A,S=ASRParty,ASRSuite;
+ASRSuiteRuntime.scripts.OnEvent(ASRSuiteRuntime,"ADDON_LOADED","ASRSuite"); A.BindSuite();
+assert(S.pages.party and S.panelAdapters.party,"Party registers settings and docking adapter");
+S.SetEditing(true); assert(A.frame:IsShown() and A.members and A.CanMove(),"shared edit mode previews and unlocks party");
+assert(A.frame.strata=="FULLSCREEN_DIALOG" and A.frame:GetFrameLevel()==450 and MockOnTop.ASRPartyPanel,"party is registered above the game dimming overlay during editing");
+assert(A.frame.header.strata=="FULLSCREEN_DIALOG" and A.frame.rows[1].strata=="FULLSCREEN_DIALOG","all party subframes inherit the raised edit layer");
+S.SetEditing(false); assert(A.frame.header:IsShown() and not A.frame.rows[1]:IsShown() and not A.CanMove(),"shared lock and preview exit work");
+assert(not MockOnTop.ASRPartyPanel and A.frame.strata=="HIGH","leaving editing restores normal HUD layers");
+S.SetLanguage("ru"); A.BindSuite(); assert(ASRPartyDB.language=="ru");
+local c=S.pages.party.partyControls; c.mode.scripts.OnClick(); assert(ASRPartyDB.mode=="compact");
+local scale=ASRPartyDB.scale; c.plus.scripts.OnClick(); assert(math.abs(ASRPartyDB.scale-scale-0.01)<0.0001);
+S.panelAdapters.party.savePosition({left=150,top=300,ratio=0.75}); assert(ASRPartyDB.positions.compact.x==200);
+c.showHeader.scripts.OnClick(); assert(not ASRPartyDB.showHeader,"Suite header checkbox updates saved setting");
+local code=assert(S.ExportSettings()); local profile=assert(S.DecodeSettings(code)); assert(profile.party.showHeader==false and profile.party.mode=="compact" and profile.party.positions.classic.x==100 and profile.party.positions.compact.y==400);
+ASRPartyDB.mode="classic"; assert(S.ImportSettings(code)); assert(ASRPartyDB.mode=="compact" and ASRPartyDB.positions.compact.y==400,"whole profile includes Party layout and preferences");
+local saved=ASRPartyDB; ASRPartyDB=nil; assert(not S.ImportSettings(code),"profile import checks installed Party module"); ASRPartyDB=saved;
+c.enabled.scripts.OnClick(); assert(not ASRPartyDB.enabled); c.enabled.scripts.OnClick(); assert(ASRPartyDB.enabled);
+print("PASS: Party suite controls, shared editing, docking and settings profile");

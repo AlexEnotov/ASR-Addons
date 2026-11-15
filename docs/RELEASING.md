@@ -22,12 +22,14 @@ Use one GitHub repository and one release containing one asset per standalone ad
 
 | Store ID | Asset pattern | Folder |
 | --- | --- | --- |
-| `asr-advisor` | `ASRAdvisor-v*.zip` | `ASAdvisor` |
+| `asr-advisor` | `ASRAdvisor-v*.zip` | `ASRAdvisor`, `ASAdvisor` (settings bridge) |
 | `asr-stats` | `ASRStats-v*.zip` | `ASRStats` |
 | `asr-combat-text` | `ASRCombatText-v*.zip` | `ASRCombatText` |
 | `asr-suite` | `ASRSuite-v*.zip` | `ASRSuite` |
 | `asr-endless` | `ASREndless-v*.zip` | `ASREndless` |
 | `asr-loot`  | `ASRLoot-v*.zip` | `ASRLoot` |
+| `asr-party` | `ASRParty-v*.zip` | `ASRParty` |
+| `asr-chat` | `ASRChat-v*.zip` | `ASRChat` |
 
 Each ID has its own catalogue entry. `requires = []` is deliberate: Suite is optional and the native game addons are not entries to install from this catalogue. Do not add Suite as a mandatory dependency of a standalone module.
 
@@ -38,10 +40,10 @@ store entries always point at their individual module ZIPs.
 ## Preparing a release
 
 1. GPL-3.0-only has been selected for original ASR implementation code; the complete text is in root `LICENSE`. Keep third-party notices and the resource inventory; do not relicense material owned by others.
-2. If renaming the GitHub repository, update the Git remote, README links and all `catalog/*.toml` repository values. Keep technical addon folders and SavedVariables unchanged.
+2. If renaming the GitHub repository, update the Git remote, README links and all `catalog/*.toml` repository values. Folder changes need matching TOCs, dependencies, asset paths and catalogue entries. Advisor v0.6.2 includes an `ASAdvisor` settings-only bridge as an optional dependency of `ASRAdvisor`; both declare the unchanged `ASAdvisorDB` global so old saves load before the renamed addon initializes.
 3. Review the source changes since the last published tag, run both test commands in the root README and verify the modules in the game independently and together.
-4. Select one new common release tag (v0.6.1 follows v0.6.0). Align TOC/runtime versions during release preparation and record module changes in the release notes. The store displays the common release tag.
-5. Run `./tools/package.ps1 -Tag <tag>`. Inspect `release/` and hashes. Repeating a build with unchanged input produces identical bytes. Only attach that tag's six module ZIPs, the optional ASR-All ZIP and optional checksum file; never attach a second ZIP matching the same module pattern.
+4. Select one new common release tag (v0.6.2 follows v0.6.1). Align TOC/runtime versions during release preparation and record module changes in the release notes. The store displays the common release tag.
+5. Run `./tools/package.ps1 -Tag <tag>`. Inspect `release/` and hashes. Repeating a build with unchanged input produces identical bytes. Only attach that tag's eight module ZIPs, the optional ASR-All ZIP and optional checksum file; never attach a second ZIP matching the same module pattern.
 6. Commit the prepared source and packaging files, push to the author's repository, then create a Git tag pointing at the exact source used to build the ZIPs. Upload assets to a **draft** release first and review it.
 7. Publish a normal release only when ready. Drafts and prereleases are ignored by the index bot. Do not replace bytes in an already pinned asset; use a new tag for any correction.
 8. When explicitly authorized, submit only new or intentionally changed TOML entries to `Syiana/azs-addons`. Do not upload addon source to that repository. Reborn compatibility remains `untested` until an actual game version has been recorded from testing.

@@ -1,0 +1,14 @@
+## Interface: 30300
+## Title: |cff8cd123ASR|r Party
+## Author: AlexEnotov
+## X-License: GPL-3.0-only
+## Version: 0.6.2
+## Notes: Movable classic and compact party frames. /asrparty
+## Dependencies: AzerothSurvivors, AzerothSurvivorsAPI
+## OptionalDeps: AzerothSurvivorsUI
+## SavedVariables: ASRPartyDB
+Language.lua
+Style.lua
+Core.lua
+UI.lua
+Settings.lua

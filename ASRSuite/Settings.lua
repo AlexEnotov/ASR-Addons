@@ -1,7 +1,25 @@
 local A=ASRSuite; local S=ASRStyle; local window,content,status; local pages,nav={},{}; local selected="general"; local records={}; local MountPage; local navCount=0; local subnav={};
 A.settingsPages={};
+local moduleTitles={endless="ASR Endless",combat="ASR Combat Text",stats="ASR Stats",builder="ASR Advisor",party="ASR Party",loot="ASR Loot",chat="ASR Chat"};
 local function L(parent,key,size,x,y,w,color) local f=S.Label(parent,A.T(key),size,x,y+(parent.contentOffset or 0),w,color); if parent.contentOffset and size==16 and y==0 then f:Hide(); end; records[#records+1]=function() f:SetText(A.T(key)); end; return f; end
+local function Heading(parent,title)
+ local f=S.Label(parent,"",16,8,parent.contentOffset or 0,480);
+ records[#records+1]=function() f:SetText("|cff8cd123ASR|r "..string.gsub(A.T(title),"^ASR%s+","")); end
+ if parent.contentOffset then f:Hide(); end; return f;
+end
 local function B(parent,key,w,h,x,y,fn) local f=S.Button(parent,A.T(key),w,h,x,y+(parent.contentOffset or 0),fn); records[#records+1]=function() f.text:SetText(A.T(key)); end; return f; end
+local function ArrangeNavigation()
+ local row=0;
+ for _,p in ipairs(A.settingsPages) do
+  local button=nav[p.id];
+  if button then
+   button:ClearAllPoints();
+   if p.id=="about" or p.id=="compat" then
+    button:SetPoint("BOTTOMLEFT",window,"BOTTOMLEFT",24,p.id=="about" and 66 or 32);
+   else button:SetPoint("TOPLEFT",window,"TOPLEFT",24,-(87+row*34)); row=row+1; end
+  end
+ end
+end
 local function Note(page,key,y) local f=L(page,key,10,8,y,468,S.muted); f:SetHeight(36); return f; end
 local function Changed() A.RefreshModules(); end
 local function Check(page,key,get,set,y,available)
@@ -32,7 +50,7 @@ end
 local function OwnOpacity(module,category) return ASRSuiteDB.moduleOverrides[module][category=="menu" and "menuOpacity" or "opacity"]; end
 function A.RegisterSettingsPage(id,title,build,draw,parent)
  for _,kind in ipairs(A.typeKeys) do if id==kind then parent="combat"; end end
- local spec={id=id,title=title,build=build,draw=draw,parent=parent}; A.settingsPages[#A.settingsPages+1]=spec;
+ local spec={id=id,title=moduleTitles[id] or title,build=build,draw=draw,parent=parent}; A.settingsPages[#A.settingsPages+1]=spec;
  if A.settings==window and MountPage then MountPage(spec,#A.settingsPages); A.DrawSettings(); end
 end
 function A.SelectSettingsPage(id)
@@ -64,7 +82,7 @@ function A.ToggleSettings() if window:IsShown() then window:Hide(); else window:
 local function RegisterBuiltins()
  A.RegisterSettingsPage("general","Общие",function(root)
   local page=CreateFrame("Frame",nil,root); page:SetSize(500,465); page:SetPoint("TOPLEFT",root,"TOPLEFT",0,0); root.generalOptions=page;
-  L(page,"Настройки комплекса",16,8,0,480);
+  Heading(page,"ASR Suite");
   local lang=B(page,"",210,27,266,34,function() end); A.controls.language=lang; ASRLocale.Bind(lang,function() return ASRSuiteDB.language; end,A.SetLanguage); L(page,"Язык комплекса",11,8,38,250); records[#records+1]=function() lang.text:SetText(ASRLocale.Name(ASRSuiteDB.language)); end
   Step(page,"Фон настроек",function() return ASRSuiteDB.opacity; end,function(v) ASRSuiteDB.opacity=v; end,70,0.2,1,0.05,Percent);
   Step(page,"Фон трекеров",function() return ASRSuiteDB.trackerOpacity; end,function(v) ASRSuiteDB.trackerOpacity=v; end,102,0,1,0.05,Percent);
@@ -82,7 +100,7 @@ local function RegisterBuiltins()
   records[#records+1]=function() root.transfer:Draw(); end
  end);
  if ASREndless then A.RegisterSettingsPage("endless","Endless",function(page)
-  L(page,"Бесконечный режим",16,8,0,480);
+  Heading(page,"ASR Endless");
   A.controls.endlessEnabled=Check(page,"Показывать трекер Endless",function() return ASREndlessDB.endlessEnabled~=false; end,function(v) ASREndlessDB.endlessEnabled=v; ASREndless.UpdateEndless(0,true); end,30);
   Note(page,"Автоматически заменяет штатный трекер только в бесконечном режиме. Выключение возвращает штатный интерфейс.",64):SetHeight(40);
   Note(page,"Враги — за весь забег. Боссы — только в бесконечном режиме.",114):SetHeight(30);
@@ -92,7 +110,7 @@ local function RegisterBuiltins()
  end);
  end
  A.RegisterSettingsPage("combat","Текст урона",function(page)
-  L(page,"Общие настройки текста",16,8,0,480);
+  Heading(page,"ASR Combat Text");
   A.controls.enabled=Check(page,"Текст урона",function() return A.IsModuleEnabled("combat"); end,function(v) A.SetModuleEnabled("combat",v); end,26);
   local mode=B(page,"",468,25,8,56,function() A.CombatConfig().mode=A.CombatConfig().mode=="columns" and "enemies" or "columns"; A.ClearCombat(); Changed(); end);
   records[#records+1]=function() mode.text:SetText(A.T("Расположение: ")..A.T(A.CombatConfig().mode=="columns" and "Колонки" or "Над врагами")); end
@@ -118,7 +136,7 @@ local function RegisterBuiltins()
  end
  A.RegisterSettingsPage("stats","Stats",function(root)
   local page=CreateFrame("Frame",nil,root); page:SetSize(500,465); page:SetPoint("TOPLEFT",root,"TOPLEFT",0,0); root.statsOptions=page;
-  L(page,"Stats",16,8,0,480);
+  Heading(page,"ASR Stats");
   Check(page,"Модуль включён",function() return A.IsModuleEnabled("stats"); end,function(v) A.SetModuleEnabled("stats",v); end,30);
   local function Have() return ASRStatsDB and ASRStats; end
   Note(page,"Настройки панели характеристик. Расположение меняется в общем режиме редактирования.",60);
@@ -159,7 +177,7 @@ local function RegisterBuiltins()
   chooser.none=B(chooser,"Выключить все",226,26,250,433,function() ASRStats.SetAllStatsShown(false); A.DrawSettings(); end);
  end);
  A.RegisterSettingsPage("builder","Билдер",function(page)
-  L(page,"Билдер",16,8,0,480);
+  Heading(page,"ASR Advisor");
   local function Have() return ASAdvisor and ASAdvisorDB and ASAdvisorDB.options; end
   Check(page,"Модуль включён",function() return A.IsModuleEnabled("builder"); end,function(v) A.SetModuleEnabled("builder",v); end,30);
   local function Opt() return Have() or {}; end
@@ -175,6 +193,24 @@ local function RegisterBuiltins()
   OverrideOpacity(page,"builder",290);
   Step(page,"Фон трекера",function() return Opt().trackerOpacity or 0.42; end,function(v) Opt().trackerOpacity=v; end,320,0.1,1,0.05,Percent,function() return Have() and OwnOpacity("builder"); end);
   Note(page,"Билды, требования и импорт/экспорт доступны в редакторе билдов.",356);
+ end);
+ A.RegisterSettingsPage("about","О комплексе",function(page)
+  Heading(page,"ASR Suite");
+  Note(page,"Независимые аддоны для Azeroth Survivors Reborn. Установи нужные модули и управляй ими через общий комплекс.",34):SetHeight(42);
+  L(page,"Автор: AlexEnotov",11,8,88,468);
+  local version=S.Label(page,"",11,8,116,468); records[#records+1]=function() version:SetText(A.T("Версия")..": v"..A.VERSION); end
+  L(page,"Исходный код, релизы и сообщения об ошибках",11,8,160,468);
+  local url="https://github.com/AlexEnotov/ASR-Addons";
+  local link=CreateFrame("EditBox",nil,page); page.sourceLink=link; link:SetSize(468,28); link:SetPoint("TOPLEFT",page,"TOPLEFT",8,-186);
+  link:SetAutoFocus(false); link:SetMultiLine(false); link:SetFont(S.font,11,""); link:SetTextColor(0.65,0.85,1,1); link:SetTextInsets(8,8,0,0);
+  link:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",edgeSize=8,insets={left=2,right=2,top=2,bottom=2}}); link:SetBackdropColor(0.08,0.09,0.1,1);
+  link:SetText(url);
+  link:SetScript("OnMouseUp",function(self) self:SetFocus(); self:HighlightText(); end);
+  link:SetScript("OnEditFocusGained",function(self) self:HighlightText(); end);
+  link:SetScript("OnTextChanged",function(self) if self:GetText()~=url then self:SetText(url); self:HighlightText(); end end);
+  link:SetScript("OnEscapePressed",function(self) self:ClearFocus(); end); link:SetScript("OnEnterPressed",function(self) self:ClearFocus(); end);
+  page:SetScript("OnHide",function() link:ClearFocus(); end);
+  Note(page,"Нажми на ссылку и скопируй её с помощью Ctrl+C.",224);
  end);
  A.RegisterSettingsPage("compat","Совместимость",function(page)
   L(page,"Совместимость",16,8,0,480);
@@ -204,8 +240,14 @@ local function RegisterBuiltins()
    control:SetScript("OnLeave",function() GameTooltip:Hide(); end);
   end
   A.RefreshCompatibility=function()
-   local y=0;
-   for _,spec in ipairs(A.compatibilityAddons) do
+   local y=0; local ranks={};
+   for i,pageSpec in ipairs(A.settingsPages) do if not pageSpec.parent then ranks[pageSpec.id]=i; end end
+   local ordered={}; for i,spec in ipairs(A.compatibilityAddons) do ordered[#ordered+1]={spec=spec,index=i}; end
+   table.sort(ordered,function(a,b)
+    local ar,br=ranks[a.spec.id] or math.huge,ranks[b.spec.id] or math.huge;
+    if ar~=br then return ar<br; end; return a.index<b.index;
+   end);
+   for _,entry in ipairs(ordered) do local spec=entry.spec;
     local group=groups[spec.id];
     if not group then
      group={controls={},rows={},features={}}; groups[spec.id]=group; A.controls.compatibility[spec.id]=group.controls;
@@ -253,7 +295,7 @@ function A.CreateSettings()
  window:SetScript("OnShow",function(self) self:SetFrameStrata("FULLSCREEN_DIALOG"); self:SetFrameLevel(400); if self.Raise then self:Raise(); end; S.SyncChildren(self); end);
  window:SetScript("OnDragStart",function(self) self:StartMoving(); end); window:SetScript("OnDragStop",function(self) self:StopMovingOrSizing(); local point,_,relative,x,y=self:GetPoint(); ASRSuiteDB.settingsPosition={point=point,relative=relative,x=x,y=y}; end);
  window:SetScale(math.min(1,(UIParent:GetWidth()-24)/740,(UIParent:GetHeight()-24)/610)); S.Panel(window,ASRSuiteDB.opacity);
- local title=L(window,"ASR / КОМПЛЕКС",17,24,24,420); records[#records+1]=function() title:SetText((string.gsub(A.T("ASR / КОМПЛЕКС"),"^ASR","|cff8cd123ASR|r",1))); end; L(window,"by AlexEnotov",9,25,47,250,S.muted);
+ local title=L(window,"ASR / КОМПЛЕКС",17,24,24,420); window.title=title; records[#records+1]=function() title:SetText((string.gsub(A.T("ASR / КОМПЛЕКС"),"^ASR","|cff8cd123ASR|r",1)).." v"..A.VERSION); end; L(window,"by AlexEnotov",9,25,47,250,S.muted);
  A.controls={}; A.controls.edit=B(window,"Изменить интерфейс",230,26,456,24,function() A.ToggleEdit(); end);
  B(window,"×",24,22,692,26,function() window:Hide(); end);
  RegisterBuiltins();
@@ -270,6 +312,7 @@ function A.CreateSettings()
    local tabs=CreateFrame("Frame",nil,page); tabs:SetSize(500,58); tabs:SetPoint("TOPLEFT",page,"TOPLEFT",0,0);
    for j,entry in ipairs({{"combat","Общие"},{"normal","Обычный урон"},{"critical","Критические удары"},{"heal","Исцеление"},{"taken","Полученный урон"},{"periodic","Периодический урон"}}) do local target=entry[1]; local button=B(tabs,entry[2],156,25,8+((j-1)%3)*160,math.floor((j-1)/3)*30,function() A.SelectSettingsPage(target); end); subnav[#subnav+1]={button=button,target=target}; end
   end
+  ArrangeNavigation();
  end
  for i,p in ipairs(A.settingsPages) do MountPage(p,i); end
  status=S.Label(window,"",10,214,563,500,S.muted); status:SetHeight(28);

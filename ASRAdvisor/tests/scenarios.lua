@@ -1,7 +1,7 @@
 local A=ASAdvisor;
 local passed=0;
 local function check(condition,description) assert(condition,description); passed=passed+1; end
-ASAdvisorRuntime.scripts.OnEvent(ASAdvisorRuntime,"ADDON_LOADED","ASAdvisor");
+ASAdvisorRuntime.scripts.OnEvent(ASAdvisorRuntime,"ADDON_LOADED","ASRAdvisor");
 check(A.ready,"addon loads");
 check(ASAdvisorDB.options.language=="en","fresh builder installation defaults to English");
 check(#AZS_GEN.spells.HUNTER==18,"actual Hunter catalog");

@@ -1,4 +1,4 @@
-ASRLoot={VERSION="0.6.1",ready=false}; local A=ASRLoot;
+ASRLoot={VERSION="0.6.2",ready=false}; local A=ASRLoot;
 local translations={
  ["Новые"]="New",["Все"]="All",["Переключить режим"]="Switch mode",["Масштаб"]="Scale",["Добыча"]="Loot",["Только новые"]="New items only",["Вся добыча"]="All drops",["Новый"]="New",["Продано"]="Sold",["Неизвестная редкость"]="Unknown rarity",
  ["Новые: %d · Дубликаты: %d"]="New: %d · Duplicates: %d",["Золото за дубликаты: %d"]="Duplicate gold: %d",["Пока нет предметов"]="No items yet",["Прокрутка колёсиком"]="Scroll with mouse wheel",

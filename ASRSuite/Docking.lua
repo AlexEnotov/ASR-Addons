@@ -62,9 +62,19 @@ function A.ApplyDocking()
  end
  for id in pairs(panels) do Apply(id); end; busy=false;
 end
+local opposite={top="bottom",bottom="top",left="right",right="left"};
+function A.IsDockSideOccupied(id,side,ignore)
+ local own=Links()[id];
+ if own and own.parent~=ignore and opposite[own.side]==side then return true; end
+ for child,link in pairs(Links()) do
+  if child~=ignore and link.parent==id and link.side==side then return true; end
+ end
+ return false;
+end
 function A.DockPanel(child,parent,side,offset,align)
  if child==parent or not panels[child] or not panels[parent] or A.IsDockDescendant(parent,child) then return false; end
  if side~="top" and side~="bottom" and side~="left" and side~="right" then return false; end
+ if A.IsDockSideOccupied(parent,side,child) or A.IsDockSideOccupied(child,opposite[side],parent) then return false; end
  ASRSuiteDB.docking[child]={parent=parent,side=side,offset=offset or 0,align=align or "offset"}; A.ApplyDocking(); return true;
 end
 function A.UndockPanel(id)
@@ -73,8 +83,28 @@ end
 local function SaveTree(parent)
  Save(parent); for id,link in pairs(Links()) do if link.parent==parent then SaveTree(id); end end
 end
+local function Cursor()
+ if not GetCursorPosition then return; end
+ local x,y=GetCursorPosition(); local scale=UIParent.GetEffectiveScale and UIParent:GetEffectiveScale() or 1; return x/scale,y/scale;
+end
+local function EdgeDistance(r,side,x,y)
+ if not x or not y then return math.huge; end
+ local left,right,bottom,top=r.left,r.left+r.width,r.top-r.height,r.top;
+ if side=="left" then right=left; elseif side=="right" then left=right;
+ elseif side=="top" then bottom=top; else top=bottom; end
+ local dx=math.max(left-x,0,x-right); local dy=math.max(bottom-y,0,y-top);
+ return math.sqrt(dx*dx+dy*dy);
+end
+local function Better(candidate,best)
+ if not best then return true; end
+ if candidate.nearCursor~=best.nearCursor then return candidate.nearCursor; end
+ if candidate.nearCursor and candidate.cursorDistance~=best.cursorDistance then return candidate.cursorDistance<best.cursorDistance; end
+ if candidate.distance~=best.distance then return candidate.distance<best.distance; end
+ if candidate.parent~=best.parent then return candidate.parent<best.parent; end
+ return candidate.side<best.side;
+end
 local function FindTarget(id,c)
-  c=Visual(c); local best;
+  c=Visual(c); local best; local x,y=Cursor();
   for parent,p in pairs(panels) do
    if parent~=id and Ready(parent) and p.frame:IsShown() and not A.IsDockDescendant(parent,id) then
     local r=Rect(p.frame);
@@ -85,7 +115,10 @@ local function FindTarget(id,c)
      if horizontal then candidates[#candidates+1]={side="bottom",distance=math.abs(c.top-(r.top-r.height-Gap())),offset=c.left-r.left,ending=r.width-c.width}; candidates[#candidates+1]={side="top",distance=math.abs(c.top-c.height-r.top-Gap()),offset=c.left-r.left,ending=r.width-c.width}; end
      if vertical then candidates[#candidates+1]={side="right",distance=math.abs(c.left-r.left-r.width-Gap()),offset=c.top-r.top,ending=c.height-r.height}; candidates[#candidates+1]={side="left",distance=math.abs(c.left+c.width-r.left+Gap()),offset=c.top-r.top,ending=c.height-r.height}; end
      for _,candidate in ipairs(candidates) do
-      if candidate.distance<=SNAP and (not best or candidate.distance<best.distance or candidate.distance==best.distance and parent<best.parent) then candidate.parent=parent; best=candidate; end
+      if candidate.distance<=SNAP and not A.IsDockSideOccupied(parent,candidate.side,id) and not A.IsDockSideOccupied(id,opposite[candidate.side],parent) then
+       candidate.parent=parent; candidate.cursorDistance=EdgeDistance(r,candidate.side,x,y); candidate.nearCursor=candidate.cursorDistance<=SNAP*3;
+       if Better(candidate,best) then best=candidate; end
+      end
      end
     end
    end
@@ -106,13 +139,16 @@ local function Preview(best)
  elseif best.side=="top" then preview.line:SetSize(r.width,2); preview.line:SetPoint("TOPLEFT",preview,"TOPLEFT",0,Gap());
  elseif best.side=="left" then preview.line:SetSize(2,r.height); preview.line:SetPoint("TOPLEFT",preview,"TOPLEFT",-Gap(),0);
  else preview.line:SetSize(2,r.height); preview.line:SetPoint("TOPRIGHT",preview,"TOPRIGHT",Gap(),0); end
+ -- Keep the hint on screen independently of the edge highlight.
+ local screenWidth,screenHeight=UIParent:GetWidth(),UIParent:GetHeight();
+ local textWidth=math.min(240,math.max(1,screenWidth-16)); local textHeight=16;
+ local textX=math.max(8,math.min(r.left,screenWidth-textWidth-8));
+ local textY=r.top+3; if textY+textHeight>screenHeight-8 then textY=r.top-textHeight/2; end
+ textY=math.max(8,math.min(textY,screenHeight-textHeight-8));
+ preview.text:SetWidth(textWidth); preview.text:ClearAllPoints(); preview.text:SetPoint("BOTTOMLEFT",UIParent,"BOTTOMLEFT",textX,textY);
  preview.text:SetText(A.T("Отпусти — стыковка")); preview:Show();
  if AZS_SetOnTopOfScreens then AZS_SetOnTopOfScreens("ASRDockingPreview",true); end
  preview:SetFrameLevel(900);
-end
-local function Cursor()
- if not GetCursorPosition then return; end
- local x,y=GetCursorPosition(); local scale=UIParent.GetEffectiveScale and UIParent:GetEffectiveScale() or 1; return x/scale,y/scale;
 end
 local function PositionDrag()
  local p=dragging and panels[dragging]; if not p or not dragData or not dragData.active then return; end

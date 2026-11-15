@@ -70,4 +70,26 @@ check(math.abs(paintedChild:GetLeft()*0.75+1.5*0.75-(paintedParent:GetLeft()+1.5
 ASRSuiteDB.dockingGap=7; A.ApplyDocking();
 check(math.abs((paintedChild:GetTop()*0.75-10*0.75)-(parentVisibleBottom-7))<0.001,"changing configured gap updates existing scaled anchors");
 ASRSuiteDB.dockingGap=4; A.ClearDocking(); MouseDown=false; A.SetEditing(false);
+
+local near=panel(1400,900,180,300); local far=panel(1584,1024,180,400); local tall=panel(1584,620,180,400); local extra=panel(1900,1000,100,100);
+A.RegisterDockPanel("pointerNear",near); A.RegisterDockPanel("pointerFar",far); A.RegisterDockPanel("pointerTall",tall); A.RegisterDockPanel("pointerExtra",extra);
+local oldCursor=GetCursorPosition; GetCursorPosition=function() return 1580,610; end
+A.SetEditing(true); A.BeginDockDrag("pointerTall"); A.EndDockDrag("pointerTall");
+check(ASRSuiteDB.docking.pointerTall.parent=="pointerNear" and ASRSuiteDB.docking.pointerTall.side=="right","cursor-near edge wins over an equally close remote edge of a tall moving panel");
+check(A.IsDockSideOccupied("pointerNear","right") and A.IsDockSideOccupied("pointerTall","left"),"both touching faces are occupied by a saved connection");
+check(not A.DockPanel("pointerExtra","pointerNear","right",0,"start"),"second attachment to an occupied parent face is rejected");
+check(not A.DockPanel("pointerNear","pointerExtra","left",0,"start"),"a child cannot reuse a face already occupied by its attached subtree");
+A.UndockPanel("pointerTall"); tall:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",1584,620); GetCursorPosition=function() return 0,0; end
+A.BeginDockDrag("pointerTall"); A.EndDockDrag("pointerTall");
+check(ASRSuiteDB.docking.pointerTall.parent=="pointerFar","when no eligible edge is near the cursor geometry supplies the nearest fallback");
+A.ClearDocking(); GetCursorPosition=oldCursor; A.SetEditing(false);
+
+local screenW,screenH=UIParent:GetWidth(),UIParent:GetHeight();
+local edgeParent=panel(screenW-50,screenH-2,180,100); local edgeChild=panel(screenW-50,screenH-106,180,80);
+A.RegisterDockPanel("screenEdgeParent",edgeParent); A.RegisterDockPanel("screenEdgeChild",edgeChild);
+A.SetEditing(true); A.BeginDockDrag("screenEdgeChild"); MouseDown=true; A.UpdateDocking(0.1);
+local hint=A.dockPreview.text; local point,relative,anchor,x,y=hint:GetPoint();
+check(A.dockPreview:IsShown() and relative==UIParent and x>=8 and x+hint:GetWidth()<=screenW-8 and y>=8 and y+hint:GetHeight()<=screenH-8,"docking hint stays visible at the top and right screen edges");
+check(y<edgeParent:GetTop(),"hint moves below the panel top when there is no room above");
+A.EndDockDrag("screenEdgeChild"); A.ClearDocking(); MouseDown=false; A.SetEditing(false);
 print("Passed "..count.." magnetic docking checks");

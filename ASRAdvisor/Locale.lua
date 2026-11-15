@@ -1,5 +1,6 @@
 local A=ASAdvisor;
 local EN={
+ ["Параметры бонуса доступны в описании полученного амулета."]="Bonus values are available in the acquired amulet's description.",
  ["Длит."]="Dur.",["с"]="s",["м"]="yd",["Особый бонус"]="Special bonus",
  ["Забанены"]="Banished",
  ["Все улучшения, кроме уже достигнутых целей."]="All upgrades except goals already reached.",

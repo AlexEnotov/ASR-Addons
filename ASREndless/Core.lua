@@ -1,4 +1,4 @@
-ASREndless={VERSION="0.6.1",ready=false}; local A=ASREndless;
+ASREndless={VERSION="0.6.2",ready=false}; local A=ASREndless;
 local keys={"endlessEnabled","endlessPosition","endlessState","endlessHud"};
 local function Copy(v) if type(v)~="table" then return v; end; local t={}; for k,x in pairs(v) do t[k]=Copy(x); end; return t; end
 function A.Init()
@@ -29,6 +29,15 @@ function A.MigrateSuite()
  if A.legacySuite then old.endlessEnabled=ASREndlessDB.endlessEnabled; old.endlessPosition=Copy(ASREndlessDB.endlessPosition); end
  if A.endlessFrame then A.endlessFrame.placed=nil; end
 end
+function A.SetEditMode(on)
+ A.editing=on and true or false; local f=A.endlessFrame; if not f then return; end
+ if f.editOverlay~=A.editing then
+  f.editOverlay=A.editing;
+  if AZS_SetOnTopOfScreens then AZS_SetOnTopOfScreens("ASREndlessTracker",A.editing); end
+ end
+ f:SetFrameStrata(A.editing and "FULLSCREEN_DIALOG" or "MEDIUM"); f:SetFrameLevel(A.editing and 450 or 20);
+ ASRStyle.SyncChildren(f);
+end
 function A.CanMovePanel()
  if ASRSuite and ASRSuite.ready then return ASRSuite.CanMovePanel("endless"); end
  return not ASREndlessDB.locked;
@@ -44,9 +53,10 @@ function A.BindSuite()
  if A.boundSuite==suite then return; end
  A.MigrateSuite(); A.boundSuite=suite;
  if suite.RegisterPanel then suite.RegisterPanel("endless",{frame=A.endlessFrame,available=function() return A.endlessFrame:IsShown(); end,
+  setEditing=A.SetEditMode,
   savePosition=function(r) ASREndlessDB.endlessPosition={"TOPLEFT","BOTTOMLEFT",r.left/r.ratio,r.top/r.ratio}; A.endlessFrame.placed=true; end}); end
  if suite.RegisterCompatibilityAddon then suite.RegisterCompatibilityAddon("endless","ASR Endless",function() return true; end,{{id="tracker",title="Показывать трекер Endless",get=function() return ASREndlessDB.endlessEnabled; end,set=A.SetEnabled}}); end
- A.SetLanguage(ASRSuiteDB.language);
+ A.SetLanguage(ASRSuiteDB.language); A.SetEditMode(suite.editing);
 end
 local runtime=CreateFrame("Frame","ASREndlessRuntime"); runtime:RegisterEvent("ADDON_LOADED");
 runtime:SetScript("OnEvent",function(self,event,name)

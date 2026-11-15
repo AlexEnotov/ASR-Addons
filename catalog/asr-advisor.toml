@@ -6,7 +6,7 @@ repo = "AlexEnotov/ASR-Addons"
 description = "Build planner and card recommendations for Azeroth Survivors Reborn."
 category = "Combat"
 license = "GPL-3.0-only"
-folders = ["ASAdvisor"]
+folders = ["ASRAdvisor", "ASAdvisor"]
 requires = []
 
 [source]

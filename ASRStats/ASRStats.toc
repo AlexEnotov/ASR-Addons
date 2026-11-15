@@ -3,7 +3,7 @@
 ## Notes: Current character stats. /asrstats
 ## Author: AlexEnotov
 ## X-License: GPL-3.0-only
-## Version: 0.6.1
+## Version: 0.6.2
 ## Dependencies: AzerothSurvivors
 ## OptionalDeps: AzerothSurvivorsAPI, AzerothSurvivorsUI
 ## SavedVariables: ASRStatsDB

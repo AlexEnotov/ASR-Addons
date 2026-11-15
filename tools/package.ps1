@@ -7,17 +7,11 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 $repoRoot = Split-Path $PSScriptRoot -Parent
 $output = if ([IO.Path]::IsPathRooted($OutputDirectory)) { $OutputDirectory } else { Join-Path $repoRoot $OutputDirectory }
 [IO.Directory]::CreateDirectory($output) | Out-Null
-$modules = [ordered]@{ ASAdvisor = 'ASRAdvisor'; ASRStats = 'ASRStats'; ASRCombatText = 'ASRCombatText'; ASRSuite = 'ASRSuite'; ASRLoot = 'ASRLoot'; ASREndless = 'ASREndless' }
+$modules = [ordered]@{ ASRAdvisor = 'ASRAdvisor'; ASRStats = 'ASRStats'; ASRCombatText = 'ASRCombatText'; ASRSuite = 'ASRSuite'; ASRLoot = 'ASRLoot'; ASREndless = 'ASREndless'; ASRParty = 'ASRParty'; ASRChat = 'ASRChat' }
 $hashes = @()
 foreach ($folder in $modules.Keys) {
-    $source = Join-Path $repoRoot $folder
-    $toc = Join-Path $source "$folder.toc"
-    $tocText = [IO.File]::ReadAllText($toc)
-    if ($tocText -notmatch '(?m)^## Interface: (11200|30300)\s*$') { throw "Unsupported Interface: $folder" }
-    # Runtime allowlist: development tools, tests and package metadata never enter the ZIP.
-    $files = @(Get-ChildItem -LiteralPath $source -File | Where-Object { $_.Extension -in @('.lua', '.toc') })
-    $media = Join-Path $source 'media'
-    if (Test-Path -LiteralPath $media) { $files += @(Get-ChildItem -LiteralPath $media -Recurse -File) }
+    $roots = @($folder)
+    if ($folder -eq 'ASRAdvisor') { $roots += 'ASAdvisor' }
     $license = Join-Path $repoRoot 'LICENSE'
     $name = "$($modules[$folder])-$Tag.zip"
     $target = Join-Path $output $name
@@ -26,10 +20,17 @@ foreach ($folder in $modules.Keys) {
     $zip = New-Object IO.Compression.ZipArchive($stream, [IO.Compression.ZipArchiveMode]::Create)
     try {
         $seen = @{}
+        foreach ($moduleFolder in $roots) {
+        $source = Join-Path $repoRoot $moduleFolder
+        $tocText = [IO.File]::ReadAllText((Join-Path $source "$moduleFolder.toc"))
+        if ($tocText -notmatch '(?m)^## Interface: (11200|30300)\s*$') { throw "Unsupported Interface: $moduleFolder" }
+        $files = @(Get-ChildItem -LiteralPath $source -File | Where-Object { $_.Extension -in @('.lua', '.toc') })
+        $media = Join-Path $source 'media'
+        if (Test-Path -LiteralPath $media) { $files += @(Get-ChildItem -LiteralPath $media -Recurse -File) }
         foreach ($file in ($files | Sort-Object FullName)) {
             if ($file.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Symlink not allowed: $file" }
             $relative = $file.FullName.Substring($source.Length).TrimStart([char[]]@('\','/')).Replace('\','/')
-            $entryName = "$folder/$relative"
+            $entryName = "$moduleFolder/$relative"
             if ($seen.ContainsKey($entryName.ToLowerInvariant())) { throw "Duplicate path: $entryName" }
             $seen[$entryName.ToLowerInvariant()] = $true
             if ($file.Extension -notin @('.lua','.toc','.tga','.png','.blp','.ttf','.otf')) { throw "Unexpected runtime asset: $entryName" }
@@ -39,13 +40,14 @@ foreach ($folder in $modules.Keys) {
             try { $bytes = [IO.File]::ReadAllBytes($file.FullName); $destination.Write($bytes,0,$bytes.Length) } finally { $destination.Dispose() }
         }
         if (Test-Path -LiteralPath $license) {
-            $entry = $zip.CreateEntry("$folder/LICENSE", [IO.Compression.CompressionLevel]::Optimal)
+            $entry = $zip.CreateEntry("$moduleFolder/LICENSE", [IO.Compression.CompressionLevel]::Optimal)
             $entry.LastWriteTime = [DateTimeOffset]::new(2026,1,1,0,0,0,[TimeSpan]::Zero)
             $destination = $entry.Open()
             try { $bytes = [IO.File]::ReadAllBytes($license); $destination.Write($bytes,0,$bytes.Length) } finally { $destination.Dispose() }
         }
+        }
     } finally { $zip.Dispose(); $stream.Dispose() }
-    & (Join-Path $PSScriptRoot 'validate-package.ps1') -Path $target -Folder $folder
+    & (Join-Path $PSScriptRoot 'validate-package.ps1') -Path $target -Folder $roots
     $hashes += "$((Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash.ToLowerInvariant())  $name"
 }
 $bundleName = "ASR-All-$Tag.zip"
@@ -65,7 +67,7 @@ try {
         } finally { $moduleZip.Dispose() }
     }
 } finally { $bundle.Dispose(); $bundleStream.Dispose() }
-& (Join-Path $PSScriptRoot 'validate-package.ps1') -Path $bundlePath -Folder @($modules.Keys)
+& (Join-Path $PSScriptRoot 'validate-package.ps1') -Path $bundlePath -Folder (@($modules.Keys) + 'ASAdvisor')
 $hashes += "$((Get-FileHash -LiteralPath $bundlePath -Algorithm SHA256).Hash.ToLowerInvariant())  $bundleName"
 [IO.File]::WriteAllLines((Join-Path $output 'SHA256SUMS'), $hashes, (New-Object Text.UTF8Encoding($false)))
 Write-Output "Built $($modules.Count) independent addons and one bundle for $Tag in $output"

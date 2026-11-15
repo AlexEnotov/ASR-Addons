@@ -1,0 +1,18 @@
+id = "asr-party"
+name = "ASR Party"
+author = "AlexEnotov"
+repo = "AlexEnotov/ASR-Addons"
+description = "Movable classic and compact party frames with health and revival status."
+category = "Unit Frames"
+license = "GPL-3.0-only"
+folders = ["ASRParty"]
+requires = []
+
+[source]
+type = "release"
+asset = "ASRParty-v*.zip"
+
+[reborn]
+status = "untested"
+tested = ""
+notes = "Classic and compact layouts verified locally; live co-op validation remains limited."

@@ -1,0 +1,18 @@
+id = "asr-chat"
+name = "ASR Chat"
+author = "AlexEnotov"
+repo = "AlexEnotov/ASR-Addons"
+description = "Movable native chat with tabs, compact controls, appearance and message copying."
+category = "Chat"
+license = "GPL-3.0-only"
+folders = ["ASRChat"]
+requires = []
+
+[source]
+type = "release"
+asset = "ASRChat-v*.zip"
+
+[reborn]
+status = "untested"
+tested = ""
+notes = "Native messages, tabs, input and interface fading verified locally."

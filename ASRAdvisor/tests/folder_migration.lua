@@ -1,0 +1,13 @@
+local A=ASAdvisor;
+local previous=ASAdvisorDB;
+local build={id=77,class="HUNTER",name="Existing saved build",spells={{key="aimed_shot",rank=0,cd=0.9}},items={}};
+local old={builds={build},active={HUNTER=77},options={language="ru",layoutVersion=2,trackerPos={point="TOPLEFT",rel="BOTTOMLEFT",x=35,y=420},trackerScale=0.65}};
+ASAdvisorDB=old;
+A.ready=false;
+ASAdvisorRuntime.scripts.OnEvent(ASAdvisorRuntime,"ADDON_LOADED","ASAdvisor");
+assert(not A.ready,"settings bridge must not start the renamed runtime");
+A.Init();
+assert(ASAdvisorDB==old and old.builds[1]==build and old.active.HUNTER==77,"renamed addon retains the database loaded by the legacy bridge");
+assert(old.options.language=="ru" and old.options.trackerPos.x==35 and old.options.trackerScale==0.65,"language, position and scale survive the rename");
+ASAdvisorDB=previous; A.Init();
+print("Passed legacy Advisor folder and settings migration checks");

@@ -33,4 +33,17 @@ score=A.ScoreItem(b,{name="Амулет инферно: Освящение",mode
 check(score.score==0 and score.reason==A.T("Амулет ниже надетого по приоритету"),"existing priority rule also blocks a lower-priority class amulet");
 b.items={row.key,"south_seas_kelp"};
 check(A.ScoreItem(b,{name="Амулет инферно: Освящение",mode="new"},live,1).score>0,"higher-priority class amulet remains recommended");
+row=A.aliasItem("legend_mind_sear");
+check(row and A.AvailableTo(row,"PRIEST") and not A.AvailableTo(row,"PALADIN"),"confirmed Mind Sear amulet is available only to priest builds");
+gear={slot="amulet",name="Амулет инферно: Иссушение разума",text="Live server bonus description"};
+b={class="PRIEST",spells={},items={"legend_mind_sear","enlightenment"},itemRules={}};
+live={inRun=true,spells={},gear={gear}};
+check(A.ResolveItem(gear,"PRIEST")==row and A.ResolveItem("Amulet of the Inferno: Mind Sear","PRIEST")==row,"Russian screenshot and English Mind Sear names identify the same item");
+local _,items=A.TrackerEntries(b,live);
+check(#items==1 and items[1].owned and items[1].planned and items[1].row==row,"Mind Sear is planned once and hides the lower-priority backup");
+check(A.ScoreItem(b,{name="Choker of Enlightenment",mode="new"},live,1).score==0,"confirmed Mind Sear amulet participates in normal amulet priority rules");
+local class=A.Class; A.Class=function() return "PRIEST"; end;
+local desc,source=A.ItemDescription(row,live); A.Class=class;
+check(source=="current" and desc:find(gear.text,1,true),"actual acquired bonus text is retained without fabricated base effects");
+check(A.BaseItemText(row):find(A.T("Параметры бонуса доступны в описании полученного амулета."),1,true),"missing base numbers are explicitly distinguished from known bonuses");
 print("Passed "..count.." class amulet identification and existing priority checks");

@@ -1,5 +1,9 @@
 local A=ASRSuite;
 local EN={
+ ["Нажми на ссылку и скопируй её с помощью Ctrl+C."]="Click the link, then press Ctrl+C to copy it.",
+ ["О комплексе"]="About",["Версия"]="Version",["Автор: AlexEnotov"]="Author: AlexEnotov",
+ ["Исходный код, релизы и сообщения об ошибках"]="Source code, releases and bug reports",
+ ["Независимые аддоны для Azeroth Survivors Reborn. Установи нужные модули и управляй ими через общий комплекс."]="Independent addons for Azeroth Survivors Reborn. Install the modules you need and manage them through the shared suite.",
  ["Экспорт настроек"]="Export settings",["Импорт настроек"]="Import settings",["Выделить всё"]="Select all",["Импортировать и перезагрузить"]="Import and reload",
  ["Все настройки ASR, расположение панелей и сохранённые билды. Выдели код и скопируй Ctrl+C."]="All ASR settings, panel layout and saved builds. Select the code and copy with Ctrl+C.",
  ["Вставь код через Ctrl+V. Импорт заменит настройки и билды из кода и перезагрузит интерфейс."]="Paste with Ctrl+V. Import replaces settings and builds from the code and reloads the interface.",

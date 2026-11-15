@@ -10,7 +10,12 @@ assert(not S.endlessFrame and not S.UpdateEndless,"Suite owns no Endless runtime
 ASREndlessDB.endlessPosition[3]=-42; E.MigrateSuite(); assert(ASREndlessDB.endlessPosition[3]==-42,"migration is one-time");
 S.SetLanguage("en"); assert(ASREndlessDB.language=="en");
 S.controls.endlessEnabled.scripts.OnClick(); assert(ASREndlessDB.endlessEnabled);
-S.SetEditing(true); assert(E.CanMovePanel()); S.SetEditing(false); assert(not E.CanMovePanel());
+local topStates={}; AZS_SetOnTopOfScreens=function(name,on) topStates[name]=on; end
+S.SetEditing(true); assert(E.CanMovePanel());
+assert(E.endlessFrame:GetFrameStrata()=="FULLSCREEN_DIALOG" and E.endlessFrame:GetFrameLevel()==450 and topStates.ASREndlessTracker,"Endless is registered above game screen dimming during editing");
+assert(E.endlessFrame.head:GetFrameStrata()=="FULLSCREEN_DIALOG" and E.endlessFrame.slot:GetFrameStrata()=="FULLSCREEN_DIALOG" and E.endlessFrame.bar:GetFrameLevel()>E.endlessFrame.slot:GetFrameLevel(),"all Endless child frames inherit raised editing layers");
+S.SetEditing(false); assert(not E.CanMovePanel());
+assert(E.endlessFrame:GetFrameStrata()=="MEDIUM" and E.endlessFrame:GetFrameLevel()==20 and topStates.ASREndlessTracker==false,"leaving editing releases screen overlay registration and restores normal HUD layers");
 local profile=assert(S.ExportSettings()); local decoded=assert(S.DecodeSettings(profile));
 assert(decoded.endless.endlessPosition[3]==-42 and not decoded.endless.endlessState and not decoded.endless.endlessHud and not decoded.endless.migratedSuite);
 ASREndlessDB.endlessState={spawned=99}; ASREndlessDB.endlessHud={previous=false}; ASREndlessDB.endlessPosition[3]=0;

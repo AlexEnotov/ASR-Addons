@@ -154,6 +154,10 @@ function A.LegendDescription(m,classes)
   parts[#parts+1]=table.concat(names,", ");
   local spell; for _,token in ipairs(classes or {}) do spell=A.byKey[token..":"..m.spell]; if spell then break end end
   parts[#parts+1]=A.T("Усиление умения")..": "..(spell and spell.name or "?");
+  if m.incomplete then
+    parts[1]=A.T("Описание"); parts[#parts+1]=A.T("Параметры бонуса доступны в описании полученного амулета.");
+    return table.concat(parts,"\n");
+  end
   local labels={area="Область действия",damage="Урон",targets="Доп. цели",cooldown="Сокращение КД",duration="Длительность",burn="Горение",stun="Оглушение",splash="Урон по соседним целям",heal="Лечение",weaken="Ослабление",share="Доля урона",chance="Шанс",secs="Длительность",radius="Радиус",reset="Сброс перезарядки",jump="Перескок урона",slow="Замедление",crit="Шанс критического удара",echo="Повторное применение",absorb="Поглощение",pierce="Пробивание",execute="Добивание"};
   local function value(key,v)
     if key=="targets" or key=="count" then return fmt(v); end

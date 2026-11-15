@@ -1,4 +1,4 @@
-ASRStats={VERSION="0.6.1"}; local A=ASRStats;
+ASRStats={VERSION="0.6.2"}; local A=ASRStats;
 -- Factor fields are the game's character-sheet protocol, not a cached item database.
 -- Fallback fields in AZSSTATS are already percentages; never multiply them again.
 A.sections={

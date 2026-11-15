@@ -1,6 +1,6 @@
 local A=ASRSuite; local count=0; local function check(ok,label) assert(ok,label); count=count+1; end
 local nav=0; for id in pairs(A.navigation) do if id~="future" then nav=nav+1; end end
-check(nav==5 and not A.navigation.endless and not A.navigation.heal and not A.navigation.critical,"sidebar contains only installed modules, with damage types inside Combat text");
+check(nav==6 and not A.navigation.endless and not A.navigation.heal and not A.navigation.critical,"sidebar contains only installed modules, with damage types inside Combat text");
 check(A.pages.builder.unavailable,"missing builder shows installation placeholder instead of inert settings");
 ASRStatsDB.locked=false; ASRStatsPanel.settings.close.scripts.OnClick(ASRStatsPanel.settings.close); AZS_RUN.ph="playing";
 A.SetEditing(false); ASRSuiteDB.lockPanels=true;
@@ -22,8 +22,8 @@ local display="third-party";
 A.RegisterDisplaySource("party","replacement","Replacement",nil,function() local before=display; display="ASR"; return function() display=before; end; end);
 A.SelectDisplaySource("party","replacement"); check(display=="ASR","registered module can own only its display element");
 A.SetModuleEnabled("party",false); check(display=="third-party","disabling a provider restores captured third-party UI rather than forcing native UI");
-A.SetLanguage("ru"); check(A.navigation.stats.text:GetText()=="Статы" and A.T("ASR Stats")=="ASR Статы","stats section follows Russian language");
-A.SetLanguage("en"); check(A.navigation.stats.text:GetText()=="Stats","stats section follows English language"); A.SetLanguage("ru");
+A.SetLanguage("ru"); check(A.navigation.stats.text:GetText()=="ASR Статы" and A.T("ASR Stats")=="ASR Статы","stats section follows Russian language");
+A.SetLanguage("en"); check(A.navigation.stats.text:GetText()=="ASR Stats","stats section follows English language"); A.SetLanguage("ru");
 local provider=A.controls.compatibility.combat.combat;
 check(A.compatibilityGroups.combat.frame:GetParent()==A.compatibilityGroups.stats.frame:GetParent(),"compatibility lists addon sections together rather than a second navigation menu");
 check(not A.compatibilityScroll.bar:IsShown() and A.compatibilityScroll.maximum()==0,"short compatibility lists hide the scrollbar instead of suggesting hidden content");
@@ -65,3 +65,11 @@ A.SetLanguage("en"); check(chooser.rows.crit.label:GetText()=="Crit","stat picke
 chooser.all.scripts.OnClick(); check(ASRStats.IsStatShown("crit") and ASRStats.IsStatShown("pet"),"enable all restores every stat"); A.SetLanguage("ru");
 
 print("Passed "..count.." module and interface controls checks");
+
+check(A.navigation.about.point[1]=="BOTTOMLEFT" and A.navigation.about.point[5]==66 and A.navigation.compat.point[1]=="BOTTOMLEFT" and A.navigation.compat.point[5]==32,"About and Compatibility form a separate fixed footer even after dynamic page registration");
+check(A.settings.title:GetText():find("v"..A.VERSION,1,true),"Suite header displays the current distribution version");
+
+A.RegisterSettingsPage("order-a","Order A",function() end); A.RegisterSettingsPage("order-b","Order B",function() end);
+local feature={{id="panel",title="Panel",get=function() return true; end,set=function() end}};
+A.RegisterCompatibilityAddon("order-b","Order B",nil,feature); A.RegisterCompatibilityAddon("order-a","Order A",nil,feature);
+check(A.compatibilityGroups["order-a"].frame.point[5]>A.compatibilityGroups["order-b"].frame.point[5],"compatibility follows sidebar order even when modules register compatibility in reverse order");

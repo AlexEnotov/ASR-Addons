@@ -6,7 +6,30 @@ are summarized with the feature they improve rather than listed individually.
 
 ## Unreleased
 
-No pending changes.
+## v0.6.2 — 2026-11-15
+
+- **ASR Chat — new addon:** movable and resizable native chat, wide tabs and a
+  compact tab picker, custom channel/friends/scroll controls, appearance previews,
+  stone/simple/borderless styles and copying recent messages. Hide the interface
+  smoothly while messages retain their configured lifetime; chat controls and
+  input have separate always-visible options. Keep input and message bounds stable
+  during resizing and fading. Settings, layout editing and profile transfer work
+  independently or through Suite.
+- **ASR Party — new addon:** movable classic portrait frames and compact health
+  rows, individual member frames, class colors, levels, health-number formats,
+  death and revival states, and native character inspection on click. Includes
+  five-state previews, an optional solo/group header and Suite integration.
+- **ASR Advisor:** rename the main addon folder to `ASRAdvisor`. A minimal
+  `ASAdvisor` settings bridge preserves existing builds and preferences. Add the
+  confirmed priest Inferno/Mind Sear amulet without inventing missing base bonuses.
+- **ASR Suite:** consistent module names and version display, separate About and
+  Compatibility pages below module navigation, copyable links and compatibility
+  controls ordered like the menu. Improve magnetic docking: prefer free edges
+  near the cursor, avoid occupied edges and keep hints within the screen.
+- **ASR Endless:** keep the tracker and its native charge bar above game dimming
+  while editing the interface, restoring normal layers afterward.
+- Ship eight standalone addon ZIPs and a complete ASR-All pack. Party's live
+  co-op coverage remains limited; automated and local preview checks are included.
 
 ## v0.6.1 — 2026-11-15
 

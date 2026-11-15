@@ -855,7 +855,7 @@ local function cardMark(i)
   local w=math.max(20,f:GetWidth()); local font=parent.tagText and parent.tagText:GetFont() or FONT;
   f.text:ClearAllPoints(); f.text:SetPoint("CENTER",f,"CENTER",0,0); f.text:SetFont(font,style=="band" and 15 or math.max(7,math.min(12,w/5)),"OUTLINE"); f.text:SetWidth(w-8); f.text:SetTextColor(pickColor[1],pickColor[2],pickColor[3],1); f.spaced=w>=44;
   if style=="arrow" then
-    f:SetBackdrop(nil); if not f.arrow then f.arrow=f:CreateTexture(nil,"OVERLAY"); f.arrow:SetAllPoints(f); f.arrow:SetTexture("Interface\\AddOns\\ASAdvisor\\media\\arrow-down.tga"); end
+    f:SetBackdrop(nil); if not f.arrow then f.arrow=f:CreateTexture(nil,"OVERLAY"); f.arrow:SetAllPoints(f); f.arrow:SetTexture("Interface\\AddOns\\ASRAdvisor\\media\\arrow-down.tga"); end
     f.arrow:SetVertexColor(pickColor[1],pickColor[2],pickColor[3],1); f.arrow:Show(); f.text:Hide();
   else
     f:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8",edgeFile=BORDER,edgeSize=8,insets={left=2,right=2,top=2,bottom=2}});

@@ -1,7 +1,7 @@
 local A=ASRSuite;
 local LIMIT=2000000;
-local specs={suite="ASRSuiteDB",stats="ASRStatsDB",combat="ASRCombatTextDB",loot="ASRLootDB",endless="ASREndlessDB"};
-local excluded={suite={endlessState=true,endlessHud=true},combat={nativeDamage=true,previousSurvivorMode=true},loot={run=true,items=true,nativeLoot=true},stats={},endless={endlessState=true,endlessHud=true,migratedSuite=true}};
+local specs={suite="ASRSuiteDB",stats="ASRStatsDB",combat="ASRCombatTextDB",loot="ASRLootDB",endless="ASREndlessDB",party="ASRPartyDB",chat="ASRChatDB"};
+local excluded={suite={endlessState=true,endlessHud=true},combat={nativeDamage=true,previousSurvivorMode=true},loot={run=true,items=true,nativeLoot=true},stats={},party={},chat={},endless={endlessState=true,endlessHud=true,migratedSuite=true}};
 local function Copy(value,omit)
  if type(value)~="table" then return value; end
  local out={}; for k,v in pairs(value) do if not (omit and omit[k]) then out[k]=Copy(v); end end; return out;

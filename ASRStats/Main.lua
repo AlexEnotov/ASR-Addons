@@ -30,6 +30,7 @@ local function Tip(frame,title,body)
 end
 function A.Refresh()
  if not ready then return; end
+ ASRLocale.UseFont(ASRStatsDB.language); ASRLocale.ApplyFonts(panel,ASRStatsDB.language);
  Layers();
  if not config and (ASRStatsDB.enabled==false or ASRSuite and ASRSuite.IsModuleEnabled and not ASRSuite.IsModuleEnabled("stats")) then Stop(); panel:Hide(); return; end
  if not config and not A.editing and (ASRStatsDB.hidden or not InRun()) then Stop(); panel:Hide(); return; end
@@ -50,7 +51,7 @@ function A.Refresh()
   end
   menu.reset.text:SetText(L("Сбросить положение","Reset position")); menu.close.text:SetText(L("Готово","Done")); height=375;
  else
-  local primary=received and raw or AZS_STATS; local fallback=AZS_RUNSTATS; if not InRun() then primary=nil; fallback=nil; end; local y=45; local shown=0; local selected=0;
+  local primary=received and raw or AZS_STATS; local fallback=AZS_RUNSTATS; if not InRun() then primary=nil; fallback=nil; end; local caps=A.ReadStatCaps(); local y=45; local shown=0; local selected=0;
   for gi,group in ipairs(A.sections) do
    local start=y; local groupShown=0;
    for _,row in ipairs(panel.groupRows[gi]) do
@@ -60,6 +61,7 @@ function A.Refresh()
      if groupShown==0 then y=y+14; end
      row:ClearAllPoints(); row:SetPoint("TOPLEFT",panel,"TOPLEFT",20,-y);
      row.name:SetText(L(row.definition[1],row.definition[2])); row.value:SetText(A.Format(row.definition,v,ASRStatsDB.language~="ru")); row:Show();
+     row.value:SetTextColor(unpack(A.IsCapped(row.definition,v,caps) and A.capColor or S.text));
      y=y+11; shown=shown+1; groupShown=groupShown+1;
     end
    end
@@ -123,7 +125,7 @@ clock:SetScript("OnEvent",function(self,event,name)
   ASRStatsDB.onlyRun=nil; if type(ASRStatsDB.hiddenStats)~="table" then ASRStatsDB.hiddenStats={}; end;
   Build(); ready=true;
   AZS.On("AZS",function(msg) raw={}; for key,value in string.gmatch(msg or "","(%w+)=([^;]*)") do raw[key]=A.Number(value); end; received=true; A.Refresh(); end);
-  for _,prefix in ipairs({"AZSSTATS","AZSRUN","AZSEND","AZSZONE"}) do AZS.On(prefix,function() A.Refresh(); end); end
+  for _,prefix in ipairs({"AZSSTATS","AZSCAPS","AZSRUN","AZSEND","AZSZONE"}) do AZS.On(prefix,function() A.Refresh(); end); end
   A.Refresh();
  elseif ready then A.Refresh(); end
 end);

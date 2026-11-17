@@ -37,7 +37,7 @@ end
 local function Tooltip(button,refresh)
  local m=button.model; if not m or m.preview or A.editing or ASRSuite and ASRSuite.editing then return; end
  if not refresh then GameTooltip:SetOwner(button,"ANCHOR_RIGHT"); A.tooltipOwner=button; end; GameTooltip:SetText(m.name,Color(m.class));
- GameTooltip:AddLine((m.className or m.class or "").." · "..A.T("Уровень").." "..tostring(m.level or "—"));
+ GameTooltip:AddLine(A.ClassLabel(m).." · "..A.T("Уровень").." "..tostring(m.level or "—"));
  GameTooltip:AddLine(A.T("Здоровье")..": "..A.Short(m.hp).." / "..A.Short(m.max),0.85,0.85,0.87);
  if m.meter then
   GameTooltip:AddLine(A.T("Урон")..": "..A.Short(m.meter.dmg).." · DPS: "..A.Short(m.meter.dps),0.85,0.85,0.87);
@@ -109,7 +109,7 @@ local function Paint(row,m,mode)
   local unit=m.preview and "player" or m.unit; local key=tostring(A.Safe(UnitGUID,unit) or "")..":"..tostring(m.name);
   A.PaintPortrait(row,unit,key)
   row.status:ClearAllPoints(); row.status:SetPoint("TOPLEFT",row,"TOPLEFT",82,-37); row.status:SetWidth(96); row.status:Show();
-  Fit(row.status,m.className or m.class or "",96);
+  Fit(row.status,A.ClassLabel(m),96);
  end
  local caseWidth=compact and 164 or 111; local caseHeight=compact and 28 or 32; local caseLeft=compact and 16 or 67; local caseTop=compact and 34 or 50;
  -- Match the native player fill (385x37) to its visible case (716x188, cropped 617/1024 by 120/256).
@@ -157,6 +157,7 @@ function A.SetOverlay(on)
 end
 function A.Refresh()
  if not A.ready or not A.frame then return; end; local f=A.frame; local members=A.Snapshot(); A.members=members;
+ ASRLocale.UseFont(ASRPartyDB.language); ASRLocale.ApplyFonts(f,ASRPartyDB.language);
  local preview=#members==0 and (A.editing or A.preview);
  if not ASRPartyDB.enabled or #members==0 and not preview and not ASRPartyDB.showHeader then A.StopDrag(); A.SetOverlay(false); f:Hide(); A.active=false; A.RestoreNative(); return; end
  if preview then members={

@@ -27,6 +27,7 @@ function A.BuildOptions(page,width,suite)
  return c;
 end
 function A.DrawOptions(c)
+ ASRLocale.UseFont(ASRPartyDB.language); ASRLocale.ApplyFonts(c.title:GetParent(),ASRPartyDB.language);
  c.showHeader:SetChecked(ASRPartyDB.showHeader); c.enabled:SetChecked(ASRPartyDB.enabled); c.locked:SetChecked(ASRPartyDB.locked); c.scale:SetText(math.floor(ASRPartyDB.scale*100+0.5).."%");
  c.healthFormat.text:SetText(A.T("Формат ХП")..": "..A.T(A.HealthFormatName(ASRPartyDB.healthFormat))); c.healthPreview:SetText(A.HealthText(1200,2400));
  c.mode.text:SetText(A.T("Вид панели")..": "..A.T(ASRPartyDB.mode=="classic" and "Классический" or "Компактный"));
@@ -34,6 +35,7 @@ function A.DrawOptions(c)
  for _,v in ipairs(c.labels) do v[1]:SetText(A.T(v[2])); end; if c.edit then c.edit.text:SetText(A.T("Изменить интерфейс")); end
  c.title:SetText("|cff8cd123ASR|r Party");
  local shared=ASRSuite and ASRSuite.ready; c.locked:SetAlpha(shared and 0.45 or 1); c.note:SetText(A.T(shared and "С Suite перемещение — через «Изменить интерфейс»." or "Перетащи заголовок, чтобы переместить группу."));
+ ASRLocale.ApplyFonts(c.title:GetParent(),ASRPartyDB.language);
 end
 function A.DrawSettings() if A.settings and A.settings.partyControls then A.DrawOptions(A.settings.partyControls); end end
 function A.CreateSettings()

@@ -40,6 +40,7 @@ function A.BuildOptions(page,width,suite)
 end
 function A.DrawOptions(c)
  if not c then return; end
+ ASRLocale.UseFont(ASRChatDB.language); ASRLocale.ApplyFonts(c.title:GetParent(),ASRChatDB.language);
  for _,v in ipairs(c.labels) do v.frame:SetText(A.T(v.key)); end
  for key,f in pairs(c.checks) do f:SetChecked(ASRChatDB[key]); end
  for key,r in pairs(c.steps) do r.value:SetText(r.format(ASRChatDB[key])); end
@@ -52,6 +53,7 @@ function A.DrawOptions(c)
  A.PanelStyle(c.preview,ASRChatDB.frameStyle,opacity);
  c.sample:SetFont(S.font,ASRChatDB.fontSize,""); c.sample:SetText("|cff8cd123Alex:|r "..A.T("Пример сообщения группы").."\n|cffffd100"..A.T("Получена новая вещь").."|r");
  c.note:SetText(A.T("Перетащи заголовок. Угол справа снизу меняет размер."));
+ ASRLocale.ApplyFonts(c.title:GetParent(),ASRChatDB.language);
 end
 function A.DrawSettings() if A.settings then A.DrawOptions(A.settings.chatControls); end end
 function A.CreateSettings()

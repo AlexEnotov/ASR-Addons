@@ -1,4 +1,5 @@
 local A,S=ASRParty,ASRSuite;
+SlashCmdList.ASRPARTY("deDE"); assert(ASRPartyDB.language=="deDE","party native locale command is case-insensitive"); SlashCmdList.ASRPARTY("en");
 ASRSuiteRuntime.scripts.OnEvent(ASRSuiteRuntime,"ADDON_LOADED","ASRSuite"); A.BindSuite();
 assert(S.pages.party and S.panelAdapters.party,"Party registers settings and docking adapter");
 S.SetEditing(true); assert(A.frame:IsShown() and A.members and A.CanMove(),"shared edit mode previews and unlocks party");
@@ -7,6 +8,8 @@ assert(A.frame.header.strata=="FULLSCREEN_DIALOG" and A.frame.rows[1].strata=="F
 S.SetEditing(false); assert(A.frame.header:IsShown() and not A.frame.rows[1]:IsShown() and not A.CanMove(),"shared lock and preview exit work");
 assert(not MockOnTop.ASRPartyPanel and A.frame.strata=="HIGH","leaving editing restores normal HUD layers");
 S.SetLanguage("ru"); A.BindSuite(); assert(ASRPartyDB.language=="ru");
+S.SetLanguage("deDE"); assert(ASRPartyDB.language=="deDE" and A.T("Модуль включён")~="Module enabled","Suite propagates built-in translations immediately");
+S.SetLanguage("ru");
 local c=S.pages.party.partyControls; c.mode.scripts.OnClick(); assert(ASRPartyDB.mode=="compact");
 local scale=ASRPartyDB.scale; c.plus.scripts.OnClick(); assert(math.abs(ASRPartyDB.scale-scale-0.01)<0.0001);
 S.panelAdapters.party.savePosition({left=150,top=300,ratio=0.75}); assert(ASRPartyDB.positions.compact.x==200);
@@ -16,3 +19,5 @@ ASRPartyDB.mode="classic"; assert(S.ImportSettings(code)); assert(ASRPartyDB.mod
 local saved=ASRPartyDB; ASRPartyDB=nil; assert(not S.ImportSettings(code),"profile import checks installed Party module"); ASRPartyDB=saved;
 c.enabled.scripts.OnClick(); assert(not ASRPartyDB.enabled); c.enabled.scripts.OnClick(); assert(ASRPartyDB.enabled);
 print("PASS: Party suite controls, shared editing, docking and settings profile");
+for _,code in ipairs(ASRLocale.order) do S.SetLanguage(code); A.Refresh(); A.DrawSettings(); assert(ASRPartyDB.language==code); end
+S.SetLanguage("en");

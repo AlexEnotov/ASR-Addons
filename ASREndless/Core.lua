@@ -1,4 +1,4 @@
-ASREndless={VERSION="0.6.2",ready=false}; local A=ASREndless;
+ASREndless={VERSION="0.6.3",ready=false}; local A=ASREndless;
 local keys={"endlessEnabled","endlessPosition","endlessState","endlessHud"};
 local function Copy(v) if type(v)~="table" then return v; end; local t={}; for k,x in pairs(v) do t[k]=Copy(x); end; return t; end
 function A.Init()
@@ -70,6 +70,6 @@ SlashCmdList.ASRENDLESS=function(msg)
  if msg=="on" or msg=="off" then A.SetEnabled(msg=="on");
  elseif msg=="reset" then A.ResetPosition();
  elseif msg=="unlock" or msg=="lock" then ASREndlessDB.locked=msg=="lock";
- elseif ASRLocale.languages[msg] then A.SetLanguage(msg);
+ elseif ASRLocale.IsLanguage(msg) then A.SetLanguage(msg);
  else if A.settings:IsShown() then A.settings:Hide(); else A.settings:Show(); end; A.DrawSettings(); end
 end;

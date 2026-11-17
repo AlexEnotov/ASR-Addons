@@ -1,23 +1,54 @@
 -- Shared, independently shipped locale registry and picker. No Suite dependency.
-if ASRLocale and ASRLocale.version>=2 then return; end
-ASRLocale=ASRLocale or {languages={},order={},translations={}}; ASRLocale.version=2;
+if ASRLocale and ASRLocale.version>=5 then return; end
+ASRLocale=ASRLocale or {languages={},order={},translations={}}; ASRLocale.version=5;
 local L=ASRLocale; local serial=0;
 function L.Register(code,name)
  if type(code)~="string" or type(name)~="string" then return; end
  if not L.languages[code] then L.order[#L.order+1]=code; end; L.languages[code]=name;
 end
 L.Register("ru","Русский"); L.Register("en","English");
-function L.Normalize(code) return L.languages[code] and code or "en"; end
+for _,lang in ipairs({{"deDE","Deutsch"},{"frFR","Français"},{"esES","Español"},{"ptBR","Português"},{"itIT","Italiano"},{"plPL","Polski"},{"trTR","Türkçe"},{"jaJP","日本語"},{"zhCN","简体中文"},{"koKR","한국어"}}) do L.Register(lang[1],lang[2]); end
+local aliases={enUS="en",ruRU="ru",de="deDE",fr="frFR",es="esES",pt="ptBR",it="itIT",pl="plPL",tr="trTR",ja="jaJP",zh="zhCN",ko="koKR"};
+for _,code in ipairs(L.order) do aliases[string.lower(code)]=code; end
+aliases.enus="en"; aliases.ruru="ru";
+local function Known(code) if type(code)~="string" then return nil; end; code=aliases[code] or aliases[string.lower(code)] or code; return L.languages[code] and code or nil; end
+function L.Normalize(code) return Known(code) or "en"; end
+function L.IsLanguage(code) return Known(code)~=nil; end
 function L.Name(code) return (L.languages[code] or code or "English").." ▾"; end
 function L.RegisterTranslations(module,code,strings,name)
- L.translations[module]=L.translations[module] or {}; L.translations[module][code]=strings;
+ L.translations[module]=L.translations[module] or {}; local target=L.translations[module][code] or {}; L.translations[module][code]=target;
+ for key,value in pairs(strings) do if type(value)=="string" and value~="" then target[key]=value; end end
  if name then L.Register(code,name); end
 end
 function L.Text(module,code,source,english)
- local all=L.translations[module] or {}; local own=all[code] or {};
- if own[source] then return own[source]; end
+ if type(source)~="string" then return source; end
+ code=L.Normalize(code); local all=L.translations[module] or {}; local own=all[code] or {};
+ if type(own[source])=="string" and own[source]~="" then return own[source]; end
  if code=="ru" then return source; end
+ if english and type(own[english])=="string" and own[english]~="" then return own[english]; end
  return english or (all.en and all.en[source]) or source;
+end
+local fonts={jaJP="Fonts\\KOSUGI.TTF",zhCN="Fonts\\ZCOOLKUAILE.TTF",koKR="Fonts\\NANUMGOTHIC.TTF"};
+function L.Font(code,base) return fonts[L.Normalize(code)] or base or GameFontNormal:GetFont(); end
+function L.UseFont(code) if ASRStyle then ASRStyle.baseFont=ASRStyle.baseFont or ASRStyle.font; ASRStyle.font=L.Font(code,ASRStyle.baseFont); end end
+function L.ApplyFonts(root,code)
+ local seen={}; local function Visit(frame)
+  if not frame or seen[frame] then return; end; seen[frame]=true;
+  if frame.GetFont and frame.SetFont then local ok,path,size,flags=pcall(frame.GetFont,frame); if ok and path and size then
+   local base=path; for _,asian in pairs(fonts) do if path==asian then base=ASRStyle and ASRStyle.baseFont or GameFontNormal:GetFont(); break end end
+   frame.asrBaseFont=frame.asrBaseFont or base; local selected=L.Font(code,frame.asrBaseFont);
+   if path~=selected then frame:SetFont(selected,size,flags or ""); end
+  end end
+  if frame.GetRegions then for _,child in ipairs({frame:GetRegions()}) do Visit(child); end end
+  if frame.GetChildren then for _,child in ipairs({frame:GetChildren()}) do Visit(child); end end
+  local label=type(frame.text)=="table" and frame.text or nil;
+  if label and label.GetFont and label.GetStringWidth and label.GetWidth then
+   local path,size,flags=label:GetFont(); if path and size then
+    label.asrButtonSize=label.asrButtonSize or size; local target=label.asrButtonSize; label:SetFont(path,target,flags or "");
+    while target>7.5 and label:GetStringWidth()>label:GetWidth() do target=target-0.5; label:SetFont(path,target,flags or ""); end
+   end
+  end
+ end; Visit(root);
 end
 function L.Bind(button,get,set,refresh)
  if button.RegisterForClicks then button:RegisterForClicks("LeftButtonUp"); end
@@ -43,7 +74,7 @@ function L.Bind(button,get,set,refresh)
     local option=menu.options[code];
     if not option then
      local key=code; option=CreateFrame("Button",nil,menu); option:SetSize(184,24); if option.RegisterForClicks then option:RegisterForClicks("LeftButtonUp"); end; menu.options[code]=option;
-     option.text=option:CreateFontString(nil,"OVERLAY"); option.text:SetFont(GameFontNormal:GetFont(),11,""); option.text:SetPoint("LEFT",option,"LEFT",8,0); option.text:SetWidth(152); option.text:SetHeight(20); option.text:SetJustifyH("LEFT");
+     option.text=option:CreateFontString(nil,"OVERLAY"); option.text:SetFont(L.Font(code),11,""); option.text:SetPoint("LEFT",option,"LEFT",8,0); option.text:SetWidth(152); option.text:SetHeight(20); option.text:SetJustifyH("LEFT");
      option:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8"});
      option:SetScript("OnClick",function() menu:Hide(); set(key); if refresh then refresh(); end end);
      option:EnableMouseWheel(true); option:SetScript("OnMouseWheel",function(self,delta) menu.offset=menu.offset-delta; Draw(); end);

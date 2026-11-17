@@ -43,12 +43,12 @@ local words={
 };
 local short={damage={"УРН","DMG"},cooldown={"КД","CD"},luck={"УДЧ","LCK"},gold={"ЗОЛ","GOLD"},crit={"КРИТ","CRIT"},crit_damage={"КР.УРН","CR.DMG"},health={"ОЗ","HP"},max_health={"ОЗ","HP"},reduction={"ЗАЩ","DR"},area={"РАД","RAD"},speed={"СКОР","SPD"},pickup={"СБОР","PICK"},xp={"ОПТ","XP"},leech={"ЛЕЧ","LEECH"}};
 function A.StatLabel(key,fallback)
-  local pair=short[key]; return pair and pair[ASAdvisorDB.options.language=="en" and 2 or 1] or fallback or "?";
+  local pair=short[key]; return pair and ASRLocale.Text("builder",ASAdvisorDB.options.language,pair[1],pair[2]) or fallback or "?";
 end
 local baseLabels={damage="Урон",cooldown="Сокращение КД",luck="Удача",gold="Золото",crit="Шанс критического удара",crit_damage="Критический урон",max_health="Макс. здоровье",reduction="Снижение урона",regen="ОЗ/с",speed="Скорость передвижения",pickup="Радиус подбора",xp="Опыт",lifesteal="Лечение от урона",kill_heal="ОЗ за убийство",echo="Повторное применение",thorns="Отражение урона",targets="Доп. цели",area="Область действия",dot_haste="Частота периодического урона",buff="Сила усилений",lives="Воскрешения"};
 local flatBase={regen=true,kill_heal=true,targets=true,lives=true};
 local function fmt(v) return (string.gsub(string.gsub(string.format("%.2f",v),"0+$",""),"%.$","")); end
-local function say(ru,en,...) return string.format(ASAdvisorDB.options.language=="en" and en or ru,...); end
+local function say(ru,en,...) return string.format(ASRLocale.Text("builder",ASAdvisorDB.options.language,ru,en),...); end
 function A.SpellEffects(m)
   local lines={};
   local riders={slow={"Замедление","Slow"},root={"Обездвиживание","Root"},stun={"Оглушение","Stun"},weaken={"Ослабление","Weaken"},flee={"Страх","Fear"},mend={"Лечение","Healing"},drain={"Похищение здоровья","Health drain"},guard={"Защита","Protection"}};
@@ -95,7 +95,7 @@ function A.BaseSpellProse(m)
   local s=m.shapeData and m.shapeData[m.shape] or {}; local lines={};
   local schoolRU={holy="урона от светлой магии",fire="урона огнём",frost="урона холодом",nature="урона силами природы",shadow="урона тёмной магией",arcane="урона тайной магией",physical="физического урона"};
   local schoolEN={holy="holy damage",fire="fire damage",frost="frost damage",nature="nature damage",shadow="shadow damage",arcane="arcane damage",physical="physical damage"};
-  local damage=say("%s ед. %s","%s %s",fmt(m.hit or 0),ASAdvisorDB.options.language=="en" and (schoolEN[m.school] or "damage") or (schoolRU[m.school] or "урона"));
+  local damage=say("%s ед. %s","%s %s",fmt(m.hit or 0),ASAdvisorDB.options.language=="ru" and (schoolRU[m.school] or "урона") or ASRLocale.Text("builder",ASAdvisorDB.options.language,schoolRU[m.school] or "урона",schoolEN[m.school] or "damage"));
   local range=(m.range or 0)>0 and say(" в радиусе %s м"," within %s yd",fmt(m.range)) or "";
   local specific=true;
   if m.shape=="strike" or m.shape=="execute" then

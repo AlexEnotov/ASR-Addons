@@ -11,7 +11,7 @@ function A.SetClassText(font,row,token)
 end
 function A.WrapTooltipText(text,width,measure)
   local lines={}; width=math.max(1,width);
-  local units={['м']=true,['сек']=true,['с']=true,['ед']=true,['%']=true,yd=true,yds=true,sec=true,secs=true,s=true,m=true};
+  local units={['м']=true,['сек']=true,['с']=true,['ед']=true,['%']=true,yd=true,yds=true,sec=true,secs=true,sek=true,sn=true,s=true,m=true};
   for paragraph in string.gmatch(A.Plain(text).."\n","(.-)\n") do
     local tokens={};
     for word in string.gmatch(paragraph,"%S+") do
@@ -65,7 +65,7 @@ function A.SpellTags(row)
   -- A support effect does not imply a co-op-only restriction. Use explicit
   -- game wording, never a spell's WoW name, for mode/support badges.
   local current=A.Lower(A.Plain(AZS_SPELLTIPS and AZS_SPELLTIPS[row.key] or ""));
-  if string.find(current,"co-op",1,true) or string.find(current,"кооператив",1,true) then add("Co-op"); end
+  if string.find(current,"co-op",1,true) or string.find(current,"кооператив",1,true) then add("Кооператив"); end
   if string.find(current,"solo only",1,true) or string.find(current,"только соло",1,true) then add("Только соло"); end
   if string.find(current,"allies",1,true) or string.find(current,"союзник",1,true) then add("Поддержка союзников"); end
   return table.concat(tags," · ");
@@ -85,6 +85,8 @@ function A.ColorTooltipLine(line,row)
     heal={"исцеление","исцеляет","лечение","healing"},
   };
   for school,list in pairs(literals) do for _,phrase in ipairs(list) do add(phrase,A.SchoolColors[school]); end end
+  for school,phrase in pairs(schools) do add(A.T(phrase),A.SchoolColors[school]); end
+  add(A.T("Урон"),damage);
   for _,phrase in ipairs({"урон","урона","урону","damage","УРН","DMG"}) do add(phrase,damage); end
   local token=row and row.class or A.Class(); local class=AZS_GEN and AZS_GEN.classByToken and AZS_GEN.classByToken[token];
   if class then add(A.Local(class.name),A.ClassHex(row,token)); end

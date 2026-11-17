@@ -20,7 +20,7 @@ function run(code,name){
 run(fs.readFileSync(path.join(__dirname,'mock.lua'),'utf8'),'mock');
 run(fs.readFileSync(path.join(game,'Generated/Content.lua'),'utf8'),'game catalog');
 run(fs.readFileSync(path.join(game,'Generated/Content_ruRU.lua'),'utf8'),'game Russian');
-for(const file of ['Language.lua','Mechanics.lua','CatalogExtras.lua','Names.lua','Core.lua','Locale.lua','Presentation.lua','Stats.lua','Advisor.lua','UI.lua','Runtime.lua']) run(fs.readFileSync(path.join(root,file),'utf8'),file);
+for(const file of ['Language.lua','Translations.lua','Mechanics.lua','CatalogExtras.lua','Names.lua','Core.lua','Locale.lua','Presentation.lua','Stats.lua','Advisor.lua','UI.lua','Runtime.lua']) run(fs.readFileSync(path.join(root,file),'utf8'),file);
 run(fs.readFileSync(path.join(__dirname,'scenarios.lua'),'utf8'),'scenarios');
 run(fs.readFileSync(path.join(__dirname,'extended.lua'),'utf8'),'extended');
 run(fs.readFileSync(path.join(__dirname,'v040.lua'),'utf8'),'v040');
@@ -46,5 +46,7 @@ run('ASRSuite={}; ASRSuiteDB={language="en",opacity=0.95};','settings transfer c
 run(fs.readFileSync(path.resolve(__dirname,'../../ASRSuite/Transfer.lua'),'utf8'),'suite transfer codec');
 run(fs.readFileSync(path.join(__dirname,'settings_transfer.lua'),'utf8'),'builder settings transfer');
 run(fs.readFileSync(path.join(__dirname,'folder_migration.lua'),'utf8'),'legacy folder migration');
+run('for _,code in ipairs(ASRLocale.order) do ASAdvisor.SetLanguage(code); ASAdvisor.RefreshUI(); assert(ASAdvisorDB.options.language==code); end; ASAdvisor.SetLanguage("en");','all built-in builder languages');
+run(fs.readFileSync(path.join(__dirname,'localization.lua'),'utf8'),'dynamic localization audit');
 console.log('PASS: Lua 5.1 syntax, game catalog integration, recommendation scenarios, import validation and UI smoke.');
 

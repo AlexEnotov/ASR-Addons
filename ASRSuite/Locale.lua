@@ -111,6 +111,7 @@ function A.SetLanguage(language)
  language=ASRLocale.Normalize(language); ASRSuiteDB.language=language; if ASREndlessDB and ASREndless then ASREndless.SetLanguage(language); end if ASRCombatTextDB then ASRCombatTextDB.language=language; end
  if ASRStatsDB then ASRStatsDB.language=language; if ASRStats and ASRStats.Refresh then ASRStats.Refresh(); end end
  if ASAdvisorDB and ASAdvisorDB.options and ASAdvisor and ASAdvisor.SetLanguage and ASAdvisorDB.options.language~=language then ASAdvisor.SetLanguage(language); end
+ for _,module in ipairs({ASRParty or false,ASRLoot or false,ASRChat or false}) do if module and module.ready and module.SetLanguage then module.SetLanguage(language); end end
  if GameTooltip then GameTooltip:Hide(); end
  if A.DrawSettings then A.DrawSettings(); end
 end

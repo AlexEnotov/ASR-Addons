@@ -1,5 +1,9 @@
 # Source and resource notes
 
+- `localization/ui.tsv` contains authored interface translations. The filtered
+  `localization/native.json` contains relevant game terminology from the installed
+  locale/content tables. Generated module `Translations.lua` files combine them;
+  game names/translations remain separate from the license of original ASR code.
 - `assets/branding/icons/asr-*.png`: original ASR icon artwork generated and edited with the built-in image generation tool and approved by the project owner. These design masters are outside runtime addon folders and are not included by the release packager. See `docs/ICON-STYLE.md` for the approved appearance and reusable prompt.
 
 - `ASRAdvisor/media/arrow-*.tga`: generated UI glyphs; generator is `ASRAdvisor/tools/build-arrow.cjs`.

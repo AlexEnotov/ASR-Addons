@@ -1,6 +1,15 @@
 # ASR Addons — by AlexEnotov
 
-Independent addons for **Azeroth Survivors Reborn**, with an optional shared settings and interface editor. Russian and English interfaces.
+Independent addons for **Azeroth Survivors Reborn**, with an optional shared settings and interface editor.
+
+Built-in interface languages match the game: English, Russian, German, French,
+Spanish, Brazilian Portuguese, Italian, Polish, Turkish, Japanese, Simplified
+Chinese and Korean. Select a language in Suite or in an individual addon's
+settings. Missing translations use English. Translations of game content use
+the installed game's terminology; Japanese, Chinese and Korean use its bundled
+fonts. Settings, tooltips, generated effect descriptions and diagnostic labels
+are translated; raw descriptions and player-written text received from the game
+retain their original language.
 
 | Addon | Install folder | Command | Purpose |
 | --- | --- | --- | --- |
@@ -13,7 +22,7 @@ Independent addons for **Azeroth Survivors Reborn**, with an optional shared set
 | ASR Party | `ASRParty` | `/asrparty` | Classic and compact party frames |
 | ASR Chat | `ASRChat` | `/asrchat` | Movable native chat, appearance and copying |
 
-Install only what you need. All seven feature addons work without Suite. Suite discovers installed modules; it does not require all of them. All modules require the game's native AzerothSurvivors addon; some also use AzerothSurvivorsAPI as declared in their TOCs. These native game components are not bundled. The v0.6.2 release includes eight standalone addons.
+Install only what you need. All seven feature addons work without Suite. Suite discovers installed modules; it does not require all of them. All modules require the game's native AzerothSurvivors addon; some also use AzerothSurvivorsAPI as declared in their TOCs. These native game components are not bundled. The v0.6.3 release includes eight standalone addons.
 
 ## Installation
 
@@ -49,12 +58,12 @@ Node.js 22 and PowerShell 7:
 npm ci --ignore-scripts
 npm test
 npm run test:game -- "D:/path/to/game/Interface/AddOns/AzerothSurvivors"
-./tools/package.ps1 -Tag v0.6.2
+./tools/package.ps1 -Tag v0.6.3
 ```
 
 `npm test` checks Lua 5.1 syntax for all modules, TOC resources and Stats/Combat Text/Suite scenarios. The builder's full recommendation tests require a locally installed native game catalogue, supplied explicitly to `test:game`; CI does not redistribute it. Mocked UI tests do not replace in-game visual checks.
 
-Packaging writes eight independently installable, deterministic ZIPs, an ASR-All bundle and `SHA256SUMS` to ignored `release/`. The tag is the shared distribution release version; module TOC/runtime versions are aligned to 0.6.2. The Advisor ZIP and bundle also include the settings-only legacy bridge. The store displays the pinned release tag.
+Packaging writes eight independently installable, deterministic ZIPs, an ASR-All bundle and `SHA256SUMS` to ignored `release/`. The tag is the shared distribution release version; module TOC/runtime versions are aligned to 0.6.3. The Advisor ZIP and bundle also include the settings-only legacy bridge. The store displays the pinned release tag.
 
 See [the release process](docs/RELEASING.md). Original ASR implementation code is licensed under **GPL-3.0-only**. Copyright (C) 2026 AlexEnotov. See [LICENSE](LICENSE) for the full terms and [resource notes](docs/RESOURCES.md) for game data and third-party material, whose rights remain with their respective owners.
 

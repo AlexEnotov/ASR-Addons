@@ -109,7 +109,7 @@ local function tip(root,anchor,title,body,row)
     root.tip.measure=label(root.tip,"",11,0,0,0,text); root.tip.measure:Hide();
     root.tip.scrollHint=label(root.tip,"",9,12,-90,276,mint);
   end
-  local f=root.tip; RestoreTipWheel(f); f:SetFrameStrata("TOOLTIP"); f:SetFrameLevel(math.max(1000,root:GetFrameLevel()+100)); f:SetAlpha(1); local raw=A.Plain(body or "");
+  local f=root.tip; ASRLocale.ApplyFonts(f,ASAdvisorDB.options.language); RestoreTipWheel(f); f:SetFrameStrata("TOOLTIP"); f:SetFrameLevel(math.max(1000,root:GetFrameLevel()+100)); f:SetAlpha(1); local raw=A.Plain(body or "");
   f:ClearAllPoints(); f:SetPoint("TOPLEFT",anchor,"BOTTOMLEFT",0,-5); f:SetBackdropColor(0.06,0.06,0.065,1);
   f.title:SetText(title); A.SetClassText(f.title,row,root==main and view.class or A.Class()); f.row=row;
   local width=raw=="" and math.max(80,math.min(300,(f.title.GetStringWidth and f.title:GetStringWidth() or #title*5)+24)) or 330;
@@ -145,11 +145,11 @@ local function hint(b,key)
 end
 local function itemTip(root,cell,row)
   if cell.banned then tip(root,cell,row.name,A.T("Забанены"),row); return; end
-  if row.addAny then tip(root,cell,"Any",A.T("Любой вариант или выбранный список взаимозаменяемых вариантов.")); return; end
+  if row.addAny then tip(root,cell,A.T("Любой"),A.T("Любой вариант или выбранный список взаимозаменяемых вариантов.")); return; end
   if row.any then
     local b=root==main and edited() or A.Active(); local p=b and (row.group=="spell" and A.FindPick(b,row.key) or A.ItemRule(b,row.key)); local names={};
     for _,key in ipairs(p and p.options or {}) do local r=row.group=="spell" and A.byKey[b.class..":"..key] or A.aliasItem(key); names[#names+1]=r and r.name or "?"; end
-    tip(root,cell,"Any",#names>0 and table.concat(names,", ") or A.T("Любой вариант")); return;
+    tip(root,cell,A.T("Любой"),#names>0 and table.concat(names,", ") or A.T("Любой вариант")); return;
   end
   local desc;
   if row.group=="spell" then
@@ -215,7 +215,7 @@ end
 local function buildCell(p,x,y)
   local f=button(p,"",34,34,x,y,function(self) if self.row then selectPick(self.row); end end);
   f.icon=texture(f,nil,30,2,-2); f.number=label(f,"",9,2,-2,13);
-  f.anyLabel=label(f,"Any",9,2,-22,30,mint); f.anyLabel:Hide();
+  f.anyLabel=label(f,A.T("Любой"),9,2,-22,30,mint); f.anyLabel:Hide();
   f.banBorder=CreateFrame("Frame",nil,f); f.banBorder:SetPoint("TOPLEFT",f,"TOPLEFT",0,0); f.banBorder:SetSize(34,34);
   f.banBorder:SetFrameLevel(f:GetFrameLevel()+4); f.banBorder:SetBackdrop({edgeFile=BORDER,edgeSize=8}); f.banBorder:SetBackdropBorderColor(1,0.25,0.2,0.75); f.banBorder:Hide();
   f.remove=button(f,"×",20,20,29,3,function(self)
@@ -234,7 +234,7 @@ local function fillPlanCell(cell,row,n)
   cell.row=row;
   if not row then cell:Hide(); return; end
   cell.icon:SetTexture(A.Icon(row.icon)); cell.number:SetText(tostring(n));
-  if row.any then cell.anyLabel:Show(); else cell.anyLabel:Hide(); end
+  if row.any then cell.anyLabel:SetText(A.T("Любой")); cell.anyLabel:Show(); else cell.anyLabel:Hide(); end
   local plan=row.group=="spell" and A.BanishPlan(edited());
   if plan and plan[row.key] then cell.banBorder:SetBackdropBorderColor(1,0.25,0.2,plan[row.key]=="manual" and 0.85 or 0.45); cell.banBorder:Show(); else cell.banBorder:Hide(); end
   cell:SetBackdropBorderColor(unpack(view.selected==row.key and view.group==row.group and mint or {0.14,0.24,0.28,0.7})); cell:Show();
@@ -541,12 +541,14 @@ local function previewBuild(b,width)
   sheet:SetHeight(y+54); page.export.text:SetText(A.T("Скопировать код билда")); page.back.text:SetText(A.T("Назад"));
 end
 function A.Redraw()
+  FONT=ASRLocale.Font(ASAdvisorDB and ASAdvisorDB.options and ASAdvisorDB.options.language,GameFontNormal:GetFont());
+  if main then ASRLocale.ApplyFonts(main,ASAdvisorDB.options.language); end
   if not main or not main:IsShown() or layoutBusy then return; end; layoutBusy=true;
   view.class=view.class or A.Class(); local b=edited();
   local width=main:GetWidth(); local workWidth=width-(view.mode=="preview" and 32 or 220);
   move(main.work,view.mode=="preview" and 16 or 204,84); move(main.side,12,84); if view.mode=="preview" then main.side:Hide(); main.status:Hide(); else main.side:Show(); main.status:Show(); end
   local columns=math.max(8,math.floor((workWidth-4)/42));
-  local list={{key="@new",name="Any",group=view.tab,addAny=true,icon="INV_Misc_QuestionMark"}};
+  local list={{key="@new",name=A.T("Любой"),group=view.tab,addAny=true,icon="INV_Misc_QuestionMark"}};
   for _,r in ipairs(A.catalog) do if r.group==view.tab and (r.group~="spell" or r.class==view.class) and A.AvailableTo(r,view.class) and (view.query=="" or string.find(A.Lower(r.name),view.query,1,true) or string.find(r.key,view.query,1,true)) then list[#list+1]=r; end end
   if view.tab=="amulet" then table.sort(list,function(x,y) if x==y then return false; elseif x.addAny then return true; elseif y.addAny then return false; end; local xm,ym=ASAdvisorMechanics.items[x.key],ASAdvisorMechanics.items[y.key]; local xc=xm and xm.classes and #xm.classes>0 or false; local yc=ym and ym.classes and #ym.classes>0 or false; if xc~=yc then return not xc; end; return x.name<y.name; end); end
   local rowBudget=math.max(3,math.floor(((ASAdvisorDB.options.plannerHeight or 650)-500)/40));
@@ -639,7 +641,7 @@ function A.Redraw()
         if view.editAny and selectedPick and selectedPick.any then chosen=row.addAny and #(selectedPick.options or {})==0;
           for _,key in ipairs(selectedPick.options or {}) do if key==row.key then chosen=true; end end
         end
-        cell.mark:SetText(row.addAny and "Any" or chosen and "✓" or ""); cell:SetAlpha(chosen and 1 or row.addAny and 0.85 or 0.5);
+        cell.mark:SetText(row.addAny and A.T("Любой") or chosen and "✓" or ""); cell:SetAlpha(chosen and 1 or row.addAny and 0.85 or 0.5);
         cell.mark:SetWidth(row.addAny and 30 or 14); move(cell.mark,row.addAny and 2 or 19,21);
         cell:SetBackdropBorderColor(unpack(chosen and mint or {0.38,0.39,0.42,0.6})); cell:SetBackdropColor(0.18,0.19,0.22,chosen and 0.7 or 0.1); cell:Show();
       else cell:Hide(); end
@@ -887,6 +889,8 @@ local function actionMark(kind,index)
   return actionMarks[key];
 end
 function A.RefreshUI()
+  FONT=ASRLocale.Font(ASAdvisorDB and ASAdvisorDB.options and ASAdvisorDB.options.language,GameFontNormal:GetFont());
+  if tracker then ASRLocale.ApplyFonts(tracker,ASAdvisorDB.options.language); end
   if not A.ready or trackerLayoutBusy then return; end
   if not tracker then createTracker(); end
   if ASAdvisorDB.options.enabled==false or ASRSuite and ASRSuite.IsModuleEnabled and not ASRSuite.IsModuleEnabled("builder") then A.currentAction=nil; tracker:Hide(); if hints then hints:Hide(); end; return; end

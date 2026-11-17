@@ -1,4 +1,4 @@
-ASRParty={VERSION="0.6.2",ready=false}; local A=ASRParty;
+ASRParty={VERSION="0.6.3",ready=false}; local A=ASRParty;
 ASRLocale.RegisterTranslations("party","en",{
  ["Группа"]="Party",["Соло"]="Solo",["Всегда показывать заголовок группы"]="Always show party header",["Классический"]="Classic",["Компактный"]="Compact",["Вид панели"]="Panel style",["Модуль включён"]="Module enabled",
  ["Закрепить"]="Lock panel",["Масштаб"]="Scale",["Фон трекера"]="Tracker background",["Сбросить положение"]="Reset position",
@@ -10,6 +10,8 @@ ASRLocale.RegisterTranslations("party","en",{
  ["Изменить интерфейс"]="Edit interface",["Язык"]="Language",["Формат ХП"]="Health format",["Короткие числа"]="Short numbers",["Полные числа"]="Full numbers",["Проценты"]="Percent",["Число и процент"]="Value and percent",
 });
 function A.T(key) return ASRLocale.Text("party",ASRPartyDB and ASRPartyDB.language or "en",key); end
+local classNames={WARRIOR="Warrior",MAGE="Mage",ROGUE="Rogue",PALADIN="Paladin",PRIEST="Priest",HUNTER="Hunter",DRUID="Druid",SHAMAN="Shaman",WARLOCK="Warlock",DEATHKNIGHT="Death Knight",MONK="Monk",DEMONHUNTER="Demon Hunter",EVOKER="Evoker"};
+function A.ClassLabel(member) local english=classNames[member.class]; return english and ASRLocale.Text("names",ASRPartyDB.language,english,english) or member.className or member.class or ""; end
 function A.Safe(fn,...) if type(fn)~="function" then return nil; end; local ok,a,b,c=pcall(fn,...); if ok then return a,b,c; end end
 function A.Bool(fn,...)
  if type(fn)~="function" then return nil; end; local ok,v=pcall(fn,...); if ok then return v~=nil and v~=false and v~=0; end
@@ -95,6 +97,6 @@ SlashCmdList.ASRPARTY=function(msg)
  elseif msg=="on" or msg=="off" then A.SetEnabled(msg=="on");
  elseif msg=="lock" or msg=="unlock" then ASRPartyDB.locked=msg=="lock"; A.DrawSettings();
  elseif msg=="reset" then A.ResetPosition();
- elseif ASRLocale.languages[msg] then A.SetLanguage(msg);
+ elseif ASRLocale.IsLanguage(msg) then A.SetLanguage(msg);
  else if A.settings:IsShown() then A.settings:Hide(); else A.settings:Show(); end; A.DrawSettings(); end
 end;

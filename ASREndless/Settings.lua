@@ -1,5 +1,6 @@
 local A,S=ASREndless,ASRStyle;
 function A.DrawSettings()
+ ASRLocale.UseFont(ASREndlessDB and ASREndlessDB.language); ASRLocale.ApplyFonts(A.settings,ASREndlessDB and ASREndlessDB.language);
  if not A.settings then return; end; local f=A.settings;
  f.enabled:SetChecked(ASREndlessDB.endlessEnabled); f.enabled.label:SetText(A.T("Показывать трекер Endless"));
  f.locked:SetChecked(ASREndlessDB.locked); f.locked.label:SetText(A.T("Закрепить"));

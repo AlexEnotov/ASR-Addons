@@ -254,6 +254,7 @@ function A.UpdateEndless(dt,force)
  local f=A.endlessFrame;
  if f.moving and IsMouseButtonDown and not IsMouseButtonDown("LeftButton") then A.StopDrag(f); end
  tick=tick+(dt or 0); if not force and tick<0.1 then return; end; tick=0;
+ ASRLocale.UseFont(ASREndlessDB.language); ASRLocale.ApplyFonts(f,ASREndlessDB.language);
  local r=AZS_RUN or {}; local phase=r.ph;
  local active=Enabled(r) and (phase=="playing" or phase=="choosing" or phase=="paused" or phase=="dead");
  if not active then

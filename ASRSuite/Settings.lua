@@ -66,6 +66,7 @@ function A.RefreshStatus()
 end
 function A.DrawSettings()
  if not window then return; end
+ ASRLocale.UseFont(ASRSuiteDB.language); ASRLocale.ApplyFonts(window,ASRSuiteDB.language);
  S.Panel(window,ASRSuiteDB.opacity);
  for _,draw in ipairs(records) do draw(); end
  if A.TranslateLayout then A.TranslateLayout(); end
@@ -77,6 +78,7 @@ function A.DrawSettings()
   if p.draw then p.draw(pages[p.id]); end
  end
  A.RefreshStatus();
+ ASRLocale.ApplyFonts(window,ASRSuiteDB.language);
 end
 function A.ToggleSettings() if window:IsShown() then window:Hide(); else window:Show(); A.DrawSettings(); end end
 local function RegisterBuiltins()

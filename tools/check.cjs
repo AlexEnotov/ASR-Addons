@@ -3,6 +3,8 @@ const path = require('node:path');
 const {execFileSync} = require('node:child_process');
 const parser = require('luaparse');
 const root = path.resolve(__dirname, '..');
+execFileSync(process.execPath,[path.join(root,'tools/build-locales.cjs'),'--check'],{stdio:'pipe',cwd:root});
+execFileSync(process.execPath,[path.join(root,'localization/tests.cjs')],{stdio:'inherit',cwd:root});
 const modules = ['ASRAdvisor', 'ASAdvisor', 'ASRStats', 'ASRCombatText', 'ASRSuite', 'ASRLoot', 'ASREndless', 'ASRParty', 'ASRChat'];
 for (const folder of modules) {
   const dir = path.join(root, folder);

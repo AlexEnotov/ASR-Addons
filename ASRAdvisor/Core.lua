@@ -1,5 +1,5 @@
 -- Original implementation for Reborn's Lua 5.1 interface. No network or executable imports.
-ASAdvisor = { VERSION = "0.6.2", catalog = {}, byKey = {}, aliases = {}, ready = false };
+ASAdvisor = { VERSION="0.6.3", catalog = {}, byKey = {}, aliases = {}, ready = false };
 local A = ASAdvisor;
 local function trim(s) return (string.gsub(s or "", "^%s*(.-)%s*$", "%1")); end
 A.Trim = trim;
@@ -12,7 +12,7 @@ function A.Plain(s)
   return trim((string.gsub(string.gsub(tostring(s or ""), "|c%x%x%x%x%x%x%x%x", ""), "|r", "")));
 end
 function A.Local(s)
-  if ASAdvisorDB and ASAdvisorDB.options and ASAdvisorDB.options.language~="ru" then return ASRLocale.Text("builder",ASAdvisorDB.options.language,s,s); end
+  if ASAdvisorDB and ASAdvisorDB.options and ASAdvisorDB.options.language~="ru" then return ASRLocale.Text("names",ASAdvisorDB.options.language,s,s); end
   return (ASAdvisorNamesRU and ASAdvisorNamesRU[s]) or (AZS_L and AZS_L[s]) or s;
 end
 function A.Icon(s)
@@ -61,7 +61,7 @@ function A.BuildCatalog()
     local classes={}; for token in pairs(AZS_GEN.spells or {}) do if A.byKey[token..":"..m.spell] then classes[#classes+1]=token; end end
     if #classes>0 then
       ASAdvisorMechanics.items[m.key]={slot="amulet",behavior="",classes=classes,legend=m,effects={}};
-      local r=add(m,"amulet"); r.legend=m; r.baseName=ASAdvisorDB.options.language~="ru" and m.name or m.ru;
+      local r=add(m,"amulet"); r.legend=m; r.baseName=ASAdvisorDB.options.language~="ru" and A.Local(m.name) or m.ru;
       local spell=A.byKey[classes[1]..":"..m.spell]; r.name=r.baseName.." · "..spell.name;
       for _,name in ipairs({m.name,m.ru}) do
         A.itemNames[name]=A.itemNames[name] or {}; local found=false; for _,v in ipairs(A.itemNames[name]) do if v==r then found=true; end end; if not found then A.itemNames[name][#A.itemNames[name]+1]=r; end
@@ -98,12 +98,12 @@ function A.ResolveItem(value,token)
   return match;
 end
 function A.Info(b, key, group)
-  if group=="spell" then local p=A.FindPick(b,key); if p and p.any then return {key=key,name="Any",group="spell",any=true,icon="INV_Misc_QuestionMark",class=b.class}; end end
+  if group=="spell" then local p=A.FindPick(b,key); if p and p.any then return {key=key,name=A.T("Любой"),group="spell",any=true,icon="INV_Misc_QuestionMark",class=b.class}; end end
   return A.byKey[(group == "spell" and b.class or group) .. ":" .. key];
 end
 function A.ItemInfo(b,key)
   local p=b and b.itemRules and b.itemRules[key];
-  if p and p.any then return {key=key,name="Any",group=p.group,any=true,icon="INV_Misc_QuestionMark"}; end
+  if p and p.any then return {key=key,name=A.T("Любой"),group=p.group,any=true,icon="INV_Misc_QuestionMark"}; end
   return A.aliasItem(key);
 end
 function A.ItemRule(b,key)

@@ -1,4 +1,4 @@
-ASRSuite={VERSION="0.6.2",ready=false}; local A=ASRSuite;
+ASRSuite={VERSION="0.6.3",ready=false}; local A=ASRSuite;
 local defaults={enabled=true,mode="columns",fontSize=16,lifetime=1.6,rise=85,merge=0.35,spacing=0,icons=true,periodic=true,heals=true,taken=true,short=true,minimapAngle=220,opacity=0.95};
 A.lanes={"normal","critical","heal","taken"};
 A.positions={normal={x=-190,y=25},critical={x=190,y=25},heal={x=-100,y=-125},taken={x=100,y=-125}};

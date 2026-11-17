@@ -31,7 +31,7 @@ check(A.frame:GetWidth()==196 and A.frame.rows[1]:GetHeight()==102 and A.frame.r
 check(A.frame.rows[1].hp:GetText()=="590 / 800" and A.frame.rows[1].levelText:GetText()=="36","classic contains current health and level");
 check(not A.frame.backdrop and A.frame.header.backdrop and A.frame.rows[1].backdrop,"header and each member have separate frames without a shared outer frame");
 check(A.frame.header:GetWidth()==196 and A.frame.rows[1]:GetWidth()==196 and A.frame.asrDockInsets.top==10 and A.frame.asrDockInsets.bottom==11,"chain uses tracker width and visible border insets for docking");
-check(A.frame.title:GetText():find("2",1,true) and A.frame.rows[1].status:GetText()=="MAGE","header counts players and classic secondary text contains the class");
+check(A.frame.title:GetText():find("2",1,true) and A.frame.rows[1].status:GetText()=="Mage","header counts players and classic secondary text contains the localized class");
 check(A.frame.rows[1].portraitBorder.texturePath:find("orb_case_hi",1,true) and A.frame.rows[1].bar.barTexture:find("hp_lowmid_bar",1,true) and A.frame.rows[1].barCase.texturePath:find("hp_mid_case",1,true),"portrait and health use the actual player-frame assets");
 check(A.frame.header:GetHeight()>=64 and A.frame.title.point[5]==-24 and A.frame.settings.point[5]==-22,"header fits the full-size stone border and aligned content");
 check(A.frame.rows[1].portrait:GetWidth()==36 and A.frame.rows[1].levelBadge:IsShown(),"classic has a larger round portrait with numeric level badge");

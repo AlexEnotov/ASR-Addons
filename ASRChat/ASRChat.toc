@@ -2,12 +2,13 @@
 ## Title: |cff8cd123ASR|r Chat
 ## Author: AlexEnotov
 ## X-License: GPL-3.0-only
-## Version: 0.6.2
+## Version: 0.6.3
 ## Notes: Movable native chat, appearance and copying. /asrchat
 ## Dependencies: AzerothSurvivors, AzerothSurvivorsAPI
 ## OptionalDeps: AzerothSurvivorsUI, SurvivorUI
 ## SavedVariables: ASRChatDB
 Language.lua
+Translations.lua
 Style.lua
 Core.lua
 UI.lua

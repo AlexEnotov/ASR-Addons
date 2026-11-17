@@ -1,5 +1,6 @@
-ASRChat={VERSION="0.6.2",ready=false}; local A=ASRChat;
+ASRChat={VERSION="0.6.3",ready=false}; local A=ASRChat;
 ASRLocale.RegisterTranslations("chat","en",{
+ ["Всегда показывать чат"]="Always show chat",["Всегда показывать поле ввода"]="Always show input field",
  ["Модуль включён"]="Module enabled",["Вид"]="Appearance",["Поведение"]="Behavior",
  ["Ширина"]="Width",["Высота"]="Height",["Масштаб"]="Scale",["Размер текста"]="Text size",
  ["Фон"]="Background",["Фон: свой"]="Background: own",["Фон: общий"]="Background: shared",["Интервал строк"]="Line spacing",["Рамка: камень"]="Frame: stone",["Рамка: простая"]="Frame: simple",
@@ -12,8 +13,6 @@ ASRLocale.RegisterTranslations("chat","en",{
  ["Настройки"]="Settings",["Рамка: нет"]="Frame: none",["Показывать кнопки"]="Show buttons",["Канал сообщения"]="Message channel",["Друзья в сети"]="Friends online",["Выше"]="Scroll up",["Ниже"]="Scroll down",["Последние сообщения"]="Latest messages",["Вкладки"]="Chat tabs",["Сказать"]="Say",["Группа"]="Party",["Рейд"]="Raid",["Крик"]="Yell",["Шёпот"]="Whisper",["Эмоция"]="Emote",["Общий"]="General",["Сообщения и команды остаются штатными."]="Messages and commands use the native chat.",
 });
 function A.T(key) return ASRLocale.Text("chat",ASRChatDB and ASRChatDB.language or "en",key); end
-ASRLocale.RegisterTranslations("chat","en",{["Всегда показывать чат"]="Always show chat"});
-ASRLocale.RegisterTranslations("chat","en",{["Всегда показывать поле ввода"]="Always show input field"});
 function A.Safe(fn,...) if type(fn)~="function" then return; end; local ok,a,b,c,d,e,f=pcall(fn,...); if ok then return a,b,c,d,e,f; end end
 function A.Call(object,method,...) if object then return A.Safe(object[method],object,...); end end
 local defaults={enabled=true,locked=false,width=396,height=220,scale=0.85,fontSize=12,opacity=0.75,spacing=2,fading=true,timeVisible=30,inputTop=false,alwaysShowChat=false,hideButtons=true,showTools=true,showHeader=true,stone=true,ownOpacity=false,language="en"};
@@ -62,6 +61,6 @@ SlashCmdList.ASRCHAT=function(msg)
  elseif msg=="lock" or msg=="unlock" then ASRChatDB.locked=msg=="lock"; A.Apply(); A.DrawSettings();
  elseif msg=="debug" then A.debugDelay=2;
  elseif msg=="copy" then A.OpenCopy(); elseif msg=="reset" then A.ResetPosition();
- elseif ASRLocale.languages[msg] then A.SetLanguage(msg);
+ elseif ASRLocale.IsLanguage(msg) then A.SetLanguage(msg);
  else if A.settings:IsShown() then A.settings:Hide(); else A.settings:Show(); end end
 end;

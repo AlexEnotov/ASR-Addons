@@ -1,4 +1,4 @@
-ASRStats={VERSION="0.6.2"}; local A=ASRStats;
+ASRStats={VERSION="0.6.3"}; local A=ASRStats;
 -- Factor fields are the game's character-sheet protocol, not a cached item database.
 -- Fallback fields in AZSSTATS are already percentages; never multiply them again.
 A.sections={
@@ -55,6 +55,20 @@ function A.SetAllStatsShown(on)
 end
 function A.Number(value)
  local n=tonumber(value); if n and n==n and math.abs(n)<1e12 then return n; end
+end
+A.capColor={1,0.82,0,1};
+local cappedStats={crit=true,cdr=true,red=true,echo=true};
+function A.ReadStatCaps()
+ -- The API replaces its table on each server update; read it anew per refresh.
+ if type(AZS_GetStatCaps)=="function" then
+  local ok,caps=pcall(AZS_GetStatCaps); if ok and type(caps)=="table" then return caps; end
+ end
+ return type(AZS_CAPS)=="table" and AZS_CAPS or {};
+end
+function A.IsCapped(row,value,caps)
+ local key=row[4]; if not key or not cappedStats[key] then return false; end
+ local limit=A.Number(caps and caps[key]); value=A.Number(value);
+ return limit~=nil and limit>=0 and value~=nil and value>=limit-0.00001;
 end
 function A.Value(row,raw,fallback,run)
  if row[5]=="shield" then return A.Number(run and run.sh); end

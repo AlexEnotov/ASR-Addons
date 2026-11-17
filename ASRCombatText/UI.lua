@@ -5,7 +5,9 @@ local function Config() local k=targets[index]; return k=="all" and ASRCombatTex
 local function Editable() return index==1 or ASRCombatTextDB.types[targets[index]].custom; end
 local function Refresh()
  if not panel then return; end
- for key,h in pairs(handles) do h.label:SetText(T(names[key][1],names[key][2])); end
+ ASRLocale.UseFont(ASRCombatTextDB.language); ASRLocale.ApplyFonts(panel,ASRCombatTextDB.language);
+ for key,h in pairs(handles) do ASRLocale.ApplyFonts(h,ASRCombatTextDB.language); h.label:SetText(T(names[key][1],names[key][2])); end
+ ASRLocale.ApplyFonts(A.editBar,ASRCombatTextDB.language);
  if A.testButton then A.testButton.text:SetText(T("Тест","Test")); A.doneButton.text:SetText(T("Готово","Done")); end
  panel.title:SetText((string.gsub(T("ASR / ТЕКСТ УРОНА","ASR / COMBAT TEXT"),"^ASR","|cff8cd123ASR|r",1))); panel.enabled.text:SetText(T("Модуль: ","Module: ")..(ASRCombatTextDB.enabled and T("Вкл.","On") or T("Выкл.","Off")));
  panel.mode.text:SetText(T("Расположение: ","Placement: ")..(ASRCombatTextDB.mode=="columns" and T("Колонки","Columns") or T("Над врагами","Above enemies")));

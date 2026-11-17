@@ -34,8 +34,8 @@ function Frame:GetNumLetters() return #self:GetText(); end
 function Frame:HasFocus() return self.focus; end
 function Frame:SetFocus() self.focus=true; if self.scripts.OnEditFocusGained then self.scripts.OnEditFocusGained(self); end end
 function Frame:ClearFocus() local old=self.focus; self.focus=false; if old and self.scripts.OnEditFocusLost then self.scripts.OnEditFocusLost(self); end end
-function Frame:GetFont() return "Fonts\\FRIZQT__.TTF",12; end
-function Frame:SetFont(path,size) self.fontSize=size; self.fontPath=path; end
+function Frame:GetFont() return self.fontPath or "Fonts\\FRIZQT__.TTF",self.fontSize or 12,self.fontFlags or ""; end
+function Frame:SetFont(path,size,flags) self.fontSize=size; self.fontPath=path; self.fontFlags=flags; end
 function Frame:GetStringWidth()
  local visible=(self:GetText() or ""):gsub("|c%x%x%x%x%x%x%x%x",""):gsub("|r",""); local count=utf8.len(visible) or #visible; return count*(self.fontSize or 11)*0.55;
 end

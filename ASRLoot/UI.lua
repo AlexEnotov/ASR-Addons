@@ -23,6 +23,7 @@ local function RarityName(r)
 end
 function A.Refresh()
  if not panel or not A.ready then return; end
+ ASRLocale.UseFont(ASRLootDB.language); ASRLocale.ApplyFonts(panel,ASRLootDB.language);
  local editing=A.editing or ASRSuite and ASRSuite.editing;
  panel:SetFrameStrata(editing and "FULLSCREEN_DIALOG" or "HIGH"); panel:SetFrameLevel(editing and 450 or 10);
  if AZS_SetOnTopOfScreens then AZS_SetOnTopOfScreens("ASRLootTracker",editing and true or false); end

@@ -28,8 +28,8 @@ check(A.Plain(painted)==line and string.find(painted,"|cffffe58a",1,true) and st
 check(string.find(A.ColorTooltipLine("Текущие значения",cons),"|cff8cd123",1,true) and string.find(A.ColorTooltipLine("Базовые параметры · без улучшений",cons),"|cffd5bc83",1,true),"base and current sections have distinct heading colors");
 check(A.ClassHex(cons)=="f58cba","Paladin title uses Paladin class color");
 local oldTip=AZS_SPELLTIPS.exorcism; AZS_SPELLTIPS.exorcism="Supports nearby allies in co-op.";
-check(string.find(A.SpellTags(exorcism),"Co-op",1,true) and string.find(A.SpellTags(exorcism),"Поддержка союзников",1,true),"mode and support tags require explicit game wording");
-AZS_SPELLTIPS.exorcism=nil; check(not string.find(A.SpellTags(exorcism),"Co-op",1,true),"absence of mode data is not presented as a co-op restriction"); AZS_SPELLTIPS.exorcism=oldTip;
+check(string.find(A.SpellTags(exorcism),"Кооператив",1,true) and string.find(A.SpellTags(exorcism),"Поддержка союзников",1,true),"mode and support tags require explicit game wording");
+AZS_SPELLTIPS.exorcism=nil; check(not string.find(A.SpellTags(exorcism),"Кооператив",1,true),"absence of mode data is not presented as a co-op restriction"); AZS_SPELLTIPS.exorcism=oldTip;
 local ui=ASAdvisorPlanner; if ui:IsShown() then A.ToggleUI(); end
 local b=A.NewBuild("HUNTER"); A.ToggleUI(); local cell;
 ui.search:SetText(""); ui.tabs.spell.scripts.OnClick(ui.tabs.spell);

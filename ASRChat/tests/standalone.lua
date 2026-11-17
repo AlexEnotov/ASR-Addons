@@ -1,5 +1,6 @@
 local A=ASRChat; local n=0; local function check(value,label) assert(value,label); n=n+1; end
 ASRChatRuntime.scripts.OnEvent(ASRChatRuntime,"ADDON_LOADED","ASRChat");
+SlashCmdList.ASRCHAT("koKR"); check(ASRChatDB.language=="koKR","native locale code survives lowercasing in chat command"); SlashCmdList.ASRCHAT("en");
 check(A.ready and not ASRSuite and A.frame:IsShown(),"Chat loads and works independently of Suite");
 check(A.frame:GetWidth()==396 and A.frame:GetHeight()==220,"default chat occupies two shared width units");
 check(select(2,ChatFrame1:GetPoint())==A.frame and select(2,ChatFrame2:GetPoint())==A.frame,"native docked message frames are placed inside the wrapper");

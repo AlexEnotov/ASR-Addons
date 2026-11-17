@@ -106,12 +106,13 @@ local function EditBox(edit,f)
   Hook("OnEnterPressed",EndInput); Hook("OnEscapePressed",EndInput);
  end
  edit:ClearAllPoints(); edit:SetPoint("TOPLEFT",f.inputHolder,"TOPLEFT",0,0); edit:SetScale(1); edit:SetSize(f.inputHolder:GetWidth(),28);
- edit:SetFrameStrata(f:GetFrameStrata()); edit:SetFrameLevel(f:GetFrameLevel()+8); if r.font then edit:SetFont(r.font,ASRChatDB.fontSize,r.flags); end
+ edit:SetFrameStrata(f:GetFrameStrata()); edit:SetFrameLevel(f:GetFrameLevel()+8); if r.font then edit:SetFont(ASRLocale.Font(ASRChatDB.language,r.font),ASRChatDB.fontSize,r.flags); end
  if edit.GetRegions then for _,region in ipairs({edit:GetRegions()}) do if A.Call(region,"GetObjectType")=="Texture" then Quiet(region); end end end
 
 end
 function A.Apply()
  if not A.ready or not A.frame then return; end; local f=A.frame; local d=ASRChatDB;
+ ASRLocale.UseFont(d.language); ASRLocale.ApplyFonts(f,d.language);
  if not d.enabled or not ChatFrame1 then if A.active then A.Restore(); end; f:Hide(); return; end
  if not A.active and SurvivorUIChatPanel and SurvivorUIChatPanel:IsShown() and SurvivorUIDB and SurvivorUI_StyleChatPanel then
   A.survivorTaken=true; A.survivorLook=SurvivorUIDB.chatLook; SurvivorUIDB.chatLook="text"; SurvivorUI_StyleChatPanel();
@@ -126,7 +127,7 @@ function A.Apply()
  local opacity=not d.ownOpacity and ASRSuite and ASRSuite.ready and ASRSuite.GetPanelOpacity and ASRSuite.GetPanelOpacity("chat",d.opacity) or d.opacity;
  f.skin:SetSize(f:GetWidth(),f:GetHeight()); A.PanelStyle(f.skin,d.frameStyle,opacity); A.ApplyLayers(f);
  f.asrDockInsets=d.frameStyle=="stone" and IsAddOnLoaded and IsAddOnLoaded("AzerothSurvivorsUI") and {left=1.5,right=1.5,top=10,bottom=11} or {left=0,right=0,top=0,bottom=0};
- f.title:SetText("|cff8cd123ASR|r / "..(d.language=="ru" and "Чат" or "Chat"));
+ f.title:SetText("|cff8cd123ASR|r / "..A.T("Чат"));
  local move=A.CanMove(); if move then f.grip:Show(); else f.grip:Hide(); end
  local frames=Frames(); local selected=A.selectedChat or SELECTED_DOCK_FRAME or DEFAULT_CHAT_FRAME or ChatFrame1; local found=false;
  for _,entry in ipairs(frames) do if entry.frame==selected then found=true; end end; if not found then selected=ChatFrame1; A.selectedChat=selected; end
@@ -164,7 +165,7 @@ function A.Apply()
   if p~="TOPLEFT" or rel~=f or relativePoint~="TOPLEFT" or x~=inset or y~=-top or A.Call(chat,"GetNumPoints")~=1 then
    chat:ClearAllPoints(); chat:SetPoint("TOPLEFT",f,"TOPLEFT",inset,-top);
   end
-  chat:SetScale(1); chat:SetSize(f:GetWidth()-inset-layout.padding,textHeight); chat:SetFont(r.font or S.font,d.fontSize,r.flags or "");
+  chat:SetScale(1); chat:SetSize(f:GetWidth()-inset-layout.padding,textHeight); chat:SetFont(ASRLocale.Font(d.language,r.font or S.font),d.fontSize,r.flags or "");
   A.Call(chat,"SetSpacing",d.spacing); A.Call(chat,"SetFading",d.fading); A.Call(chat,"SetTimeVisible",d.timeVisible); A.Call(chat,"SetFadeDuration",2);
   chat:SetFrameStrata(f:GetFrameStrata()); chat:SetFrameLevel(f:GetFrameLevel()+2);
   if not r.wheelChanged then

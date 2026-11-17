@@ -6,6 +6,22 @@ are summarized with the feature they improve rather than listed individually.
 
 ## Unreleased
 
+## v0.6.3 — 2026-11-17
+
+- Fixed ASR Chat showing Russian settings when English was selected: repeated
+  registrations no longer erase its English interface dictionary.
+- All eight modules include the game's 12 interface languages, with English
+  fallback for untranslated strings. Language changes apply through Suite or
+  standalone settings, including class and catalog names where available.
+  Asian languages use the game's bundled fonts without changing its settings.
+  Completed translations of settings help, stat explanations, recommendation
+  reasons, effect descriptions with numbers, and diagnostic labels.
+  Fixed generated Stats headings, damage-school names in dynamic descriptions,
+  and untranslated wildcard/co-op labels; runtime language audits cover these.
+- ASR Stats highlights capped numeric values in gold using the live character
+  caps API. Update colors when caps change and keep normal colors while caps
+  are unknown. Labels and uncapped stats retain their existing appearance.
+
 ## v0.6.2 — 2026-11-15
 
 - **ASR Chat — new addon:** movable and resizable native chat, wide tabs and a

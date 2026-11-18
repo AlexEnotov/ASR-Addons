@@ -1,4 +1,4 @@
-ASREndless={VERSION="0.6.3",ready=false}; local A=ASREndless;
+ASREndless={VERSION="0.6.4",ready=false}; local A=ASREndless;
 local keys={"endlessEnabled","endlessPosition","endlessState","endlessHud"};
 local function Copy(v) if type(v)~="table" then return v; end; local t={}; for k,x in pairs(v) do t[k]=Copy(x); end; return t; end
 function A.Init()
@@ -67,6 +67,7 @@ runtime:SetScript("OnUpdate",function(self,dt) if A.ready then A.BindSuite(); A.
 SLASH_ASRENDLESS1="/asrendless";
 SlashCmdList.ASRENDLESS=function(msg)
  if not A.ready then return; end
+ if ASRTrackerStyle.Command(ASREndlessDB,msg,function() A.UpdateEndless(0,true) end) then return end;
  if msg=="on" or msg=="off" then A.SetEnabled(msg=="on");
  elseif msg=="reset" then A.ResetPosition();
  elseif msg=="unlock" or msg=="lock" then ASREndlessDB.locked=msg=="lock";

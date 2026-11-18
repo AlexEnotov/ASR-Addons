@@ -128,6 +128,19 @@ function A.BaseItemText(row)
   local m=ASAdvisorMechanics.items[row.key]; if not m then return A.T("Базовые данные предмета недоступны."); end
   if m.legend then return A.LegendDescription(m.legend,m.classes); end
   local parts={A.T(row.group=="amulet" and "Базовые значения · ранг 1" or "Базовые значения · до редкости и улучшений")};
+  local proc=m.proc;
+  if proc and m.base then
+    local triggers={cast={"При применении умения","On cast"},hit={"При попадании","On hit"},crit={"При критическом попадании","On critical hit"},itself={"Автоматически","Automatically"}};
+    local trigger=triggers[proc.on];
+    if trigger then parts[#parts+1]=say(trigger[1],trigger[2]); end
+    local amount=fmt(m.base*100).."%";
+    if proc.stacks then amount=amount.." "..say("за эффект (до %s)","per stack (up to %s)",proc.stacks); end
+    parts[#parts+1]=A.T(baseLabels[proc.stat] or "Базовая сила особого эффекта")..": +"..amount;
+    if proc.chance then parts[#parts+1]=A.T("Шанс")..": "..fmt(proc.chance*100).."%"; end
+    if proc.lasts then parts[#parts+1]=say("Действует %s сек.","Lasts %s sec.",fmt(proc.lasts)); end
+    if proc.every then parts[#parts+1]=say("Не чаще раза в %s сек.","At most once every %s sec.",fmt(proc.every)); end
+    return table.concat(parts,"\n");
+  end
   local explanation={lifesteal={"Возвращает часть нанесённого урона в виде здоровья.","Restores part of damage dealt as health."},kill_heal={"Восстанавливает здоровье за убийства.","Restores health on kills."},regen={"Постоянно восстанавливает здоровье.","Continuously restores health."},cooldown={"Сокращает время перезарядки способностей.","Reduces ability cooldowns."},area={"Увеличивает область действия способностей.","Increases the area affected by abilities."},echo={"Даёт шанс повторного применения способности.","Grants a chance to repeat an ability."},lives={"Даёт дополнительные воскрешения.","Grants additional revivals."}};
   local seen={}; local function explain(effect) local e=explanation[effect]; if e and not seen[effect] then parts[#parts+1]=say(e[1],e[2]); seen[effect]=true; end end
   explain(m.behavior); for _,pair in ipairs(m.effects or {}) do explain(pair[1]); end
@@ -148,29 +161,60 @@ function A.BaseItemText(row)
   if #parts==1 then parts[#parts+1]=A.T("Числовые параметры не извлечены."); end
   return table.concat(parts,"\n");
 end
+local legendLabels={
+  area="Область действия",damage="Урон",targets="Доп. цели",cooldown="Сокращение КД",duration="Длительность",
+  burn="Горение",stun="Оглушение",splash="Урон по соседним целям",heal="Лечение",weaken="Ослабление",
+  share="Доля урона",chance="Шанс",secs="Длительность",radius="Радиус",reset="Сброс перезарядки",
+  jump="Перескок урона",slow="Замедление",crit="Шанс критического удара",echo="Повторное применение",
+  absorb="Поглощение",pierce="Пробивание",execute="Добивание",power="Сила эффекта",n="Количество",
+  cast_shield="Щит при применении",dot_burst="Взрыв периодического урона",totem_heal="Лечение тотемом",
+  kill_explode="Взрыв при убийстве",again="Шанс повторного применения",immune_explode="Взрыв после невосприимчивости",
+  no_falloff="Урон не ослабевает",shield_burst="Взрыв щита",hot_leech="Вампиризм при периодическом лечении",
+  jump_gain="Прирост за перескок",vs_low="Урон по целям с низким здоровьем",below="Порог здоровья",
+  kill_cooldown_cut="Сокращение КД за убийство",tick_splash="Периодический урон по соседним целям",
+  pct="Сила эффекта",count="Количество",vs_slowed="Урон по замедленным целям",tempest="Буря",
+  crit_dotted="Критический удар по цели с периодическим уроном",dot_reap="Сбор периодического урона",
+  twice="Шанс двойного срабатывания",thorns_stun="Оглушение от отражения урона",
+};
+local legendUnits={targets="",count="",n="",pct="%",secs=" сек.",radius=" м"};
+local function legendValue(key,value)
+  local unit=legendUnits[key];
+  if unit~=nil then return value,unit; end
+  return value*100,"%";
+end
 function A.LegendDescription(m,classes)
-  local parts={A.T("Базовые параметры · без улучшений"),A.T("Классовый амулет")}; local names={};
+  local parts={A.T("Базовые значения · ранг 1"),A.T("Классовый амулет")}; local names={};
   for _,token in ipairs(classes or {}) do names[#names+1]=A.ClassName(token); end
   parts[#parts+1]=table.concat(names,", ");
   local spell; for _,token in ipairs(classes or {}) do spell=A.byKey[token..":"..m.spell]; if spell then break end end
   parts[#parts+1]=A.T("Усиление умения")..": "..(spell and spell.name or "?");
-  if m.incomplete then
-    parts[1]=A.T("Описание"); parts[#parts+1]=A.T("Параметры бонуса доступны в описании полученного амулета.");
-    return table.concat(parts,"\n");
-  end
-  local labels={area="Область действия",damage="Урон",targets="Доп. цели",cooldown="Сокращение КД",duration="Длительность",burn="Горение",stun="Оглушение",splash="Урон по соседним целям",heal="Лечение",weaken="Ослабление",share="Доля урона",chance="Шанс",secs="Длительность",radius="Радиус",reset="Сброс перезарядки",jump="Перескок урона",slow="Замедление",crit="Шанс критического удара",echo="Повторное применение",absorb="Поглощение",pierce="Пробивание",execute="Добивание"};
-  local function value(key,v)
-    if key=="targets" or key=="count" then return fmt(v); end
-    if key=="secs" or key=="duration" then return fmt(v)..A.T(" сек."); end
-    if key=="radius" then return fmt(v)..A.T(" м"); end
-    return fmt(v*100).."%";
+  local function value(key,raw)
+    local amount,unit=legendValue(key,raw);
+    return fmt(amount)..((unit=="%" or unit=="") and unit or A.T(unit));
   end
   for _,effect in ipairs(m.effects) do
-    if type(effect)=="string" then parts[#parts+1]=A.T(labels[effect] or "Особый эффект");
-    else for key,v in pairs(effect) do
-      if type(v)=="number" then parts[#parts+1]=A.T(labels[key] or "Особый эффект")..": "..value(key,v);
-      elseif type(v)=="table" then local details={}; for _,field in ipairs({"chance","share","secs","radius","count"}) do if type(v[field])=="number" then details[#details+1]=A.T(labels[field] or "Количество").." "..value(field,v[field]); end end; parts[#parts+1]=A.T(labels[key] or "Особый эффект")..(#details>0 and ": "..table.concat(details,", ") or ""); end
-    end end
+    if type(effect)=="string" then
+      if effect=="tempest" then
+        if #m.effects==1 then parts[1]=A.T("Описание"); end
+        parts[#parts+1]=A.T("Особый эффект")..": "..A.T(legendLabels[effect]);
+        parts[#parts+1]=A.T("Параметры бонуса доступны в описании полученного амулета.");
+      else
+        parts[#parts+1]=A.T(legendLabels[effect] or "Особый эффект");
+      end
+    else
+      for key,v in pairs(effect) do
+        local label=A.T(legendLabels[key] or "Особый эффект");
+        if type(v)=="number" then
+          parts[#parts+1]=label..": "..value(key,v);
+        elseif type(v)=="table" then
+          local details={};
+          for _,field in ipairs({"chance","share","secs","radius","n","count","below","pct"}) do
+            if type(v[field])=="number" then details[#details+1]=A.T(legendLabels[field]).." "..value(field,v[field]); end
+          end
+          parts[#parts+1]=label..(#details>0 and ": "..table.concat(details,", ") or "");
+        end
+      end
+    end
   end
   return table.concat(parts,"\n");
 end
@@ -180,13 +224,24 @@ function A.BaseItemMetrics(row)
     result[#result+1]={kind=effect,value=value*(flatBase[effect] and 1 or 100),unit=flatBase[effect] and "" or "%",text=A.T(baseLabels[effect] or "Особый эффект")};
   end
   for _,pair in ipairs(m.effects or {}) do add(pair[1],pair[2]); end
-  if m.base then
+  if m.base and not m.proc then
     if m.behavior=="reduction_and_health" then add("reduction",m.base); result[#result+1]={kind="max_health",unit="%"};
     elseif m.behavior=="health_and_reduction" then add("max_health",m.base); result[#result+1]={kind="reduction",unit="%"};
     else add(m.behavior,m.base); end
   end
   for _,pair in ipairs(m.specials or {}) do add(pair[1],pair[2]); end
-  if m.legend then for _,effect in ipairs(m.legend.effects) do if type(effect)=="table" then for key,value in pairs(effect) do if type(value)=="number" then add(key,value); end end end end end
+  if m.legend then
+    for _,effect in ipairs(m.legend.effects) do
+      if type(effect)=="table" then
+        for key,value in pairs(effect) do
+          if type(value)=="number" then
+            local amount,unit=legendValue(key,value);
+            result[#result+1]={kind=key,value=amount,unit=unit,text=A.T(legendLabels[key] or "Особый эффект")};
+          end
+        end
+      end
+    end
+  end
   return result;
 end
 function A.SpellDescription(row,baseOnly)
@@ -211,7 +266,12 @@ function A.BaseFacts(row)
       local timed=m.shapeData and m.shapeData[m.shape]; if timed and timed.secs then parts[#parts+1]=A.T("Длительность").." "..fmt(timed.secs)..A.T(" сек."); end
     end
   else
-    for i,m in ipairs(A.BaseItemMetrics(row)) do if m.value then parts[#parts+1]=A.StatLabel(m.kind,A.T("Бонус").." "..i).." "..fmt(m.value)..(m.unit or ""); end end
+    for i,m in ipairs(A.BaseItemMetrics(row)) do
+      if m.value then
+        local fallback=row.legend and m.text or A.T("Бонус").." "..i;
+        parts[#parts+1]=A.StatLabel(m.kind,fallback).." "..fmt(m.value)..(m.unit or "");
+      end
+    end
   end
   return A.T("Базовые")..": "..(#parts>0 and table.concat(parts," · ") or A.T("Подробности при наведении"));
 end
@@ -228,6 +288,10 @@ function A.ItemDescription(row,live)
   for _,g in ipairs(live.gear or {}) do
     local actual=A.ResolveItem(g);
     if actual and actual.key==row.key and g.text and g.text~="" then return A.T("Текущие значения").."\n"..g.text,"current"; end
+  end
+  if row.legend and #row.legend.effects==1 and row.legend.effects[1]=="tempest" then
+    local observed=ASAdvisorDB.observed and ASAdvisorDB.observed[row.key];
+    if observed and observed~="" then return A.T("Последнее описание из игры").."\n"..observed,"observed"; end
   end
   return A.BaseItemText(row),"base";
 end

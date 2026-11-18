@@ -6,6 +6,21 @@ are summarized with the feature they improve rather than listed individually.
 
 ## Unreleased
 
+## v0.6.4 — 2026-11-19
+
+- Updated the Advisor catalogue for Cataclysm with six rings and trinkets and
+  two fixed legendary amulets. Spell amulets now cover all 12 classes and
+  show their rank 1 effects, including those for Mind Sear.
+- Advisor prioritizes eligible epic and legendary spell upgrades, then fills
+  open slots with new spells before lower-rarity upgrades. Spell hints show
+  Build or Any according to the winning choice. Any labels fit on one line.
+- Eye of the Tempest shows the game's effect description once observed in a run.
+
+- Added per-tracker frame styles in Suite → Appearance. Advisor, Stats, Endless,
+  Loot and Party can use a thin tooltip-style frame or a borderless layout with tighter
+  spacing. Docking follows the visible panel bounds. Chat's existing frame
+  styles can also be selected on this page.
+
 ## v0.6.3 — 2026-11-17
 
 - Fixed ASR Chat showing Russian settings when English was selected: repeated

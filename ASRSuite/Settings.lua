@@ -101,6 +101,45 @@ local function RegisterBuiltins()
   root.importSettings=B(page,"Импорт настроек",226,27,250,437,function() page:Hide(); root.transfer:Open("import"); end);
   records[#records+1]=function() root.transfer:Draw(); end
  end);
+ A.RegisterSettingsPage("appearance","Вид",function(page)
+  L(page,"Оформление трекеров",16,8,0,468);
+  page.frameButtons={};
+  local trackers={
+   {"ASR Advisor",function() return ASAdvisorDB and ASAdvisorDB.options, ASAdvisor and ASAdvisor.RefreshUI; end},
+   {"ASR Stats",function() return ASRStatsDB,ASRStats and ASRStats.Refresh; end},
+   {"ASR Endless",function() return ASREndlessDB,ASREndless and function() ASREndless.UpdateEndless(0,true); end; end},
+   {"ASR Loot",function() return ASRLootDB,ASRLoot and ASRLoot.Refresh; end},
+   {"ASR Party",function() return ASRPartyDB,ASRParty and ASRParty.Refresh; end},
+   {"ASR Chat",function() return ASRChatDB,ASRChat and ASRChat.Apply; end,"simple"},
+  };
+  local nextStyle={stone="thin",thin="none",simple="none",none="stone"};
+  local caption={stone="Рамка: камень",thin="Рамка: тонкая",simple="Рамка: простая",none="Рамка: нет"};
+  for i,entry in ipairs(trackers) do
+   local name,get,chatStyle=unpack(entry);
+   local y=38+(i-1)*39;
+   local title=L(page,name,11,8,y+4,245);
+   local function Current(options)
+    if chatStyle and options and options.frameStyle==chatStyle then return chatStyle; end
+    return ASRTrackerStyle.Get(options);
+   end
+   local button=S.Button(page,"",210,27,266,y,function()
+    local options,refresh=get();
+    if not options or not refresh then return; end
+    local style=nextStyle[Current(options)];
+    options.frameStyle=chatStyle and style=="thin" and chatStyle or style;
+    refresh();
+    if A.ApplyDocking then A.ApplyDocking(); end
+    A.DrawSettings();
+   end);
+   page.frameButtons[name]=button;
+   records[#records+1]=function()
+    local options,refresh=get();
+    if options and refresh then
+     title:Show(); button:Show(); button.text:SetText(A.T(caption[Current(options)]));
+    else title:Hide(); button:Hide(); end
+   end
+  end
+ end);
  if ASREndless then A.RegisterSettingsPage("endless","Endless",function(page)
   Heading(page,"ASR Endless");
   A.controls.endlessEnabled=Check(page,"Показывать трекер Endless",function() return ASREndlessDB.endlessEnabled~=false; end,function(v) ASREndlessDB.endlessEnabled=v; ASREndless.UpdateEndless(0,true); end,30);

@@ -1,5 +1,8 @@
 {
   "builder": {
+    "Последнее описание из игры": "Last description from the game",
+    "за эффект (до %s)": "per stack (up to %s)",
+    "Не чаще раза в %s сек.": "At most once every %s sec.",
     "Параметры бонуса доступны в описании полученного амулета.": "Bonus values are available in the acquired amulet's description.",
     "Длит.": "Dur.",
     "с": "s",
@@ -640,7 +643,13 @@
     "Следующий": "Next",
     "Далее": "Later",
     "Живых боссов: %d": "Bosses alive: %d",
-    "Следующий: круг %d": "Next: round %d"
+    "Следующий: круг %d": "Next: round %d",
+    "Вид": "Appearance",
+    "Рамка: камень": "Frame: stone",
+    "Рамка: простая": "Frame: simple",
+    "Рамка: нет": "Frame: none",
+    "Оформление трекеров": "Tracker appearance",
+    "Рамка: тонкая": "Frame: thin"
   },
   "endless": {
     "Закрепить": "Lock panel",

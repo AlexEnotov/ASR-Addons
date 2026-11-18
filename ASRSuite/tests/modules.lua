@@ -1,6 +1,6 @@
 local A=ASRSuite; local count=0; local function check(ok,label) assert(ok,label); count=count+1; end
 local nav=0; for id in pairs(A.navigation) do if id~="future" then nav=nav+1; end end
-check(nav==6 and not A.navigation.endless and not A.navigation.heal and not A.navigation.critical,"sidebar contains only installed modules, with damage types inside Combat text");
+check(nav==7 and A.navigation.appearance and not A.navigation.endless and not A.navigation.heal and not A.navigation.critical,"sidebar includes tracker appearance and keeps damage types inside Combat text");
 check(A.pages.builder.unavailable,"missing builder shows installation placeholder instead of inert settings");
 ASRStatsDB.locked=false; ASRStatsPanel.settings.close.scripts.OnClick(ASRStatsPanel.settings.close); AZS_RUN.ph="playing";
 A.SetEditing(false); ASRSuiteDB.lockPanels=true;
@@ -10,6 +10,18 @@ A.SetEditing(true); grip.scripts.OnDragStart(grip); check(ASRStatsPanel.moving,"
 ASRSuiteDB.lockPanels=false; grip.scripts.OnDragStart(grip); check(ASRStatsPanel.moving,"unlocked panels can be dragged normally"); grip.scripts.OnDragStop(grip); ASRSuiteDB.lockPanels=true;
 A.SetModuleEnabled("stats",false); check(not ASRStatsPanel:IsShown(),"module off hides Stats independently of layout mode");
 A.SetModuleEnabled("stats",true); check(ASRStatsPanel:IsShown(),"reenabling Stats restores live panel and saved options");
+A.SelectSettingsPage("appearance");
+local frameButtons=A.pages.appearance.frameButtons;
+local styleButton=frameButtons["ASR Stats"];
+check(styleButton:IsShown() and not frameButtons["ASR Party"]:IsShown(),"appearance offers only installed trackers");
+local stoneHeight=ASRStatsPanel:GetHeight();
+styleButton.scripts.OnClick(styleButton);
+check(ASRStatsDB.frameStyle=="thin" and ASRStatsPanel.backdrop.edgeFile=="Interface\\Tooltips\\UI-Tooltip-Border" and ASRStatsPanel.backdrop.edgeSize==10 and ASRStatsPanel:GetHeight()<stoneHeight,"compact tooltip frame shrinks the live tracker");
+check(ASRStatsPanel.asrDockInsets.top==0,"thin frame docks at its visible bounds");
+styleButton.scripts.OnClick(styleButton);
+check(ASRStatsDB.frameStyle=="none" and not ASRStatsPanel.backdrop.edgeFile,"borderless removes the border");
+styleButton.scripts.OnClick(styleButton);
+check(ASRStatsDB.frameStyle=="stone" and ASRStatsPanel:GetHeight()==stoneHeight,"restoring stone restores the original footprint");
 local selected;
 A.RegisterDisplaySource("party","game","Game",nil,function() selected="game"; end);
 A.RegisterDisplaySource("party","addon","Addon",function() return false; end,function() selected="addon"; end);

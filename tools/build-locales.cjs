@@ -38,5 +38,6 @@ for(const [folder,module]of Object.entries(modules)){
  }
  output(path.join(root,folder,'Translations.lua'),out);
  output(path.join(root,folder,'Language.lua'),fs.readFileSync(path.join(dir,'Language.lua'),'utf8'));
+ if(!['ASRChat','ASRCombatText'].includes(folder))output(path.join(root,folder,'TrackerStyle.lua'),fs.readFileSync(path.join(root,'ui','TrackerStyle.lua'),'utf8'));
 }
 console.log(JSON.stringify({manualPhrases:Object.keys(manual).length,translated:report},null,2));

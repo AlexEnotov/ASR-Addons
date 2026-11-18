@@ -38,7 +38,8 @@ check(found,"new gear and stats refresh without another resize");
 ASAdvisorDB.options.plannerHeight=900; ASAdvisorDB.options.previewHeight=nil; A.ToggleUI();
 if p.description:IsShown() then click(p.description.back); end; if p.settings:IsShown() then click(p.settings.back); end; if p.preview:IsShown() then click(p.preview.back); end; if p.code:IsShown() then click(p.code.back); end
 click(p.spellCells[2]);
-check(string.find(p.inline.base:GetText(),A.T("Базовые"),1,true) and string.find(p.inline.base:GetText(),"255",1,true),"base spell stats are visible directly in inspector");
+local baseHit=tostring(ASAdvisorMechanics.spells.aimed_shot.hit);
+check(string.find(p.inline.base:GetText(),A.T("Базовые"),1,true) and string.find(p.inline.base:GetText(),baseHit,1,true),"base spell stats are visible directly in inspector");
 check(p.inline.title:GetText()==A.Local("Aimed Shot") and p.planLeft.text:GetText()==A.T("Раньше") and p.inline.remove.text:GetText()==A.T("Убрать"),"selection toolbar names the item and explains its actions");
 for _,cell in ipairs(p.spellCells) do check(not cell.remove:IsShown(),"plan icons have no stacked delete buttons"); end
 click(p.itemCells.ring[1]); check(string.find(p.inline.base:GetText(),"9%%"),"base jewelry bonus is visible directly in inspector");

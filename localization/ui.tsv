@@ -1,4 +1,9 @@
 en|deDE|frFR|esES|ptBR|itIT|plPL|trTR|jaJP|zhCN|koKR
+Last description from the game|Letzte Beschreibung aus dem Spiel|Dernière description du jeu|Última descripción del juego|Última descrição do jogo|Ultima descrizione dal gioco|Ostatni opis z gry|Oyundaki son açıklama|ゲーム内の前回の説明|上次记录的游戏说明|마지막 게임 내 설명
+per stack (up to %s)|pro Stapel (max. %s)|par cumul (max. %s)|por acumulación (máx. %s)|por acúmulo (até %s)|per accumulo (max %s)|za kumulację (maks. %s)|yük başına (en fazla %s)|1スタックあたり（最大%s）|每层（最多%s层）|중첩당 (최대 %s회)
+At most once every %s sec.|Höchstens einmal alle %s Sek.|Au plus une fois toutes les %s s|Como máximo una vez cada %s s|No máximo uma vez a cada %s s|Al massimo una volta ogni %s s|Najwyżej raz na %s s|En fazla %s saniyede bir|%s秒に最大1回|每%s秒最多触发一次|%s초마다 최대 1회
+Tracker appearance|Tracker-Darstellung|Apparence des panneaux|Aspecto de los paneles|Aparência dos painéis|Aspetto dei pannelli|Wygląd paneli|Takipçi görünümü|トラッカーの外観|追踪器外观|추적기 모양
+Frame: thin|Rahmen: dünn|Cadre : fin|Marco: fino|Moldura: fina|Bordo: sottile|Ramka: cienka|Çerçeve: ince|枠：細い|边框：细边|테두리: 얇게
 Any|Alle|Tout|Todo|Tudo|Tutti|Dow.|Tümü|任意|任意|모두
 Co-op|Koop|Coop|Coop.|Coop.|Coop|Koop|Eşli|協力|合作|협동
 Stats|Werte|Statistiques|Estadísticas|Atributos|Statistiche|Statystyki|İstatistikler|能力値|属性|능력치

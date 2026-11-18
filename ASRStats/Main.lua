@@ -34,10 +34,15 @@ function A.Refresh()
  Layers();
  if not config and (ASRStatsDB.enabled==false or ASRSuite and ASRSuite.IsModuleEnabled and not ASRSuite.IsModuleEnabled("stats")) then Stop(); panel:Hide(); return; end
  if not config and not A.editing and (ASRStatsDB.hidden or not InRun()) then Stop(); panel:Hide(); return; end
- panel:Show(); panel:SetWidth(config and 280 or 196); local ownOpacity=config and ASRStatsDB.menuOpacity or ASRStatsDB.opacity; S.Panel(panel,ASRSuite and ASRSuite.GetPanelOpacity and ASRSuite.GetPanelOpacity("stats",ownOpacity,config and "menu" or "tracker") or ownOpacity);
- panel.title:SetWidth(config and 198 or 129); panel.title:SetFont(S.font,config and 10 or 9,""); panel.title:ClearAllPoints(); panel.title:SetPoint("TOPLEFT",panel,"TOPLEFT",config and 24 or 20,config and -24 or -23); panel.title:SetHeight(config and 20 or 16);
- panel.menu:ClearAllPoints(); panel.menu:SetPoint("TOPLEFT",panel,"TOPLEFT",config and 232 or 156,config and -24 or -23); panel.menu:SetSize(config and 24 or 20,config and 20 or 16);
- grip:SetWidth(config and 200 or 136); grip:SetHeight(config and 24 or 18); grip:ClearAllPoints(); grip:SetPoint("TOPLEFT",panel,"TOPLEFT",config and 22 or 18,config and -22 or -22); panel.title:SetText(Brand(config and L("ASR / НАСТРОЙКИ","ASR / SETTINGS") or (A.editing and L("СТАТЫ · ПЕРЕТАЩИ","STATS · DRAG") or L("ASR / СТАТЫ","ASR / STATS"))));
+ local style=config and "stone" or ASRTrackerStyle.Get(ASRStatsDB);
+ local compact=style~="stone"; local inset=compact and 8 or 20; local lift=compact and 15 or 0;
+ panel:Show(); panel:SetWidth(config and 280 or 196); local ownOpacity=config and ASRStatsDB.menuOpacity or ASRStatsDB.opacity;
+ local opacity=ASRSuite and ASRSuite.GetPanelOpacity and ASRSuite.GetPanelOpacity("stats",ownOpacity,config and "menu" or "tracker") or ownOpacity;
+ ASRTrackerStyle.Apply(panel,style,opacity);
+ panel.asrDockInsets=ASRTrackerStyle.Insets(style,IsAddOnLoaded and IsAddOnLoaded("AzerothSurvivorsUI"));
+ panel.title:SetWidth(config and 198 or 129); panel.title:SetFont(S.font,config and 10 or 9,""); panel.title:ClearAllPoints(); panel.title:SetPoint("TOPLEFT",panel,"TOPLEFT",config and 24 or inset,config and -24 or -23+lift); panel.title:SetHeight(config and 20 or 16);
+ panel.menu:ClearAllPoints(); panel.menu:SetPoint("TOPLEFT",panel,"TOPLEFT",config and 232 or 176-inset,config and -24 or -23+lift); panel.menu:SetSize(config and 24 or 20,config and 20 or 16);
+ grip:SetWidth(config and 200 or 136); grip:SetHeight(config and 24 or 18); grip:ClearAllPoints(); grip:SetPoint("TOPLEFT",panel,"TOPLEFT",config and 22 or inset-2,-22+lift); panel.title:SetText(Brand(config and L("ASR / НАСТРОЙКИ","ASR / SETTINGS") or (A.editing and L("СТАТЫ · ПЕРЕТАЩИ","STATS · DRAG") or L("ASR / СТАТЫ","ASR / STATS"))));
  panel.menu.text:SetText(config and "‹" or "≡");
  for _,row in ipairs(panel.rows) do row:Hide(); end; for _,head in ipairs(panel.headings) do head:Hide(); end
  panel.empty:Hide(); if config then menu:Show(); else menu:Hide(); end
@@ -51,7 +56,7 @@ function A.Refresh()
   end
   menu.reset.text:SetText(L("Сбросить положение","Reset position")); menu.close.text:SetText(L("Готово","Done")); height=375;
  else
-  local primary=received and raw or AZS_STATS; local fallback=AZS_RUNSTATS; if not InRun() then primary=nil; fallback=nil; end; local caps=A.ReadStatCaps(); local y=45; local shown=0; local selected=0;
+  local primary=received and raw or AZS_STATS; local fallback=AZS_RUNSTATS; if not InRun() then primary=nil; fallback=nil; end; local caps=A.ReadStatCaps(); local y=45-lift; local shown=0; local selected=0;
   for gi,group in ipairs(A.sections) do
    local start=y; local groupShown=0;
    for _,row in ipairs(panel.groupRows[gi]) do
@@ -59,16 +64,19 @@ function A.Refresh()
     local v=A.Value(row.definition,primary,fallback,InRun() and AZS_RUN or nil);
     if enabled and ((v~=nil and (not ASRStatsDB.hideZeros or math.abs(v)>0.00001)) or (not ASRStatsDB.hideZeros and (primary or fallback))) then
      if groupShown==0 then y=y+14; end
-     row:ClearAllPoints(); row:SetPoint("TOPLEFT",panel,"TOPLEFT",20,-y);
+     row:ClearAllPoints(); row:SetPoint("TOPLEFT",panel,"TOPLEFT",inset,-y); row:SetWidth(196-2*inset);
+     row.value:ClearAllPoints(); row.value:SetPoint("TOPRIGHT",row,"TOPRIGHT",0,0);
+     row.name:SetWidth(143-2*inset);
      row.name:SetText(L(row.definition[1],row.definition[2])); row.value:SetText(A.Format(row.definition,v,ASRStatsDB.language~="ru")); row:Show();
      row.value:SetTextColor(unpack(A.IsCapped(row.definition,v,caps) and A.capColor or S.text));
      y=y+11; shown=shown+1; groupShown=groupShown+1;
     end
    end
-   if groupShown>0 then local head=panel.headings[gi]; head:ClearAllPoints(); head:SetPoint("TOPLEFT",panel,"TOPLEFT",20,-start); head:SetText(L(group[1],group[2])); head:Show(); y=y+3; end
+   if groupShown>0 then local head=panel.headings[gi]; head:ClearAllPoints(); head:SetPoint("TOPLEFT",panel,"TOPLEFT",inset,-start); head:SetText(L(group[1],group[2])); head:Show(); y=y+3; end
   end
-  if shown==0 then panel.empty:SetText(selected==0 and L("Нет выбранных параметров","No stats selected") or L("Ожидание характеристик от игры…","Waiting for current game stats…")); panel.empty:Show(); y=79; end
-  height=y+20;
+  if shown==0 then panel.empty:SetText(selected==0 and L("Нет выбранных параметров","No stats selected") or L("Ожидание характеристик от игры…","Waiting for current game stats…")); panel.empty:Show(); y=79-lift; end
+  panel.empty:ClearAllPoints(); panel.empty:SetPoint("TOPLEFT",panel,"TOPLEFT",inset,-42+lift);
+  height=y+(compact and 8 or 20);
  end
  panel:SetHeight(height); panel:SetScale(math.min(config and math.max(0.85,ASRStatsDB.scale) or ASRStatsDB.scale,(UIParent:GetHeight()-24)/height,(UIParent:GetWidth()-24)/panel:GetWidth()));
 end
@@ -138,6 +146,7 @@ SLASH_ASRSTATS1="/asrstats";
 SlashCmdList.ASRSTATS=function(msg)
  if not ready then return; end
  msg=string.lower(msg or ""); Stop();
+ if ASRTrackerStyle.Command(ASRStatsDB,msg,A.Refresh) then return end;
  if msg=="config" or msg=="settings" then config=true; ASRStatsDB.hidden=false;
  elseif msg=="reset" then ASRStatsDB.position=nil; Place(); config=true; ASRStatsDB.hidden=false;
  else ASRStatsDB.hidden=not ASRStatsDB.hidden; config=false; end

@@ -218,7 +218,21 @@ local function Place(f)
 end
 function A.DrawEndless(m)
  local f=A.endlessFrame; if not f or not m then return; end
- local objectivesY=m.nextIn~=nil and 112 or 76;
+ local style=ASRTrackerStyle.Get(ASREndlessDB);
+ local compact=style~="stone"; local lift=compact and 12 or 0;
+ if f.head.asrFrameStyle~=style then
+  ASRTrackerStyle.Apply(f.head,style,0.92,function(frame,opacity)
+   frame:SetBackdrop({bgFile="Interface\\Tooltips\\UI-Tooltip-Background",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",edgeSize=14,tile=true,tileSize=16,insets={left=3,right=3,top=3,bottom=3}});
+   frame:SetBackdropColor(0.16,0.12,0.09,opacity); frame:SetBackdropBorderColor(0.55,0.5,0.45,1);
+  end);
+  f.head.asrFrameStyle=style;
+  f.head:SetHeight(68-lift);
+  for i,label in ipairs({f.title,f.round,f.levelText,f.time,f.zone}) do
+   label:ClearAllPoints(); label:SetPoint("TOPLEFT",f.head,"TOPLEFT",({12,106,12,172,12})[i],-({8,8,26,26,45})[i]+(compact and ({2,2,6,6,10})[i] or 0));
+  end
+  f.slot:ClearAllPoints(); f.slot:SetPoint("TOPLEFT",f,"TOPLEFT",4,-76+lift);
+ end
+ local objectivesY=(m.nextIn~=nil and 112 or 76)-lift;
  if m.nextIn~=nil then f.slot:Show(); else f.slot:Hide(); end
  objectivesY=objectivesY+Affixes(f,m,objectivesY);
  f.enemy:ClearAllPoints(); f.enemy:SetPoint("TOPLEFT",f,"TOPLEFT",20,-objectivesY);
@@ -228,7 +242,7 @@ function A.DrawEndless(m)
  Fit(f.difficulty,A.EndlessDifficulty(m),13,100);
  local difficultyWidth=f.difficulty:GetStringWidth();
  Fit(f.zone,A.EndlessName(m.zone),13,math.max(80,246-difficultyWidth-6));
- f.difficulty:ClearAllPoints(); f.difficulty:SetPoint("TOPLEFT",f.head,"TOPLEFT",12+f.zone:GetStringWidth()+6,-45);
+ f.difficulty:ClearAllPoints(); f.difficulty:SetPoint("TOPLEFT",f.head,"TOPLEFT",12+f.zone:GetStringWidth()+6,compact and -35 or -45);
  Fit(f.counts,string.format(A.T("Убито врагов %d"),m.kills),12,210); Mark(f.enemy,"next");
  if not f.charge and AZS_BuildBossChargeBar then
   f.chargeHolder=CreateFrame("Frame",nil,f.slot);

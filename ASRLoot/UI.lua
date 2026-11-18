@@ -32,15 +32,22 @@ function A.Refresh()
  local run=A.InRun() and A.EnsureRun() or ASRLootDB.run or {};
  local rows=A.Rows(); local visible=enabled and (A.InRun() and run.panelOpen or A.inspect or editing);
  if not visible then panel:Hide(); return; end
+ local style=ASRTrackerStyle.Get(ASRLootDB); local lift=style=="stone" and 0 or 15;
+ local inset=style=="stone" and 20 or 8; local bottom=style=="stone" and 20 or 8;
  local count=math.min(15,#rows); local gridHeight=count>0 and (math.ceil(count/5)-1)*30+24 or 14;
- panel:SetWidth(196); panel:SetScale(ASRLootDB.scale); panel:SetHeight(48+gridHeight+20+(ASRLootDB.mode=="all" and 18 or 0)); panel:Show();
- S.Panel(panel,ASRSuite and ASRSuiteDB and ASRSuiteDB.trackerOpacity or 0.9);
+ panel:SetWidth(196); panel:SetScale(ASRLootDB.scale); panel:SetHeight(48-lift+gridHeight+bottom+(ASRLootDB.mode=="all" and 18 or 0)); panel:Show();
+ ASRTrackerStyle.Apply(panel,style,ASRSuite and ASRSuiteDB and ASRSuiteDB.trackerOpacity or 0.9);
+ panel.asrDockInsets=ASRTrackerStyle.Insets(style,IsAddOnLoaded and IsAddOnLoaded("AzerothSurvivorsUI"));
+ local function Place(widget,x,y) widget:ClearAllPoints(); widget:SetPoint("TOPLEFT",panel,"TOPLEFT",x,-y+lift); end
+ Place(panel.title,inset,23); Place(panel.titleHit,inset,20); Place(panel.mode,124-inset,23);
+ Place(panel.close,176-inset,23); Place(panel.empty,inset,48);
  panel.title:SetText("|cff8cd123ASR|r / "..A.T("Добыча"));
  panel.mode.text:SetText(A.T(ASRLootDB.mode=="all" and "Все" or "Новые"));
  panel.empty:SetText(A.T("Пока нет предметов")); if count==0 then panel.empty:Show(); else panel.empty:Hide(); end
  A.offset=math.max(0,math.min(A.offset or 0,math.max(0,#rows-15)));
  for i,row in ipairs(panel.rows) do
   local item=rows[i+A.offset];
+  Place(row,inset+((i-1)%5)*30,48+math.floor((i-1)/5)*30);
   if i>count then row:Hide();
   else
    row:Show();
@@ -52,7 +59,7 @@ function A.Refresh()
    else row:Hide(); row.item=nil; end
   end
  end
- panel.footer:ClearAllPoints(); panel.footer:SetPoint("TOPLEFT",panel,"TOPLEFT",20,-(52+gridHeight));
+ Place(panel.footer,inset,52+gridHeight);
  panel.footer:SetText(ASRLootDB.mode=="all" and string.format(A.T("Золото: %d"),run.gold or 0) or "");
  if S.SyncChildren then S.SyncChildren(panel); end
 end

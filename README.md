@@ -22,9 +22,14 @@ retain their original language.
 | ASR Party | `ASRParty` | `/asrparty` | Classic and compact party frames |
 | ASR Chat | `ASRChat` | `/asrchat` | Movable native chat, appearance and copying |
 
-Install only what you need. All seven feature addons work without Suite. Suite discovers installed modules; it does not require all of them. All modules require the game's native AzerothSurvivors addon; some also use AzerothSurvivorsAPI as declared in their TOCs. These native game components are not bundled. The v0.6.3 release includes eight standalone addons.
+Install only what you need. All seven feature addons work without Suite. Suite discovers installed modules; it does not require all of them. All modules require the game's native AzerothSurvivors addon; some also use AzerothSurvivorsAPI as declared in their TOCs. These native game components are not bundled. The v0.6.4 release includes eight standalone addons.
 
 ## Installation
+
+For tracker frames, open `/asrhub` → **Appearance**. Without Suite, Advisor,
+Stats, Endless, Loot and Party accept `frame stone`, `frame thin` or
+`frame none` after their usual command. For example, `/asrstats frame thin`.
+Chat has its own frame control in `/asrchat` → **Appearance**.
 
 Download the individual addon ZIPs from the [latest release](https://github.com/AlexEnotov/ASR-Addons/releases/latest)'s **Assets** section. Extract each directly into `Interface/AddOns`. For example: `Interface/AddOns/ASRAdvisor/ASRAdvisor.toc`. GitHub's automatically generated **Source code** archives are for development and cannot be installed through the game's addon catalogue.
 
@@ -58,12 +63,12 @@ Node.js 22 and PowerShell 7:
 npm ci --ignore-scripts
 npm test
 npm run test:game -- "D:/path/to/game/Interface/AddOns/AzerothSurvivors"
-./tools/package.ps1 -Tag v0.6.3
+./tools/package.ps1 -Tag v0.6.4
 ```
 
 `npm test` checks Lua 5.1 syntax for all modules, TOC resources and Stats/Combat Text/Suite scenarios. The builder's full recommendation tests require a locally installed native game catalogue, supplied explicitly to `test:game`; CI does not redistribute it. Mocked UI tests do not replace in-game visual checks.
 
-Packaging writes eight independently installable, deterministic ZIPs, an ASR-All bundle and `SHA256SUMS` to ignored `release/`. The tag is the shared distribution release version; module TOC/runtime versions are aligned to 0.6.3. The Advisor ZIP and bundle also include the settings-only legacy bridge. The store displays the pinned release tag.
+Packaging writes eight independently installable, deterministic ZIPs, an ASR-All bundle and `SHA256SUMS` to ignored `release/`. The tag is the shared distribution release version; module TOC/runtime versions are aligned to 0.6.4. The Advisor ZIP and bundle also include the settings-only legacy bridge. The store displays the pinned release tag.
 
 See [the release process](docs/RELEASING.md). Original ASR implementation code is licensed under **GPL-3.0-only**. Copyright (C) 2026 AlexEnotov. See [LICENSE](LICENSE) for the full terms and [resource notes](docs/RESOURCES.md) for game data and third-party material, whose rights remain with their respective owners.
 

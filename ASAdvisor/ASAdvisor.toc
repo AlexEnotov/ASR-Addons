@@ -3,5 +3,5 @@
 ## Notes: Preserves existing ASAdvisorDB builds and preferences during the folder rename. No interface or runtime code.
 ## Author: AlexEnotov
 ## X-License: GPL-3.0-only
-## Version: 0.6.3
+## Version: 0.6.4
 ## SavedVariables: ASAdvisorDB

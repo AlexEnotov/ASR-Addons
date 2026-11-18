@@ -67,17 +67,18 @@ function A.GoalStatus(p,stats)
   end
   return out;
 end
-function A.ScoreSpell(b,card,live,index)
+function A.ScoreSpell(b,card,live,index,slotLimit)
   local p,priority=A.MatchSpell(b,card.key,live);
   local r={index=index,card=card,score=0,reason=A.T("Вне выбранного билда"),kind="off"};
   if not p then return r; end
   if live.banned and live.banned[card.key] then r.reason=A.T("Забанены"); r.kind="banish"; return r; end
   r.any=p.any==true;
   local current=live.spells[card.key];
-  local cap=tonumber(AZS_CARDS and AZS_CARDS.slm) or 6;
-  local used=0; for _,s in pairs(live.spells) do if (tonumber(s.rank) or 0)>0 then used=used+1; end end
   if not current or (tonumber(current.rank) or 0)<=0 then
-    if tonumber(card.new)==1 and used>=cap then r.reason=A.T("Нет свободного слота"); return r; end
+    local cap=tonumber(slotLimit) or tonumber(AZS_CARDS and AZS_CARDS.slm) or 6;
+    local used=0; for _,s in pairs(live.spells) do if (tonumber(s.rank) or 0)>0 then used=used+1; end end
+    if used>=cap then r.reason=A.T("Нет свободного слота"); return r; end
+    r.acquisition=true;
     r.score=(p.any and 600 or 1200)-priority*20+(tonumber(card.rarity) or 0); r.reason=p.any and "Any" or A.T("Нужное умение").." · "..A.T("приоритет").." "..priority; r.kind="planned"; return r;
   end
   local stats=A.SpellStats(card.key,live);
@@ -168,7 +169,13 @@ function A.Recommend(b,offer,live)
   local list={};
   if not b or b.class~=A.Class() or not live.inRun or not offer then return list; end
   for i,c in ipairs(offer.cards or {}) do
-    list[#list+1]=offer.kind=="jewel" and A.ScoreItem(b,c,live,i) or A.ScoreSpell(b,c,live,i);
+    local result=offer.kind=="jewel" and A.ScoreItem(b,c,live,i) or A.ScoreSpell(b,c,live,i,offer.slm);
+    if offer.kind=="spell" and result.score>0 then
+      local rarity=tonumber(c.rarity) or 0;
+      -- Classify eligible cards before applying the existing build order.
+      result.spellPriority=result.acquisition and 2 or rarity>=3 and rarity or 1;
+    end
+    list[#list+1]=result;
   end
   if offer.kind=="jewel" then
     local top=0; for _,r in ipairs(list) do top=math.max(top,r.score); end
@@ -181,7 +188,12 @@ function A.Recommend(b,offer,live)
       end end
     end
   end
-  table.sort(list,function(x,y) if x.score~=y.score then return x.score>y.score; end; return x.index<y.index; end);
+  table.sort(list,function(x,y)
+    local left,right=x.spellPriority or 0,y.spellPriority or 0;
+    if left~=right then return left>right; end
+    if x.score~=y.score then return x.score>y.score; end
+    return x.index<y.index;
+  end);
   return list;
 end
 function A.BanishReady(p,stats,selected)
@@ -218,13 +230,16 @@ end
 function A.NextAction(b,offer,live)
   local list=A.Recommend(b,offer,live);
   if not b or #list==0 then return nil,list; end
-  if list[1].score>0 then
-    local indices={[list[1].index]=true}; local anyIndices={};
+  local best=list[1];
+  if best.score>0 then
+    local indices={[best.index]=true}; local anyIndices={};
     for _,candidate in ipairs(list) do
-      if candidate.any and candidate.score>0 then indices[candidate.index]=true; anyIndices[candidate.index]=true; end
-      if offer.kind=="jewel" and math.abs(candidate.score-list[1].score)<0.000001 then indices[candidate.index]=true; end
+      if candidate.any and candidate.score>0 and (offer.kind~="spell" or best.any and candidate.spellPriority==best.spellPriority) then
+        indices[candidate.index]=true; anyIndices[candidate.index]=true;
+      end
+      if offer.kind=="jewel" and math.abs(candidate.score-best.score)<0.000001 then indices[candidate.index]=true; end
     end
-    return {kind="card",index=list[1].index,indices=indices,anyIndices=anyIndices,reason=list[1].reason},list;
+    return {kind="card",index=best.index,indices=indices,anyIndices=anyIndices,reason=best.reason},list;
   end
   local banish=A.BanishCandidate(b,offer,live);
   if banish then return {kind="banish",index=banish,reason=A.T("Умение отмечено для изгнания")},list; end

@@ -95,23 +95,23 @@ function A.PaintPortrait(row,unit,key)
  end
  row.portrait:Hide(); for i,part in ipairs(row.portraitSlices) do if i>1 and i<32 then part:Show(); else part:Hide(); end end
 end
-local function Paint(row,m,mode)
- row.model=m; local compact=mode=="compact"; row:SetHeight(compact and 82 or 102);
+local function Paint(row,m,mode,lift)
+ row.model=m; local compact=mode=="compact"; row:SetHeight((compact and 82 or 102)-2*lift);
  row.portrait:Hide(); for _,part in ipairs(row.portraitSlices) do part:Hide(); end; row.portraitBorder:Hide(); row.levelBadge:Hide(); row.status:Hide(); row.bar:ClearAllPoints(); row.name:ClearAllPoints(); row.levelText:ClearAllPoints(); row.portrait:ClearAllPoints();
  row.name:SetFont(S.font,compact and 10 or 11,""); row.hp:SetFont(S.font,compact and 9 or 10,""); row.levelText:SetFont(S.font,compact and 9 or 11,compact and "" or "OUTLINE");
- row.name:SetPoint("TOPLEFT",row,"TOPLEFT",compact and 16 or 82,compact and -20 or -24); Fit(row.name,(m.leader and "★ " or "")..m.name,compact and 138 or 96);
+ row.name:SetPoint("TOPLEFT",row,"TOPLEFT",compact and 16 or 82,(compact and -20 or -24)+lift); Fit(row.name,(m.leader and "★ " or "")..m.name,compact and 138 or 96);
  row.levelText:SetWidth(24); row.levelText:SetJustifyH("CENTER"); row.levelText:SetText(m.level and m.level>0 and tostring(m.level) or "—");
- if compact then row.levelText:Show(); row.levelText:SetPoint("TOPRIGHT",row,"TOPRIGHT",-20,-20); row.levelText:SetTextColor(unpack(S.muted));
+ if compact then row.levelText:Show(); row.levelText:SetPoint("TOPRIGHT",row,"TOPRIGHT",-20,-20+lift); row.levelText:SetTextColor(unpack(S.muted));
  else
-  row.portrait:SetSize(36,36); row.portrait:SetPoint("TOPLEFT",row,"TOPLEFT",28,-35); row.portraitBorder:ClearAllPoints(); row.portraitBorder:SetPoint("TOPLEFT",row,"TOPLEFT",16,-18); row.portraitBorder:SetSize(60,65);
-  row.portrait:Show(); row.portraitBorder:Show(); row.levelBadge:ClearAllPoints(); row.levelBadge:SetPoint("TOPLEFT",row,"TOPLEFT",18,-24); row.levelBadge:Show();
+  row.portrait:SetSize(36,36); row.portrait:SetPoint("TOPLEFT",row,"TOPLEFT",28,-35+lift); row.portraitBorder:ClearAllPoints(); row.portraitBorder:SetPoint("TOPLEFT",row,"TOPLEFT",16,-18+lift); row.portraitBorder:SetSize(60,65);
+  row.portrait:Show(); row.portraitBorder:Show(); row.levelBadge:ClearAllPoints(); row.levelBadge:SetPoint("TOPLEFT",row,"TOPLEFT",18,-24+lift); row.levelBadge:Show();
   row.levelText:Hide(); row.badgeText:SetText(row.levelText:GetText()); row.badgeText:SetTextColor(1,1,1,1);
   local unit=m.preview and "player" or m.unit; local key=tostring(A.Safe(UnitGUID,unit) or "")..":"..tostring(m.name);
   A.PaintPortrait(row,unit,key)
-  row.status:ClearAllPoints(); row.status:SetPoint("TOPLEFT",row,"TOPLEFT",82,-37); row.status:SetWidth(96); row.status:Show();
+  row.status:ClearAllPoints(); row.status:SetPoint("TOPLEFT",row,"TOPLEFT",82,-37+lift); row.status:SetWidth(96); row.status:Show();
   Fit(row.status,A.ClassLabel(m),96);
  end
- local caseWidth=compact and 164 or 111; local caseHeight=compact and 28 or 32; local caseLeft=compact and 16 or 67; local caseTop=compact and 34 or 50;
+ local caseWidth=compact and 164 or 111; local caseHeight=compact and 28 or 32; local caseLeft=compact and 16 or 67; local caseTop=(compact and 34 or 50)-lift;
  -- Match the native player fill (385x37) to its visible case (716x188, cropped 617/1024 by 120/256).
  local width=caseWidth*(385/(716*617/1024)); row.bar:SetSize(width,caseHeight*(37/(188*120/256))); row.bar:SetPoint("CENTER",row,"TOPLEFT",caseLeft+caseWidth/2,-(caseTop+caseHeight/2)); row.barCase:SetSize(caseWidth,caseHeight);
  row.healthOverlay:SetSize(caseWidth,caseHeight); row.healthOverlay:ClearAllPoints(); row.healthOverlay:SetPoint("TOPLEFT",row,"TOPLEFT",caseLeft,-caseTop);
@@ -135,8 +135,7 @@ local function Paint(row,m,mode)
  end
 end
 function A.PartyInsets()
- if IsAddOnLoaded and IsAddOnLoaded("AzerothSurvivorsUI") then return {left=1.5,right=1.5,top=10,bottom=11}; end
- return {left=0,right=0,top=0,bottom=0};
+ return ASRTrackerStyle.Insets(ASRTrackerStyle.Get(ASRPartyDB),IsAddOnLoaded and IsAddOnLoaded("AzerothSurvivorsUI"));
 end
 function A.ChainGap(frame)
  local ratio=(frame.GetEffectiveScale and frame:GetEffectiveScale() or ASRPartyDB.scale)/(UIParent.GetEffectiveScale and UIParent:GetEffectiveScale() or 1);
@@ -171,13 +170,20 @@ function A.Refresh()
  A.active=not preview and #members>0; f:SetScale(ASRPartyDB.scale); f.asrDockInsets=A.PartyInsets();
  local count=not preview and #members==0 and A.T("Соло") or tostring(preview and #members or #members+1); Fit(f.title,"|cff8cd123ASR|r / "..A.T("Группа").." · "..count,132);
  local opacity=ASRSuite and ASRSuite.ready and ASRSuite.GetPanelOpacity and ASRSuite.GetPanelOpacity("party",ASRPartyDB.opacity) or ASRPartyDB.opacity;
- S.Panel(f.header,opacity); f:SetBackdrop(nil);
+ local style=ASRTrackerStyle.Get(ASRPartyDB);
+ -- The stone texture already overlaps adjacent frame bounds by 21 units.
+ local lift=style=="stone" and 0 or 13;
+ local inset=style=="stone" and 20 or 8;
+ f.header:SetHeight(64-2*lift);
+ f.title:ClearAllPoints(); f.title:SetPoint("TOPLEFT",f.header,"TOPLEFT",inset,-24+lift);
+ f.settings:ClearAllPoints(); f.settings:SetPoint("TOPRIGHT",f.header,"TOPRIGHT",-inset,-22+lift);
+ ASRTrackerStyle.Apply(f.header,style,opacity); f:SetBackdrop(nil);
  local showHeader=ASRPartyDB.showHeader or A.editing or A.preview or ASRSuite and ASRSuite.editing;
  if showHeader then f.header:Show(); else f.header:Hide(); end
  local y=0; local previous=showHeader and f.header or nil; local gap=A.ChainGap(f); local inset=f.asrDockInsets;
  for i,m in ipairs(members) do
   if previous then y=y+previous:GetHeight()-inset.bottom-inset.top+gap; end
-  local row=f.rows[i]; row:ClearAllPoints(); row:SetPoint("TOPLEFT",f,"TOPLEFT",0,-y); S.Panel(row,opacity); Paint(row,m,ASRPartyDB.mode); previous=row;
+  local row=f.rows[i]; row:ClearAllPoints(); row:SetPoint("TOPLEFT",f,"TOPLEFT",0,-y); ASRTrackerStyle.Apply(row,style,opacity); Paint(row,m,ASRPartyDB.mode,lift); previous=row;
  end
  for i=#members+1,#f.rows do f.rows[i].model=nil; f.rows[i]:Hide(); end
  f:SetHeight(y+previous:GetHeight()); Place(f); f:Show(); if A.active then A.HideNative(); else A.RestoreNative(); end

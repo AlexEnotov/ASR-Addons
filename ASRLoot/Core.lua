@@ -1,4 +1,4 @@
-ASRLoot={VERSION="0.6.3",ready=false}; local A=ASRLoot;
+ASRLoot={VERSION="0.6.4",ready=false}; local A=ASRLoot;
 local translations={
  ["Новые"]="New",["Все"]="All",["Переключить режим"]="Switch mode",["Масштаб"]="Scale",["Добыча"]="Loot",["Только новые"]="New items only",["Вся добыча"]="All drops",["Новый"]="New",["Продано"]="Sold",["Неизвестная редкость"]="Unknown rarity",
  ["Новые: %d · Дубликаты: %d"]="New: %d · Duplicates: %d",["Золото за дубликаты: %d"]="Duplicate gold: %d",["Пока нет предметов"]="No items yet",["Прокрутка колёсиком"]="Scroll with mouse wheel",
@@ -190,6 +190,7 @@ end);
 SLASH_ASRLOOT1="/asrloot";
 SlashCmdList.ASRLOOT=function(msg)
  if not A.ready then return; end
+ if ASRTrackerStyle.Command(ASRLootDB,msg,A.Refresh) then return end;
  if msg=="all" or msg=="new" then A.SetMode(msg);
  elseif ASRLocale.IsLanguage(msg) then A.SetLanguage(msg);
  elseif msg=="hide" then A.Close();

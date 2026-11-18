@@ -20,7 +20,7 @@ function run(code,name){
 run(fs.readFileSync(path.join(__dirname,'mock.lua'),'utf8'),'mock');
 run(fs.readFileSync(path.join(game,'Generated/Content.lua'),'utf8'),'game catalog');
 run(fs.readFileSync(path.join(game,'Generated/Content_ruRU.lua'),'utf8'),'game Russian');
-for(const file of ['Language.lua','Translations.lua','Mechanics.lua','CatalogExtras.lua','Names.lua','Core.lua','Locale.lua','Presentation.lua','Stats.lua','Advisor.lua','UI.lua','Runtime.lua']) run(fs.readFileSync(path.join(root,file),'utf8'),file);
+for(const file of ['Language.lua','Translations.lua','TrackerStyle.lua','Mechanics.lua','CatalogExtras.lua','Names.lua','Core.lua','Locale.lua','Presentation.lua','Stats.lua','Advisor.lua','UI.lua','Runtime.lua']) run(fs.readFileSync(path.join(root,file),'utf8'),file);
 run(fs.readFileSync(path.join(__dirname,'scenarios.lua'),'utf8'),'scenarios');
 run(fs.readFileSync(path.join(__dirname,'extended.lua'),'utf8'),'extended');
 run(fs.readFileSync(path.join(__dirname,'v040.lua'),'utf8'),'v040');

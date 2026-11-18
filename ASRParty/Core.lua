@@ -1,4 +1,4 @@
-ASRParty={VERSION="0.6.3",ready=false}; local A=ASRParty;
+ASRParty={VERSION="0.6.4",ready=false}; local A=ASRParty;
 ASRLocale.RegisterTranslations("party","en",{
  ["Группа"]="Party",["Соло"]="Solo",["Всегда показывать заголовок группы"]="Always show party header",["Классический"]="Classic",["Компактный"]="Compact",["Вид панели"]="Panel style",["Модуль включён"]="Module enabled",
  ["Закрепить"]="Lock panel",["Масштаб"]="Scale",["Фон трекера"]="Tracker background",["Сбросить положение"]="Reset position",
@@ -93,6 +93,7 @@ end);
 SLASH_ASRPARTY1="/asrparty";
 SlashCmdList.ASRPARTY=function(msg)
  if not A.ready then return; end; msg=string.lower(string.match(msg or "","^%s*(.-)%s*$"));
+ if ASRTrackerStyle.Command(ASRPartyDB,msg,A.Refresh) then return end;
  if msg=="classic" or msg=="compact" then A.SetMode(msg);
  elseif msg=="on" or msg=="off" then A.SetEnabled(msg=="on");
  elseif msg=="lock" or msg=="unlock" then ASRPartyDB.locked=msg=="lock"; A.DrawSettings();

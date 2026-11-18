@@ -138,6 +138,20 @@ local anyHand={kind="spell",rr=4,cards={{key="kill_command",new=1,rarity=3},{key
 local multiple=A.NextAction(anyBuild,anyHand,anyLive);
 check(multiple and multiple.kind=="card" and multiple.indices[2] and multiple.indices[3] and not multiple.indices[1],"both offered Any alternatives marked despite different rarity");
 check(multiple.anyIndices[2] and multiple.anyIndices[3],"Any labels apply to every eligible alternative");
+if not planner:IsShown() then A.ToggleUI(); end
+if planner.description:IsShown() then planner.description.back.scripts.OnClick(planner.description.back); end
+planner.classButtons.HUNTER.scripts.OnClick(planner.classButtons.HUNTER);
+planner.search:SetText("");
+planner.tabs.spell.scripts.OnClick(planner.tabs.spell);
+for _,language in ipairs({"ru","ptBR"}) do
+  A.SetLanguage(language);
+  for _,cell in ipairs({planner.catalogRows[1],planner.spellCells[2]}) do
+    local caption=cell.anyLabel;
+    check(caption:IsShown() and caption:GetText()==A.T("Любой") and caption:GetStringWidth()<=caption:GetWidth()+0.01,
+      "Any caption fits its icon in "..language);
+  end
+end
+A.SetLanguage("ru");
 if planner:IsShown() then A.ToggleUI(); end
 AZS_RUN.ph="choosing"; AZS_SPELLS={anyLive.spells.auto_shot}; AZS_CARDS=anyHand; AZSCardsFrame:Show(); Emit("AZSCARDS","Any fixture");
 ASAdvisorRuntime.scripts.OnUpdate(ASAdvisorRuntime,0.3);

@@ -2,7 +2,7 @@
 ## Title: |cff8cd123ASR|r Combat Text
 ## Author: AlexEnotov
 ## X-License: GPL-3.0-only
-## Version: 0.6.3
+## Version: 0.6.4
 ## Notes: Standalone movable combat numbers. /asrtext
 ## Dependencies: AzerothSurvivors, AzerothSurvivorsAPI
 ## OptionalDeps: AzerothSurvivorsUI, SurvivorUI

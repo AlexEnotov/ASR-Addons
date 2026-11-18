@@ -54,6 +54,7 @@ SLASH_ASADVISOR3="/asr";
 SlashCmdList.ASADVISOR=function(msg)
   if not A.ready then return; end
   msg=A.Trim(msg);
+  if ASRTrackerStyle.Command(ASAdvisorDB.options,msg,A.RefreshUI) then return end;
   if msg=="debug" then
     ASAdvisorDB.options.debug=not ASAdvisorDB.options.debug;
     A.Print(A.T(ASAdvisorDB.options.debug and "Запись данных включена" or "Запись данных выключена"));

@@ -1,6 +1,26 @@
 -- Original implementation for Reborn's Lua 5.1 interface. No network or executable imports.
-ASAdvisor = { VERSION="0.6.3", catalog = {}, byKey = {}, aliases = {}, ready = false };
+ASAdvisor = { VERSION="0.6.4", catalog = {}, byKey = {}, aliases = {}, ready = false };
 local A = ASAdvisor;
+local legends = {};
+do
+  local legacyBySpell, russianHeads, covered = {}, {}, {};
+  for _,row in ipairs(ASAdvisorMechanics.legends) do
+    legacyBySpell[row.spell]=row;
+    russianHeads[row.name]=row.ru;
+  end
+  for _,resolved in ipairs(ASAdvisorResolvedLegends) do
+    local row={}; for key,value in pairs(resolved) do row[key]=value; end
+    local legacy=legacyBySpell[row.spell];
+    row.nativeKey=row.key;
+    row.key=legacy and legacy.key or "legend_"..row.spell;
+    row.ru=legacy and legacy.ru or russianHeads[row.name] or row.name;
+    legends[#legends+1]=row;
+    covered[row.spell]=true;
+  end
+  for _,row in ipairs(ASAdvisorMechanics.legends) do
+    if not covered[row.spell] then legends[#legends+1]=row; end
+  end
+end
 local function trim(s) return (string.gsub(s or "", "^%s*(.-)%s*$", "%1")); end
 A.Trim = trim;
 function A.Lower(s)
@@ -57,11 +77,12 @@ function A.BuildCatalog()
     add(r, m and m.slot or "unknown");
   end
   for _,r in ipairs(AZS_GEN.amulets or {}) do add(r, "amulet"); end
-  for _,m in ipairs(ASAdvisorMechanics.legends or {}) do
+  for _,m in ipairs(legends) do
     local classes={}; for token in pairs(AZS_GEN.spells or {}) do if A.byKey[token..":"..m.spell] then classes[#classes+1]=token; end end
     if #classes>0 then
       ASAdvisorMechanics.items[m.key]={slot="amulet",behavior="",classes=classes,legend=m,effects={}};
       local r=add(m,"amulet"); r.legend=m; r.baseName=ASAdvisorDB.options.language~="ru" and A.Local(m.name) or m.ru;
+      if m.nativeKey then A.byKey["amulet:"..m.nativeKey]=r; end
       local spell=A.byKey[classes[1]..":"..m.spell]; r.name=r.baseName.." · "..spell.name;
       for _,name in ipairs({m.name,m.ru}) do
         A.itemNames[name]=A.itemNames[name] or {}; local found=false; for _,v in ipairs(A.itemNames[name]) do if v==r then found=true; end end; if not found then A.itemNames[name][#A.itemNames[name]+1]=r; end
@@ -71,8 +92,8 @@ function A.BuildCatalog()
       -- the base legend catalogue. Index both game and planner separators.
       for _,token in ipairs(classes) do
         local target=A.byKey[token..":"..m.spell];
-        for _,base in ipairs({m.name,m.ru,A.Local(m.name)}) do
-          for _,suffix in ipairs({target.english,target.name,ASAdvisorNamesRU and ASAdvisorNamesRU[target.english] or target.english}) do
+        for _,base in ipairs({m.name,m.ru,A.Local(m.name),AZS_L and AZS_L[m.name] or m.name}) do
+          for _,suffix in ipairs({target.english,target.name,ASAdvisorNamesRU and ASAdvisorNamesRU[target.english] or target.english,AZS_L and AZS_L[target.english] or target.english}) do
             for _,separator in ipairs({": "," · "}) do
               local name=A.Plain(base..separator..suffix); local list=A.itemNames[name] or {}; A.itemNames[name]=list;
               local found=false; for _,v in ipairs(list) do if v==r then found=true; end end;
@@ -85,8 +106,15 @@ function A.BuildCatalog()
   end
 end
 function A.ResolveItem(value,token)
+  local key=type(value)=="table" and value.key or value;
+  local exact=type(key)=="string" and A.aliasItem(key);
+  if exact and A.AvailableTo(exact,token or A.Class()) then return exact; end
   local name=A.Plain(type(value)=="table" and value.name or value); local list=A.itemNames and A.itemNames[name];
-  if not list then return A.aliases[name]; end
+  if not list then
+    local alias=A.aliases[name];
+    if alias and A.AvailableTo(alias,token or A.Class()) then return alias; end
+    return;
+  end
   local candidates={}; for _,r in ipairs(list) do if A.AvailableTo(r,token or A.Class()) then candidates[#candidates+1]=r; end end
   if #candidates==1 then return candidates[1]; end
   local raw=type(value)=="table" and A.Lower((value.text or "").." "..(value.effect or "").." "..(value.note or "")) or "";

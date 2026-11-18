@@ -1,4 +1,4 @@
-ASRChat={VERSION="0.6.3",ready=false}; local A=ASRChat;
+ASRChat={VERSION="0.6.4",ready=false}; local A=ASRChat;
 ASRLocale.RegisterTranslations("chat","en",{
  ["Всегда показывать чат"]="Always show chat",["Всегда показывать поле ввода"]="Always show input field",
  ["Модуль включён"]="Module enabled",["Вид"]="Appearance",["Поведение"]="Behavior",

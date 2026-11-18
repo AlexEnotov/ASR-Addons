@@ -215,7 +215,8 @@ function A.InitDocking()
  for id,link in pairs(ASRSuiteDB.docking) do if type(id)~="string" or type(link)~="table" or type(link.parent)~="string" or link.parent==id or (link.offset~=nil and not A.Number(link.offset)) or string.sub(id,1,5)=="text:" or string.sub(link.parent,1,5)=="text:" then ASRSuiteDB.docking[id]=nil; end end
  local skin=IsAddOnLoaded and IsAddOnLoaded("AzerothSurvivorsUI");
  local insets=skin and {left=1.5,right=1.5,top=10,bottom=11} or {left=0,right=0,top=0,bottom=0};
- if ASRStatsPanel then ASRStatsPanel.asrDockInsets=insets; end; if ASAdvisorTracker then ASAdvisorTracker.asrDockInsets=insets; end
+ if ASRStatsPanel and not ASRStatsPanel.asrDockInsets then ASRStatsPanel.asrDockInsets=insets; end
+ if ASAdvisorTracker and not ASAdvisorTracker.asrDockInsets then ASAdvisorTracker.asrDockInsets=insets; end
  A.RegisterDockPanel("stats",ASRStatsPanel,function(r) ASRStatsDB.position={point="TOPLEFT",relative="BOTTOMLEFT",x=r.left/r.ratio,y=r.top/r.ratio}; end,function() return ASRStatsPanel:IsShown() and not ASRStatsPanel.settings:IsShown(); end);
  A.RegisterDockPanel("builder",ASAdvisorTracker,function(r) ASAdvisorDB.options.trackerPos={point="TOPLEFT",rel="BOTTOMLEFT",x=r.left/r.ratio,y=r.top/r.ratio}; ASAdvisorDB.options.trackerAnchor={left=r.left,top=r.top}; end,function() return ASAdvisorTracker:IsShown(); end);
  A.dockPanels=panels;

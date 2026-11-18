@@ -17,6 +17,14 @@ local function label(p,value,size,x,y,w,color)
   t:SetPoint("TOPLEFT",p,"TOPLEFT",x,y); if w then t:SetWidth(w); end
   t.asFontSize=size or 11; t:SetJustifyH("LEFT"); t:SetJustifyV("TOP"); t:SetTextColor(unpack(color or text)); t:SetText(value or ""); return t;
 end
+local function setIconCaption(caption,value,size)
+  caption:SetWidth(0);
+  caption:SetText(value);
+  caption:SetFont(FONT,size,"OUTLINE");
+  local width=caption:GetStringWidth();
+  if width>31 then caption:SetFont(FONT,size*31/width,"OUTLINE"); end
+  caption:SetWidth(32);
+end
 local function box(parent,name,w,h,x,y,alpha)
   local f=CreateFrame("Frame",name,parent); f:SetSize(w,h);
   if x then f:SetPoint("TOPLEFT",parent,"TOPLEFT",x,y); end
@@ -156,7 +164,8 @@ local function itemTip(root,cell,row)
     desc=A.SpellDescription(row,true);
     if A.Snapshot().spells[row.key] then desc=desc.."\n\n"..A.SpellDescription(row); end
   else
-    desc=A.BaseItemText(row); local current,source=A.ItemDescription(row,A.Snapshot()); if source=="current" then desc=desc.."\n\n"..current; end
+    local details,source=A.ItemDescription(row,A.Snapshot());
+    desc=source=="base" and details or A.BaseItemText(row).."\n\n"..details;
   end
   local b=root==main and edited() or A.Active();
   local p=b and (row.group=="spell" and A.FindPick(b,row.key) or b.itemRules and b.itemRules[row.key]);
@@ -215,7 +224,7 @@ end
 local function buildCell(p,x,y)
   local f=button(p,"",34,34,x,y,function(self) if self.row then selectPick(self.row); end end);
   f.icon=texture(f,nil,30,2,-2); f.number=label(f,"",9,2,-2,13);
-  f.anyLabel=label(f,A.T("Любой"),9,2,-22,30,mint); f.anyLabel:Hide();
+  f.anyLabel=label(f,"",9,1,-22,32,mint); f.anyLabel:SetJustifyH("CENTER"); f.anyLabel:Hide();
   f.banBorder=CreateFrame("Frame",nil,f); f.banBorder:SetPoint("TOPLEFT",f,"TOPLEFT",0,0); f.banBorder:SetSize(34,34);
   f.banBorder:SetFrameLevel(f:GetFrameLevel()+4); f.banBorder:SetBackdrop({edgeFile=BORDER,edgeSize=8}); f.banBorder:SetBackdropBorderColor(1,0.25,0.2,0.75); f.banBorder:Hide();
   f.remove=button(f,"×",20,20,29,3,function(self)
@@ -234,7 +243,7 @@ local function fillPlanCell(cell,row,n)
   cell.row=row;
   if not row then cell:Hide(); return; end
   cell.icon:SetTexture(A.Icon(row.icon)); cell.number:SetText(tostring(n));
-  if row.any then cell.anyLabel:SetText(A.T("Любой")); cell.anyLabel:Show(); else cell.anyLabel:Hide(); end
+  if row.any then setIconCaption(cell.anyLabel,A.T("Любой"),9); cell.anyLabel:Show(); else cell.anyLabel:Hide(); end
   local plan=row.group=="spell" and A.BanishPlan(edited());
   if plan and plan[row.key] then cell.banBorder:SetBackdropBorderColor(1,0.25,0.2,plan[row.key]=="manual" and 0.85 or 0.45); cell.banBorder:Show(); else cell.banBorder:Hide(); end
   cell:SetBackdropBorderColor(unpack(view.selected==row.key and view.group==row.group and mint or {0.14,0.24,0.28,0.7})); cell:Show();
@@ -327,6 +336,7 @@ local function createMain()
       refresh(); if err then status(err); end
     end);
     f.icon=texture(f,nil,30,2,-2); f.mark=label(f,"",11,20,-20,14,mint);
+    f.anyLabel=label(f,"",9,1,-22,32,mint); f.anyLabel:SetJustifyH("CENTER"); f.anyLabel:Hide();
     f:SetScript("OnEnter",function(self) if self.row then itemTip(main,self,self.row); end end);
     f:SetScript("OnLeave",function() hideTip(main); end); main.catalogRows[i]=f;
   end
@@ -641,8 +651,8 @@ function A.Redraw()
         if view.editAny and selectedPick and selectedPick.any then chosen=row.addAny and #(selectedPick.options or {})==0;
           for _,key in ipairs(selectedPick.options or {}) do if key==row.key then chosen=true; end end
         end
-        cell.mark:SetText(row.addAny and A.T("Любой") or chosen and "✓" or ""); cell:SetAlpha(chosen and 1 or row.addAny and 0.85 or 0.5);
-        cell.mark:SetWidth(row.addAny and 30 or 14); move(cell.mark,row.addAny and 2 or 19,21);
+        cell.mark:SetText(not row.addAny and chosen and "✓" or ""); cell:SetAlpha(chosen and 1 or row.addAny and 0.85 or 0.5);
+        if row.addAny then setIconCaption(cell.anyLabel,A.T("Любой"),9); cell.anyLabel:Show(); else cell.anyLabel:Hide(); end
         cell:SetBackdropBorderColor(unpack(chosen and mint or {0.38,0.39,0.42,0.6})); cell:SetBackdropColor(0.18,0.19,0.22,chosen and 0.7 or 0.1); cell:Show();
       else cell:Hide(); end
     end
@@ -913,7 +923,17 @@ function A.RefreshUI()
   for i=1,4 do local mark=actionMark("banish",i); if mark then
     if not editorOpen and action and action.kind=="banish" and action.index==i and bans[i] then mark:SetAlpha(0.88+0.12*math.sin(GetTime()*4)); mark:Show(); else mark:Hide(); end
   end end
-  tracker:SetBackdropColor(0.04,0.04,0.045,panelOpacity(ASAdvisorDB.options.trackerOpacity));
+  local style=ASRTrackerStyle.Get(ASAdvisorDB.options);
+  local inset=style=="stone" and 20 or 8;
+  local lift=style=="stone" and 0 or 15;
+  tracker.asrDockInsets=ASRTrackerStyle.Insets(style,HAS_SKIN);
+  local opacity=panelOpacity(ASAdvisorDB.options.trackerOpacity);
+  if tracker.asrFrameStyle~=style then
+    ASRTrackerStyle.Apply(tracker,style,opacity,function(frame,value)
+      frame:SetBackdrop(windowBackdrop()); frame:SetBackdropColor(0.04,0.04,0.045,value); frame:SetBackdropBorderColor(0.75,0.75,0.77,1);
+    end);
+    tracker.asrFrameStyle=style;
+  else tracker:SetBackdropColor(0.04,0.04,0.045,opacity); end
   tracker.builds.text:SetText(b and b.name or A.T("Выбрать билд")); tracker.builds.text:SetJustifyH("LEFT"); tracker.builds.text:SetHeight(14);
   if not A.suiteEditing and (editorOpen or visible or ASAdvisorDB.options.trackerHidden or not live.inRun) then stopInteraction(tracker); hideTip(tracker); tracker:Hide(); return; end
   local anchor=trackerAnchor();
@@ -922,9 +942,9 @@ function A.RefreshUI()
   local spells,items=A.TrackerEntries(b,live); local entries={}; for _,v in ipairs(spells) do entries[#entries+1]=v; end; for _,v in ipairs(items) do entries[#entries+1]=v; end
   for _,f in ipairs(tracker.icons) do f:Hide(); end; for _,r in ipairs(tracker.rows) do r:Hide(); end
   for _,icon in ipairs(tracker.extraIcons) do icon:Hide(); end; for _,icon in ipairs(tracker.bannedIcons) do icon:Hide(); end
-  tracker.brand:ClearAllPoints(); tracker.brand:SetPoint("TOPLEFT",tracker,"TOPLEFT",20,-23); tracker.brand:SetHeight(16); tracker.brand:SetJustifyV("MIDDLE"); tracker.brand:SetFont(FONT,9,""); tracker.builds:SetHeight(16);
+  tracker.brand:ClearAllPoints(); tracker.brand:SetPoint("TOPLEFT",tracker,"TOPLEFT",inset,-23+lift); tracker.brand:SetHeight(16); tracker.brand:SetJustifyV("MIDDLE"); tracker.brand:SetFont(FONT,9,""); tracker.builds:SetHeight(16);
   if ASAdvisorDB.options.trackerMode=="detailed" then
-    local width=ASAdvisorDB.options.trackerWidth; local bodyHeight=0; local inset=20; local contentWidth=width-2*inset; local bodyTop=45;
+    local width=ASAdvisorDB.options.trackerWidth; local bodyHeight=0; local contentWidth=width-2*inset; local bodyTop=45-lift;
     tracker.resize:Show(); tracker.viewport:Show();
     local planned,extras,banned={},{},{};
     for _,entry in ipairs(entries) do if entry.banned then banned[#banned+1]=entry; elseif b and not entry.planned then extras[#extras+1]=entry; else planned[#planned+1]=entry; end end
@@ -971,22 +991,22 @@ function A.RefreshUI()
       if entry.owned and entry.detail~="" then r.detail:Show(); r.detail:SetHeight(0); detailH=math.ceil(math.max(10,r.detail:GetStringHeight()))+1; r.detail:SetHeight(detailH); else r.detail:Hide(); end
       local rowH=entry.owned and math.max(24,15+detailH) or 20; move(r,0,bodyHeight); r:SetHeight(rowH); r:SetAlpha(entry.owned and 1 or 0.45); r:Show(); bodyHeight=bodyHeight+rowH;
     end
-    local height=math.min(math.max(82,bodyTop+bodyHeight+20),ASAdvisorDB.options.trackerHeight); tracker:SetSize(width,height);
-    local available=math.max(1,height-bodyTop-20); if bodyHeight>available then available=math.max(1,available-14); end; tracker.maxOffset=math.max(0,bodyHeight-available); tracker.offset=math.min(tracker.offset or 0,tracker.maxOffset);
+    local height=math.min(math.max(42+2*inset,bodyTop+bodyHeight+inset),ASAdvisorDB.options.trackerHeight); tracker:SetSize(width,height);
+    local available=math.max(1,height-bodyTop-inset); if bodyHeight>available then available=math.max(1,available-14); end; tracker.maxOffset=math.max(0,bodyHeight-available); tracker.offset=math.min(tracker.offset or 0,tracker.maxOffset);
     tracker.viewport:ClearAllPoints(); tracker.viewport:SetPoint("TOPLEFT",tracker,"TOPLEFT",inset,-bodyTop); tracker.viewport:SetSize(contentWidth,available); tracker.content:SetSize(contentWidth,math.max(1,bodyHeight)); tracker.viewport:SetVerticalScroll(tracker.offset);
-    if tracker.maxOffset>0 then tracker.scrollHint:ClearAllPoints(); tracker.scrollHint:SetPoint("BOTTOMLEFT",tracker,"BOTTOMLEFT",inset,20); tracker.scrollHint:SetHeight(13); tracker.scrollHint:SetWidth(contentWidth); tracker.scrollHint:SetText(A.T("Прокрутка колёсиком")); tracker.scrollHint:Show(); end
-    move(tracker.builds,50,23); tracker.builds:SetWidth(width-98); tracker.builds.text:SetWidth(width-108); move(tracker.mode,width-40,23); tracker.mode:SetSize(20,16);
+    if tracker.maxOffset>0 then tracker.scrollHint:ClearAllPoints(); tracker.scrollHint:SetPoint("BOTTOMLEFT",tracker,"BOTTOMLEFT",inset,inset); tracker.scrollHint:SetHeight(13); tracker.scrollHint:SetWidth(contentWidth); tracker.scrollHint:SetText(A.T("Прокрутка колёсиком")); tracker.scrollHint:Show(); end
+    move(tracker.builds,30+inset,23-lift); tracker.builds:SetWidth(width-58-2*inset); tracker.builds.text:SetWidth(width-68-2*inset); move(tracker.mode,width-20-inset,23-lift); tracker.mode:SetSize(20,16);
     tracker:SetScale(math.min(ASAdvisorDB.options.trackerScale,(UIParent:GetWidth()-24)/width,(UIParent:GetHeight()-24)/height));
   else
-    tracker.viewport:Hide(); tracker.resize:Hide(); tracker:SetWidth(196); move(tracker.builds,50,23); tracker.builds:SetWidth(98); tracker.builds.text:SetWidth(88); move(tracker.mode,156,23); tracker.mode:SetSize(20,16);
+    tracker.viewport:Hide(); tracker.resize:Hide(); tracker:SetWidth(196); move(tracker.builds,30+inset,23-lift); tracker.builds:SetWidth(138-2*inset); tracker.builds.text:SetWidth(128-2*inset); move(tracker.mode,176-inset,23-lift); tracker.mode:SetSize(20,16);
     local banned,normal={},{ }; for _,entry in ipairs(spells) do if entry.banned then banned[#banned+1]=entry; else normal[#normal+1]=entry; end end
-    local y=45; local iconIndex=0;
+    local y=45-lift; local iconIndex=0;
     local function CompactGroup(rows,heading,title,color)
       if #rows==0 then return; end
-      heading:SetWidth(156); heading:SetText(A.T(title)); heading:SetTextColor(unpack(color)); heading:SetHeight(13); move(heading,20,y); heading:Show(); y=y+14;
+      heading:SetWidth(196-2*inset); heading:SetText(A.T(title)); heading:SetTextColor(unpack(color)); heading:SetHeight(13); move(heading,inset,y); heading:Show(); y=y+14;
       for i,entry in ipairs(rows) do
         iconIndex=iconIndex+1; local f=tracker.icons[iconIndex]; if f then
-          move(f,20+((i-1)%6)*26,y+math.floor((i-1)/6)*29); f.outside=b and not entry.planned; f.banned=entry.banned;
+          move(f,inset+((i-1)%6)*26,y+math.floor((i-1)/6)*29); f.outside=b and not entry.planned; f.banned=entry.banned;
           if not f.warning then f.warning=label(f,"!",9,16,0,8,{1,0.68,0.28,1}); end
           if f.outside and not entry.banned then f.warning:Show(); else f.warning:Hide(); end
           f.row=entry.row; f.icon:SetTexture(A.Icon(entry.row.icon)); f.icon:SetVertexColor(entry.banned and 0.9 or 1,entry.banned and 0.5 or 1,entry.banned and 0.5 or 1,1); f:SetAlpha(entry.owned and 1 or 0.25); f.rank:SetText(entry.rank and tostring(entry.rank) or "");
@@ -998,9 +1018,9 @@ function A.RefreshUI()
     CompactGroup(banned,tracker.bannedLabel,"Забанены",{0.85,0.45,0.45,1});
     CompactGroup(normal,tracker.spellLabel,"Умения",muted);
     CompactGroup(items,tracker.itemLabel,"Бижутерия",muted);
-    tracker:SetHeight(math.max(86,y-7+20));
+    tracker:SetHeight(math.max(46+2*inset,y-7+inset));
   end
-  if #entries==0 then tracker.empty:SetText(A.T("Открой /asa и выбери билд")); tracker.empty:Show(); end
+  if #entries==0 then move(tracker.empty,8,32-lift+ (lift>0 and 10 or 0)); tracker.empty:SetText(A.T("Открой /asa и выбери билд")); tracker.empty:Show(); end
   if anchor then
     -- Fit below the existing header instead of letting screen clamping move it.
     local scale=math.min(ASAdvisorDB.options.trackerScale,math.max(1,UIParent:GetWidth()-anchor.left-12)/tracker:GetWidth(),math.max(1,anchor.top-12)/tracker:GetHeight());

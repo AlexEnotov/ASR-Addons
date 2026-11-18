@@ -27,7 +27,8 @@ for (const match of starts) {
   const specials=specialBody?[...specialBody.matchAll(/([a-z_]+)\s*=\s*([-+\d.eE]+)/g)].map(x=>[x[1],Number(x[2])]):[];
   const specialName=field('special');
   const classes=JSON.parse(body.match(/\bclasses\s*=\s*(\[[^\]]*\])/)?.[1] || '[]');
-  result[match[2]] = { slot, behavior: field('behavior') || '', aliases: [...new Set(aliases)],base,effects,specials,specialName,classes };
+  const procText=body.match(/\bproc\s*=\s*(\{[^}\r\n]+\})/)?.[1];
+  result[match[2]] = { slot, behavior: field('behavior') || '', aliases: [...new Set(aliases)],base,effects,specials,specialName,classes,procText };
 }
 if (Object.keys(result).length < 30 || result.accuria?.slot !== 'ring' || !result.ashen_band) {
   throw Error('Incomplete extraction: executable layout/content changed. Output was not written.');
@@ -42,7 +43,8 @@ for (const key of Object.keys(result).sort()) {
   const r = result[key];
   const pairs=list=>'{ '+list.map(([key,value])=>'{ '+quote(key)+', '+value+' }').join(', ')+' }';
   const base=Number.isFinite(r.base)?', base = '+r.base:'';
-  lines.push('    [' + quote(key) + '] = { slot = ' + quote(r.slot) + ', behavior = ' + quote(r.behavior) + ', aliases = { ' + r.aliases.map(quote).join(', ') + ' }'+base+', effects = '+pairs(r.effects)+', specials = '+pairs(r.specials)+', classes = { '+r.classes.map(x=>quote(x.toUpperCase())).join(', ')+' }'+(r.specialName?', specialName = '+quote(r.specialName):'')+' },');
+  const proc = r.procText ? ', proc = ' + lua(inline(r.procText)) : '';
+  lines.push('    [' + quote(key) + '] = { slot = ' + quote(r.slot) + ', behavior = ' + quote(r.behavior) + ', aliases = { ' + r.aliases.map(quote).join(', ') + ' }'+base+', effects = '+pairs(r.effects)+', specials = '+pairs(r.specials)+', classes = { '+r.classes.map(x=>quote(x.toUpperCase())).join(', ')+' }'+(r.specialName?', specialName = '+quote(r.specialName):'')+proc+' },');
 }
 lines.push('  },', '  spells = {');
 for(const match of source.matchAll(/\[\[spell\]\]\s*key\s*=\s*"([a-z0-9_]+)"/g)) {
